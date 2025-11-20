@@ -1,0 +1,2336 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlashMed - Ultimate Cockpit</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: { 950: '#050505', 900: '#0a0a0a', 800: '#121212', 700: '#1e1e1e' },
+                        gold: { 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706' }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Montserrat', 'sans-serif'],
+                        mono: ['Courier Prime', 'monospace']
+                    },
+                    animation: {
+                        'float': 'float 10s ease-in-out infinite',
+                        'pop-in-master': 'popInMaster 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'fade-out': 'fadeOut 0.5s forwards 2.0s', 
+                        'sparkle': 'sparkle 2s ease-out infinite',
+                        'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'dino-bounce': 'dinoBounce 0.4s ease-out infinite alternate',
+                        'dino-sleep': 'dinoSleep 2s ease-in-out infinite alternate',
+                        'gold-pulse': 'goldPulse 2s infinite',
+                        'toast-slide': 'toastSlide 0.3s ease-out forwards',
+                        'pulse-glow': 'pulseGlow 2s infinite',
+                        'warp-speed': 'warpSpeed 0.8s cubic-bezier(0.2, 0.8, 0.2, 1)',
+                        'spin-slow': 'spin 3s linear infinite',
+                        'check-pop': 'checkPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+                        'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+                    },
+                    keyframes: {
+                        float: { '0%, 100%': { transform: 'translateY(0) scale(1)' }, '50%': { transform: 'translateY(-20px) scale(1.05)' } },
+                        popInMaster: {
+                            '0%': { opacity: '0', transform: 'scale(0.8) translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'scale(1) translateY(0)' }
+                        },
+                        fadeOut: { '0%': { opacity: '1' }, '100%': { opacity: '0', visibility: 'hidden' } },
+                        sparkle: { '0%': { transform: 'scale(0)', opacity: '0' }, '50%': { transform: 'scale(1)', opacity: '1' }, '100%': { transform: 'scale(0)', opacity: '0' } },
+                        dinoBounce: { '0%, 100%': { transform: 'translateY(0) rotate(0deg)' }, '50%': { transform: 'translateY(-8px) rotate(-3deg)' } },
+                        dinoSleep: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(3px) scaleX(0.98)' } },
+                        goldPulse: { '0%': { boxShadow: '0 0 0 0 rgba(251, 191, 36, 0.4)' }, '70%': { boxShadow: '0 0 0 20px rgba(251, 191, 36, 0)' }, '100%': { boxShadow: '0 0 0 0 rgba(251, 191, 36, 0)' } },
+                        toastSlide: { '0%': { transform: 'translateX(100%)', opacity: '0' }, '100%': { transform: 'translateX(0)', opacity: '1' } },
+                        shockwave: { '0%': { transform: 'scale(0.8)', opacity: '0.8', borderWidth: '20px' }, '100%': { transform: 'scale(2.5)', opacity: '0', borderWidth: '0' } },
+                        screenFlash: { '0%': { opacity: '0.2' }, '100%': { opacity: '0' } },
+                        pulseGlow: {
+                            '0%, 100%': { boxShadow: '0 0 5px rgba(251, 191, 36, 0.2), inset 0 0 5px rgba(251, 191, 36, 0.1)' },
+                            '50%': { boxShadow: '0 0 15px rgba(251, 191, 36, 0.5), inset 0 0 10px rgba(251, 191, 36, 0.2)' }
+                        },
+                        warpSpeed: {
+                            '0%': { transform: 'scale(1)', filter: 'blur(0)' },
+                            '50%': { transform: 'scale(1.5)', filter: 'blur(4px)', opacity: '0.5' },
+                            '100%': { transform: 'scale(1)', filter: 'blur(0)', opacity: '1' }
+                        },
+                        checkPop: {
+                            '0%': { transform: 'scale(0.5)', opacity: '0' },
+                            '50%': { transform: 'scale(1.2)' },
+                            '100%': { transform: 'scale(1)', opacity: '1' }
+                        },
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts --><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@400;600;900&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Markdown --><script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <style>
+        body { background-color: #050505; color: #e5e7eb; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        .depth-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: radial-gradient(circle at center, #111, #050505); overflow: hidden; }
+        .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.3; animation: float 18s infinite ease-in-out; }
+        .orb-1 { top: -20%; left: -10%; width: 60vw; height: 60vw; background: #1e3a8a; animation-delay: 0s; }
+        .orb-2 { bottom: -20%; right: -10%; width: 50vw; height: 50vw; background: #4c1d95; animation-delay: -5s; }
+        
+        /* --- Card Styling --- */
+        .card-cinema { background: rgba(20, 20, 20, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        .card-cinema:hover { transform: translateY(-6px); border-color: rgba(255, 255, 255, 0.25); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75); z-index: 20; }
+        .card-panel { background: rgba(15, 15, 15, 0.3); border: 1px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(15px); }
+        
+        .status-lu { background: rgba(15, 40, 15, 0.5) !important; border-color: rgba(34, 197, 94, 0.3); box-shadow: 0 0 10px rgba(34, 197, 94, 0.1); }
+        .status-lu:hover { box-shadow: 0 0 30px rgba(34, 197, 94, 0.3), 0 20px 40px -10px rgba(0, 0, 0, 0.5); border-color: rgba(34, 197, 94, 0.5); }
+        .status-maitrise { background: rgba(40, 30, 5, 0.5) !important; border-color: rgba(251, 191, 36, 0.3); box-shadow: 0 0 10px rgba(251, 191, 36, 0.15); }
+        .status-maitrise:hover { box-shadow: 0 0 30px rgba(251, 191, 36, 0.5), 0 20px 40px -10px rgba(0, 0, 0, 0.5); border-color: rgba(251, 191, 36, 0.5); }
+        
+        .modal-backdrop { background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(20px); }
+        
+        /* Custom Select Styling */
+        select { 
+            -webkit-appearance: none; -moz-appearance: none; appearance: none; 
+            background-color: rgba(10, 10, 10, 0.6); backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s ease; 
+            border-radius: 12px; color: #e5e7eb; cursor: pointer; padding-right: 30px;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em;
+        }
+        select option { background-color: #1a1a1a !important; color: #e5e7eb; }
+        select:hover { border-color: rgba(255,255,255,0.25); }
+        select:focus { outline: none; border-color: #ffffff; box-shadow: 0 0 15px rgba(255, 255, 255, 0.1); }
+
+        input, textarea { background: rgba(30,30,30,0.5); border-color: #333; color: white; }
+        input:focus, select:focus, textarea:focus { border-color: white; outline: none; }
+        
+        .hide-scrollbar::-webkit-scrollbar { display: none; } .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .circular-chart { display: block; margin: 0 auto; max-width: 80%; max-height: 250px; }
+        .circle-bg { fill: none; stroke: #222; stroke-width: 2.5; }
+        .circle { fill: none; stroke-width: 2.5; stroke-linecap: round; transition: stroke-dasharray 0.5s ease; }
+        .timer-active { text-shadow: 0 0 15px rgba(59, 130, 246, 0.8); }
+        .particle { position: fixed; width: 6px; height: 6px; border-radius: 50%; pointer-events: none; z-index: 9999; animation: particleRise 2s ease-out forwards; }
+        @keyframes particleRise { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-150px) scale(0); opacity: 0; } }
+        .autocomplete-list { position: absolute; top: 100%; left: 0; width: 100%; background: rgba(20, 20, 20, 0.95); border: 1px solid #333; border-radius: 0 0 12px 12px; z-index: 50; max-height: 200px; overflow-y: auto; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        .autocomplete-item { padding: 10px 15px; cursor: pointer; font-size: 0.85rem; border-bottom: 1px solid #222; transition: background 0.2s; }
+        .autocomplete-item:hover { background: #1e3a8a; color: white; }
+
+        .shockwave-ring { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 100%; height: 100%; border-radius: 50%; border-style: solid; opacity: 0; animation: shockwave 1s ease-out; pointer-events: none; }
+        .screen-flash { position: fixed; inset: 0; z-index: 40; pointer-events: none; animation: screenFlash 0.5s ease-out forwards; }
+        #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { background: rgba(20, 20, 20, 0.9); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); padding: 12px 20px; border-radius: 10px; color: white; font-size: 0.9rem; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: toastSlide 0.3s ease-out; display: flex; items-center; gap: 10px; min-width: 250px; }
+        .toast.error { border-left: 4px solid #ef4444; }
+        .toast.success { border-left: 4px solid #22c55e; }
+        .toast.info { border-left: 4px solid #3b82f6; }
+        #celebrationOverlay.active { display: flex !important; opacity: 1 !important; }
+        .flashcard-content h1, .flashcard-content h2, .flashcard-content h3 { color: #facc15; border-bottom: 1px solid rgba(250,204,21,0.2); padding-bottom: 5px; margin-top: 1.5rem; }
+        .flashcard-content ul { list-style-type: disc; margin-left: 20px; }
+        .flashcard-content p, .flashcard-content li { color: #d1d5db; line-height: 1.6; }
+        .chat-bubble { max-width: 80%; padding: 12px 16px; border-radius: 16px; font-size: 0.9rem; line-height: 1.5; animation: toastSlide 0.3s ease-out; }
+        .chat-user { align-self: flex-end; background-color: #2563eb; color: white; border-bottom-right-radius: 4px; }
+        .chat-ai { align-self: flex-start; background-color: #333; color: #e5e7eb; border-bottom-left-radius: 4px; border: 1px solid #444; }
+        .notes-thematic { transition: background-color 0.5s; }
+        
+        /* --- MODERNIZED SUGGESTIONS --- */
+        .suggestion-card { 
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .suggestion-card:hover { 
+            transform: translateY(-4px); 
+            box-shadow: 0 15px 40px -10px rgba(0,0,0,0.8); 
+            background: rgba(255,255,255,0.08) !important;
+        }
+        .suggestion-card.done { 
+            opacity: 0.6; 
+            background: rgba(20, 50, 20, 0.4) !important; 
+            border-color: rgba(34, 197, 94, 0.3); 
+        }
+        .suggestion-card.done h3 { text-decoration: line-through; color: #6b7280; }
+
+        .custom-checkbox input:checked + div { background-color: #22c55e; border-color: #22c55e; }
+        .custom-checkbox input:checked + div i { opacity: 1; animation: check-pop 0.3s ease-out forwards; }
+        
+        .view-bar { width: 4px; height: 100%; border-radius: 1px; transition: background-color 0.3s; }
+
+        .glass-panel { background: rgba(20, 20, 20, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+        input[type="date"] { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 10px; border-radius: 8px; width: 100%; font-family: 'Courier Prime', monospace; cursor: pointer; }
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
+        .digit-scroll { display: inline-block; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .btn-gold { background: linear-gradient(135deg, #d97706 0%, #fbbf24 100%); color: black; font-weight: bold; border: none; transition: all 0.3s ease; }
+        .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 0 20px rgba(251, 191, 36, 0.6); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-gray-100 font-sans">
+
+    <div class="depth-bg"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
+    <div id="matiereGlowOverlay" class="fixed inset-0 z-[-1] transition-opacity duration-700 opacity-0 pointer-events-none"></div>
+    <div id="toast-container"></div>
+
+    <!-- Celebration Overlay -->
+    <div id="celebrationOverlay" class="fixed inset-0 z-[100] hidden opacity-0 flex-col items-center justify-center transition-opacity duration-300 pointer-events-none bg-black/80 backdrop-blur-2xl">
+        <div class="relative flex flex-col items-center justify-center transform scale-90 transition-transform duration-500" id="celebrationContent">
+            <div class="absolute inset-0 bg-yellow-500/20 blur-[120px] rounded-full"></div>
+            <div class="relative mb-8">
+                <div class="absolute inset-0 rounded-full border-2 border-yellow-500/30 animate-gold-pulse scale-150"></div>
+                <i class="fa-solid fa-dragon text-[180px] text-gray-100 drop-shadow-2xl relative z-10" id="iconDragon"></i>
+                <i class="fa-solid fa-crown text-6xl text-yellow-400 absolute -top-16 left-1/2 transform -translate-x-1/2 animate-bounce z-20 drop-shadow-[0_0_20px_rgba(250,204,21,0.8)]" id="iconCrown"></i>
+                <i class="fa-solid fa-trophy text-[180px] text-yellow-400 drop-shadow-2xl relative z-10 animate-pulse-fast hidden" id="iconTrophy"></i>
+            </div>
+            <div class="text-center space-y-2">
+                <h2 class="text-6xl md:text-8xl font-display font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 to-yellow-600 tracking-widest uppercase drop-shadow-2xl">VICTOIRE !</h2>
+                <div class="flex items-center justify-center gap-3 text-yellow-500/80 font-mono text-sm uppercase tracking-[0.4em]">
+                    <div class="h-px w-12 bg-yellow-500/50"></div>
+                    <span>Suggestions du jour complétées</span>
+                    <div class="h-px w-12 bg-yellow-500/50"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Focus Overlay -->
+    <div id="focusOverlay" class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-black/90 backdrop-blur-2xl transition-opacity duration-500 opacity-0">
+        <div class="relative flex flex-col items-center text-center px-4">
+            <div class="w-32 h-32 border-2 border-yellow-500/30 rotate-45 flex items-center justify-center mb-12 animate-pulse relative">
+                <div class="absolute inset-0 bg-yellow-500/10 blur-xl"></div>
+                <i class="fa-solid fa-dragon text-5xl text-yellow-400 drop-shadow-[0_0_25px_rgba(250,204,21,0.8)] -rotate-45"></i>
+            </div>
+            <h2 class="text-3xl md:text-5xl font-display font-black text-yellow-400 tracking-[0.1em] uppercase mb-4 drop-shadow-lg" id="focusQuote">FOCUS ABSOLU</h2>
+            <p class="text-yellow-200/70 text-sm font-bold uppercase tracking-widest">1 Minute Complétée</p>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <header class="fixed top-0 w-full z-50 bg-black/80 backdrop-blur-xl border-b border-white/5">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3 cursor-pointer group" onclick="resetView()">
+                <div class="relative w-10 h-10 flex items-center justify-center">
+                    <div class="absolute inset-0 bg-blue-600/20 rounded-full blur-md group-hover:bg-blue-500/30 transition"></div>
+                    <!-- Navbar Icon dynamic -->
+                    <i id="navbarIcon" class="fa-solid fa-dragon text-3xl text-white relative z-10 group-hover:scale-110 transition-transform"></i>
+                </div>
+                <h1 class="hidden sm:block text-sm font-display font-bold tracking-[0.2em] text-white uppercase group-hover:text-blue-400 transition">FlashMed</h1>
+            </div>
+            <div class="flex items-center gap-4">
+                <!-- External Links -->
+                <a href="https://notebooklm.google.com/" target="_blank" class="hidden lg:flex items-center gap-2 bg-green-900/20 px-3 py-1.5 rounded-lg border border-green-500/20 hover:bg-green-900/40 hover:border-green-500/40 transition group" title="Accéder à NotebookLM">
+                    <i class="fa-solid fa-book text-green-400 group-hover:text-green-300 text-xs"></i>
+                    <span class="text-xs font-bold text-green-100/80 group-hover:text-white">NOTEBOOKLM</span>
+                </a>
+                <a href="https://univ.theia.fr/login" target="_blank" class="hidden lg:flex items-center gap-2 bg-blue-900/20 px-3 py-1.5 rounded-lg border border-blue-500/20 hover:bg-blue-900/40 hover:border-blue-500/40 transition group" title="Accéder à Theia">
+                    <i class="fa-solid fa-graduation-cap text-blue-400 group-hover:text-blue-300 text-xs"></i>
+                    <span class="text-xs font-bold text-blue-100/80 group-hover:text-white">THEIA</span>
+                </a>
+                <a href="https://www.hypocampus.fr/app/dashboard" target="_blank" class="hidden lg:flex items-center gap-2 bg-purple-900/20 px-3 py-1.5 rounded-lg border border-purple-500/20 hover:bg-purple-900/40 hover:border-purple-500/40 transition group" title="Accéder à Hypocampus">
+                    <i class="fa-solid fa-brain text-purple-400 group-hover:text-purple-300 text-xs"></i>
+                    <span class="text-xs font-bold text-purple-100/80 group-hover:text-white">HYPO</span>
+                </a>
+
+                <!-- BOUTON PROFIL SIMPLIFIÉ -->
+                <button onclick="openProfileModal()" class="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition shadow-sm hover:shadow-md" title="Mon Profil">
+                    <i class="fa-solid fa-user text-xs"></i>
+                </button>
+                
+                <!-- BOUTON COMPTE A REBOURS INTEGRE -->
+                <div onclick="openSettingsModal()" class="group relative cursor-pointer hidden md:block">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-gold-600 to-yellow-400 rounded-lg blur opacity-20 group-hover:opacity-60 transition duration-500"></div>
+                    <div class="relative flex items-center gap-3 bg-black/80 px-4 py-1.5 rounded-lg border border-gold-500/30 ring-1 ring-white/5 group-hover:border-gold-400/80 transition-all duration-300">
+                        <div class="flex flex-col items-end leading-none">
+                            <span class="text-[9px] text-gold-500/80 font-bold uppercase tracking-widest">Objectif</span>
+                            <span class="text-[9px] text-gray-500" id="targetDateMini">Non défini</span>
+                        </div>
+                        <div class="h-6 w-[1px] bg-white/10"></div>
+                        <div class="flex items-center gap-2">
+                            <i id="countdownIcon" class="fa-solid fa-hourglass-half text-gold-400 text-sm group-hover:animate-spin-slow"></i>
+                            <div class="flex items-baseline">
+                                <span class="text-gold-500 font-mono font-bold text-lg" style="text-shadow: 0 0 10px rgba(251,191,36,0.3)">J-</span>
+                                <span id="countdownDisplay" class="text-white font-mono font-bold text-xl tracking-wider group-hover:text-gold-200 transition-colors digit-scroll">---</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="openGeneralModal()" class="bg-white text-black hover:bg-gray-200 px-6 py-2 rounded-full font-bold text-xs uppercase tracking-wider transition shadow-[0_0_15px_rgba(255,255,255,0.3)]">Ajouter</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="h-24"></div>
+
+    <main class="flex-grow container mx-auto px-4 pb-20">
+        <h1 class="text-3xl md:text-5xl font-display font-black text-white tracking-tight mb-8 mt-4 text-center md:text-left animate-fade-in-up" id="greetingDisplay">Bonjour, Docteur.</h1>
+        <h2 class="text-gray-500 text-xs font-bold uppercase tracking-widest mb-4 pl-2">Tableau de bord</h2>
+
+        <!-- TRIPTYQUE -->
+        <section class="mb-12 grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in-up" style="animation-delay: 0.1s;">
+            
+            <!-- 1. TIMER -->
+            <div class="card-panel rounded-3xl p-6 flex flex-col items-center justify-center relative overflow-hidden shadow-2xl order-1 min-h-[400px]">
+                <div id="timerGlow" class="absolute w-40 h-40 bg-blue-600/10 rounded-full blur-[70px] transition-all duration-1000 opacity-0 scale-50 pointer-events-none"></div>
+                <div id="timerFlame" class="hidden absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-full bg-yellow-500/5 blur-xl z-0"></div>
+                <div class="flex-grow flex items-end justify-center pb-6 w-full">
+                    <div id="dinoWrapper" class="relative transition-transform duration-300 cursor-pointer" onclick="triggerDinoJump()">
+                        <i class="fa-solid fa-dragon text-6xl text-gray-500 transition-colors duration-300" id="dinoIcon"></i>
+                        <div id="dinoZzz" class="absolute -top-6 -right-6 text-lg font-bold text-gray-600 animate-pulse">Zzz</div>
+                    </div>
+                </div>
+                <div class="flex flex-col items-center z-10 mb-4">
+                    <div id="timerDisplay" class="text-6xl font-mono font-black text-white tracking-widest transition-all duration-500 tabular-nums drop-shadow-lg">00:00</div>
+                    <div id="timerMessage" class="h-5 mt-2 text-xs font-bold text-blue-400 opacity-0 transition-opacity uppercase tracking-wider"></div>
+                </div>
+                <div class="flex items-center gap-6 mt-auto">
+                    <button onclick="resetTimer()" class="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-gray-500 hover:text-white hover:bg-white/5 transition group"><i class="fa-solid fa-rotate-right text-xs group-hover:rotate-180 transition-transform duration-500"></i></button>
+                    <button onclick="toggleTimer()" id="timerBtn" class="w-14 h-14 rounded-full bg-white text-black flex items-center justify-center shadow-lg hover:scale-105 transition-all duration-300 group relative overflow-visible active:scale-95"><i class="fa-solid fa-play text-xl ml-0.5 group-hover:scale-110 transition" id="timerIcon"></i><div id="shockwaveContainer" class="absolute inset-0 pointer-events-none"></div></button>
+                </div>
+            </div>
+
+            <!-- 2. DAILY ITEMS -->
+            <div class="card-panel rounded-3xl p-6 flex flex-col shadow-2xl order-2 relative z-20 min-h-[400px]">
+                <div class="flex justify-between items-center mb-4 border-b border-white/5 pb-4">
+                    <h3 class="font-display font-bold text-lg text-white tracking-wide">Objectifs du Jour</h3>
+                    <span class="text-xs text-gray-500 uppercase font-bold" id="dateToday">...</span>
+                </div>
+                <div class="relative mb-4">
+                    <input type="text" id="todoInput" placeholder="Rechercher un item..." class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-blue-500 transition text-white" autocomplete="off">
+                    <i class="fa-solid fa-search absolute right-4 top-3.5 text-gray-500 text-sm"></i>
+                    <div id="autocompleteList" class="autocomplete-list hidden"></div>
+                </div>
+                <div class="flex-grow overflow-y-auto custom-scrollbar space-y-2 pr-1" id="todoList">
+                    <div class="text-center text-gray-600 text-xs mt-10 italic">Sélectionnez vos priorités.</div>
+                </div>
+            </div>
+
+            <!-- 3. NOTES - MODIFIED -->
+            <div id="notesPanel" class="card-panel rounded-3xl p-6 flex flex-col shadow-2xl relative group order-3 min-h-[400px] notes-thematic">
+                <!-- NEW ICON SELECTOR FOR NOTES -->
+                <div id="notesHeader" class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <!-- Icon Container with Select -->
+                        <div class="relative w-8 h-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition border border-white/10 group">
+                             <i id="notesIcon" class="fa-solid text-sm text-gray-400"></i>
+                             <!-- Select Overlay -->
+                             <select id="notesMatiereSelect" onchange="changeNotesMatiere(this.value)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" title="Changer de matière"></select>
+                        </div>
+                        <h3 id="notesTitle" class="font-display font-bold text-lg text-white tracking-wide">Notes Générales</h3>
+                    </div>
+                    <span id="saveIndicator" class="text-[10px] text-green-500 font-bold opacity-0 transition-opacity">SAUVEGARDÉ</span>
+                </div>
+                <!-- Old Select Removed -->
+
+                <div class="flex-grow relative bg-[#111] rounded-xl border border-white/5 overflow-hidden shadow-inner">
+                    <textarea id="quickNotes" class="w-full h-full bg-transparent border-none p-5 resize-none font-sans text-sm text-gray-300 leading-relaxed focus:ring-0 placeholder-gray-700" placeholder="Écrivez vos mémos ici..."></textarea>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Stats -->
+        <section class="mb-12 animate-fade-in-up" style="animation-delay: 0.2s;">
+            <div class="flex items-center justify-between mb-6 pl-2">
+                <h2 class="text-gray-500 text-xs font-bold uppercase tracking-widest">Statistiques Globales</h2>
+                <div class="h-px flex-grow bg-white/5 ml-4"></div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                <!-- Cours Lus -->
+                <div onclick="filterByStatus('lu')" class="cursor-pointer bg-[#111] border border-white/5 hover:border-green-500/30 hover:shadow-[0_0_30px_rgba(34,197,94,0.15)] transition-all duration-500 rounded-2xl p-6 flex items-center justify-between relative overflow-hidden group">
+                    <div class="absolute -right-10 -top-10 w-48 h-48 bg-green-500/10 blur-[60px] rounded-full group-hover:bg-green-500/20 transition-all duration-500 pointer-events-none"></div>
+                    <div class="z-10">
+                        <p class="text-gray-400 text-sm font-medium mb-1 group-hover:text-green-200/70 transition-colors">Premier Passage</p>
+                        <h3 class="text-3xl font-display font-bold text-white mb-2 group-hover:drop-shadow-[0_0_10px_rgba(34,197,94,0.5)] transition-all">Cours Lus</h3>
+                        <p class="text-xs text-green-400 font-mono"><span id="countLu">0</span> / 367 ITEMS</p>
+                    </div>
+                    <div class="w-24 h-24 relative z-10">
+                        <svg viewBox="0 0 36 36" class="circular-chart">
+                            <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <path class="circle stroke-green-500 drop-shadow-[0_0_5px_rgba(34,197,94,0.8)]" id="ringLu" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center text-xs font-bold text-white" id="pctLu">0%</div>
+                    </div>
+                </div>
+
+                <!-- Maitrisés -->
+                <div onclick="filterByStatus('maitrise')" class="cursor-pointer bg-[#111] border border-white/5 hover:border-yellow-500/30 hover:shadow-[0_0_30px_rgba(234,179,8,0.15)] transition-all duration-500 rounded-2xl p-6 flex items-center justify-between relative overflow-hidden group">
+                    <div class="absolute -right-10 -top-10 w-48 h-48 bg-yellow-500/10 blur-[60px] rounded-full group-hover:bg-yellow-500/20 transition-all duration-500 pointer-events-none"></div>
+                    <div class="z-10">
+                        <p class="text-gray-400 text-sm font-medium mb-1 group-hover:text-yellow-200/70 transition-colors">Validation Finale</p>
+                        <h3 class="text-3xl font-display font-bold text-white mb-2 group-hover:drop-shadow-[0_0_10px_rgba(234,179,8,0.5)] transition-all">Maîtrisés</h3>
+                        <p class="text-xs text-yellow-400 font-mono"><span id="countMaitrise">0</span> / 367 ITEMS</p>
+                    </div>
+                    <div class="w-24 h-24 relative z-10">
+                        <svg viewBox="0 0 36 36" class="circular-chart">
+                            <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <path class="circle stroke-yellow-500 drop-shadow-[0_0_5px_rgba(234,197,94,0.8)]" id="ringMaitrise" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center text-xs font-bold text-white" id="pctMaitrise">0%</div>
+                    </div>
+                </div>
+            </div>
+            <div class="mb-4"><div class="flex justify-between items-end mb-3 px-2"><h3 class="text-white text-sm font-bold">Progression par Matière</h3><span class="text-[10px] text-gray-500 uppercase tracking-wider">Scroll Horizontal</span></div><div class="flex gap-4 overflow-x-auto hide-scrollbar pb-4" id="subjectProgressContainer"></div></div>
+        </section>
+
+        <!-- Suggestions du Jour Block - MODERNISÉ & SOMBRE -->
+        <section id="suggestionBlock" class="mb-12 animate-fade-in-up hidden" style="animation-delay: 0.3s;">
+            <!-- Background updated: Translucent, Glass, Orange Glow -->
+            <div class="relative bg-black/20 border border-white/10 backdrop-blur-2xl rounded-[2rem] p-8 shadow-[0_0_50px_-10px_rgba(249,115,22,0.1)] overflow-hidden transition-all duration-500 hover:shadow-[0_0_70px_-10px_rgba(249,115,22,0.2)] hover:border-white/20">
+                
+                <!-- Ambient Glows -->
+                <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-orange-600/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+                <div class="absolute bottom-0 left-0 w-[300px] h-[300px] bg-yellow-600/5 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/2 pointer-events-none"></div>
+
+                <div class="flex justify-between items-center mb-6 relative z-10">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500/20 to-yellow-500/20 border border-orange-500/30 flex items-center justify-center shadow-[0_0_20px_rgba(249,115,22,0.3)] backdrop-blur-md">
+                            <i class="fa-solid fa-fire text-orange-400 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-display font-black text-2xl text-white tracking-tight">Suggestions du Jour</h3>
+                            <p class="text-xs font-bold text-orange-400/70 uppercase tracking-widest">Révision Prioritaire</p>
+                        </div>
+                    </div>
+                    <button onclick="renderSuggestions(true)" class="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-all hover:rotate-180 duration-500" title="Rafraîchir">
+                        <i class="fa-solid fa-sync-alt"></i>
+                    </button>
+                </div>
+                <div id="suggestionList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 relative z-10">
+                    <!-- Items generated here -->
+                </div>
+            </div>
+        </section>
+
+        <div id="subjectHeader" class="hidden mb-10 text-center relative transition-all duration-500">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/10 mb-4 border border-white/10"><i id="subjectIcon" class="fa-solid fa-heart-pulse text-2xl text-white"></i></div>
+            <h2 id="subjectTitle" class="text-3xl md:text-4xl font-display font-black text-white tracking-tight mb-2">Matière</h2><p class="text-gray-400 text-xs uppercase tracking-widest font-bold">Vue détaillée</p>
+        </div>
+
+        <!-- Filters with ICON DROPDOWN -->
+        <div class="sticky top-24 z-40 mb-8" id="filterBar">
+            <div class="bg-[#151515]/90 backdrop-blur-md p-1.5 rounded-full border border-white/10 shadow-xl flex items-center max-w-3xl mx-auto">
+                <div class="pl-4 text-gray-500"><i class="fa-solid fa-search"></i></div>
+                <input type="text" id="searchInput" placeholder="Rechercher un cours..." class="bg-transparent border-none w-full text-sm px-3 py-2 focus:ring-0 text-white placeholder-gray-600">
+                <div class="h-6 w-px bg-white/10 mx-2"></div>
+                
+                <!-- ICON FILTER SELECTOR -->
+                <div class="relative w-8 h-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition cursor-pointer mr-1 group">
+                    <i id="filterIcon" class="fa-solid fa-filter text-gray-400 text-xs group-hover:text-white transition-colors"></i>
+                    <select id="matiereFilter" onchange="handleFilterChange(this)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" title="Filtrer par matière">
+                        <option value="all">Toutes</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div id="coursesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6"></div>
+        <div id="emptyState" class="hidden text-center py-20 text-gray-500">Aucun résultat</div>
+    </main>
+
+    <!-- Modals -->
+    <div id="settingsModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity duration-300 opacity-0">
+        <div class="glass-panel w-full max-w-md p-8 rounded-2xl transform scale-95 transition-all duration-300 relative overflow-hidden" id="settingsModalContent">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-gold-500 to-transparent opacity-50"></div>
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-gold-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-gold-500/20"><i class="fa-regular fa-calendar-check text-2xl text-gold-400"></i></div>
+                <h2 class="text-2xl font-display font-bold text-white uppercase tracking-wide">Paramètres</h2>
+                <p class="text-gray-400 text-sm mt-1">Configurez votre objectif et vos outils.</p>
+            </div>
+            <div class="space-y-6">
+                <div class="relative">
+                    <label class="block text-xs text-gray-500 uppercase font-bold mb-2 ml-1">Date du Concours</label>
+                    <input type="date" id="examDateInput" class="focus:ring-2 focus:ring-gold-500/50 transition-all outline-none">
+                </div>
+                <div class="bg-white/5 p-4 rounded-lg border border-white/5">
+                    <div class="flex justify-between items-center text-sm text-gray-300 mb-1"><span>Temps restant :</span><span id="previewCountdown" class="font-mono text-gold-400 font-bold">-- jours</span></div>
+                    <div class="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden mt-2"><div class="h-full bg-gold-500 w-2/3 animate-pulse"></div></div>
+                </div>
+                <div class="border-t border-white/10 pt-4">
+                     <label class="block text-xs font-bold uppercase text-gray-500 mb-2">Clé API Google Gemini (IA)</label>
+                    <input type="password" id="apiKeyInput" placeholder="Collez votre clé API ici..." class="w-full bg-[#222] border border-[#333] rounded-xl px-4 py-3 text-white focus:border-white transition mb-2">
+                </div>
+                <div class="flex gap-3 mt-6"><button onclick="closeSettingsModal()" class="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10 transition font-medium">Annuler</button><button onclick="saveAllSettings()" class="flex-1 px-4 py-3 rounded-xl btn-gold shadow-lg flex items-center justify-center gap-2"><span>Confirmer</span><i class="fa-solid fa-rocket"></i></button></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW PROFILE MODAL - MODERNIZED -->
+    <div id="profileModal" class="hidden fixed inset-0 z-[60] modal-backdrop flex items-center justify-center px-4">
+        <div class="bg-black/60 backdrop-blur-xl border border-white/10 rounded-3xl w-full max-w-md p-8 shadow-2xl transform transition-all scale-100">
+            <div class="flex justify-between items-start mb-8">
+                <div>
+                    <h3 class="text-2xl font-display font-black text-white">Mon Profil</h3>
+                    <p class="text-xs text-gray-400 font-medium mt-1">Personnalisez votre identité</p>
+                </div>
+                <button onclick="closeProfileModal()" class="text-gray-500 hover:text-white bg-white/5 hover:bg-white/10 rounded-full w-8 h-8 flex items-center justify-center transition"><i class="fa-solid fa-times"></i></button>
+            </div>
+            
+            <div class="space-y-6">
+                <!-- Avatar Selection -->
+                <div>
+                    <label class="block text-xs font-bold uppercase text-gray-500 mb-3">Mon Avatar</label>
+                    <div class="grid grid-cols-5 gap-2" id="avatarGrid">
+                        <!-- Avatars generated by JS -->
+                    </div>
+                </div>
+
+                <!-- Inputs -->
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-gray-500 mb-2">Nom Complet</label>
+                        <input type="text" id="profileNameInput" placeholder="Ex: Dr. Dupont" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blue-500 transition placeholder-gray-600">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-gray-500 mb-2">Alias (Navbar)</label>
+                        <input type="text" id="profileAliasInput" placeholder="Ex: Docteur" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blue-500 transition placeholder-gray-600">
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 mt-8 pt-6 border-t border-white/5">
+                <button onclick="saveProfile()" class="px-8 py-3 bg-white text-black rounded-xl text-sm font-bold hover:bg-gray-200 transition shadow-lg">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="playerModal" class="hidden fixed inset-0 z-[80] modal-backdrop flex items-center justify-center px-4 transition-all duration-300 opacity-0 scale-95"><div id="playerWrapper" class="bg-[#111] border border-white/10 rounded-2xl shadow-2xl relative overflow-hidden flex flex-col transition-all duration-500 ease-out"><div class="bg-black/50 backdrop-blur-sm px-6 py-4 border-b border-white/5 flex justify-between items-center z-20 absolute top-0 w-full"><h3 class="text-sm font-bold text-white font-display truncate pr-4 drop-shadow-md" id="playerTitle">Lecture</h3><button onclick="closePlayer()" class="w-8 h-8 rounded-full bg-black/50 flex items-center justify-center text-gray-300 hover:text-white hover:bg-red-500/80 transition"><i class="fa-solid fa-times"></i></button></div><div class="relative bg-black flex items-center justify-center w-full h-full" id="playerContainer"><div id="playerLoader" class="absolute inset-0 flex flex-col items-center justify-center bg-[#0a0a0a] z-10"><div class="w-12 h-12 bg-white text-black flex items-center justify-center font-display font-black text-xl tracking-tighter rounded-sm animate-pulse-fast">FM</div></div></div></div></div>
+    <div id="addModal" class="hidden fixed inset-0 z-[60] modal-backdrop flex items-center justify-center px-4"><div class="bg-[#111] border border-white/10 rounded-3xl w-full max-w-md p-6 shadow-2xl transform transition-all scale-100"><div class="flex justify-between items-center mb-6"><h3 class="text-xl font-bold text-white font-display" id="modalTitle">Ajouter</h3><button onclick="closeModal()" class="text-gray-500 hover:text-white"><i class="fa-solid fa-times text-xl"></i></button></div><div class="space-y-4"><div id="itemInputGroup"><label class="block text-xs font-bold uppercase text-gray-500 mb-2">Numéro d'Item</label><input type="number" id="targetItem" placeholder="Ex: 331" class="w-full bg-[#222] border border-[#333] rounded-xl px-4 py-3 text-white focus:border-white transition"></div><div id="typeInputGroup"><label class="block text-xs font-bold uppercase text-gray-500 mb-2">Format</label><div class="grid grid-cols-2 gap-3"><label class="cursor-pointer"><input type="radio" name="resType" value="video" class="peer sr-only" checked><div class="p-3 bg-[#222] rounded-xl text-center text-gray-500 peer-checked:text-red-500 peer-checked:bg-red-500/10 border border-transparent peer-checked:border-red-500/20 transition"><i class="fa-solid fa-video"></i> Vidéo</div></label><label class="cursor-pointer"><input type="radio" name="resType" value="audio" class="peer sr-only"><div class="p-3 bg-[#222] rounded-xl text-center text-gray-500 peer-checked:text-yellow-500 peer-checked:bg-yellow-500/10 border border-transparent peer-checked:border-yellow-500/20 transition"><i class="fa-solid fa-headphones"></i> Audio</div></label><label class="cursor-pointer"><input type="radio" name="resType" value="flash" class="peer sr-only"><div class="p-3 bg-[#222] rounded-xl text-center text-gray-500 peer-checked:text-purple-500 peer-checked:bg-purple-500/10 border border-transparent peer-checked:border-purple-500/20 transition"><i class="fa-solid fa-bolt"></i> Flash</div></label><label class="cursor-pointer"><input type="radio" name="resType" value="fiche" class="peer sr-only"><div class="p-3 bg-[#222] rounded-xl text-center text-gray-500 peer-checked:text-blue-500 peer-checked:bg-blue-500/10 border border-transparent peer-checked:border-blue-500/20 transition"><i class="fa-solid fa-file-pdf"></i> Fiche</div></label></div></div><div><label class="block text-xs font-bold uppercase text-gray-500 mb-2">Lien URL</label><input type="text" id="newLink" placeholder="https://..." class="w-full bg-[#222] border border-[#333] rounded-xl px-4 py-3 text-white text-sm focus:border-white transition"></div></div><div class="flex justify-end gap-3 mt-8"><button onclick="closeModal()" class="px-4 py-2 text-gray-400 hover:text-white text-sm font-medium">Annuler</button><button onclick="attachResource()" class="px-8 py-3 bg-white text-black rounded-xl text-sm font-bold hover:bg-gray-200 transition shadow-lg">Enregistrer</button></div></div></div>
+    <div id="aiModal" class="hidden fixed inset-0 z-[60] modal-backdrop flex items-center justify-center px-4"><div class="bg-[#111] border border-white/10 rounded-3xl w-full max-w-2xl h-[80vh] flex flex-col shadow-2xl"><div class="px-6 py-4 border-b border-white/5 flex justify-between items-center"><h3 class="font-bold text-white flex items-center gap-2" id="aiModalTitle"><i class="fa-solid fa-brain text-indigo-400"></i> Assistant IA</h3><button onclick="closeAiModal()" class="text-gray-500 hover:text-white"><i class="fa-solid fa-times"></i></button></div><div id="aiLoading" class="hidden absolute inset-0 z-50 bg-[#0a0a0a] flex flex-col items-center justify-center"><div class="w-12 h-12 bg-white text-black flex items-center justify-center font-display font-black text-xl tracking-tighter rounded-sm animate-pulse-fast">IA</div><p class="mt-4 text-gray-500 text-sm">Réflexion en cours...</p></div><div id="aiContent" class="flex-grow overflow-y-auto p-6 bg-[#0a0a0a] flashcard-content max-w-none prose prose-invert prose-p:text-gray-300 prose-headings:text-white hidden"></div><div id="tutorChatInterface" class="hidden flex flex-col h-full overflow-hidden"><div id="chatHistory" class="flex-grow overflow-y-auto p-4 space-y-4 bg-[#0a0a0a] scroll-smooth"></div><div class="p-4 border-t border-white/10 bg-[#111] flex gap-2"><input type="text" id="chatInput" class="flex-grow bg-[#222] border border-[#333] rounded-xl px-4 py-3 text-white focus:border-blue-500 transition text-sm" placeholder="Posez votre question sur l'item..." onkeypress="if(event.key === 'Enter') sendChatMessage()"><button onclick="sendChatMessage()" class="w-12 h-12 flex items-center justify-center bg-blue-600 text-white rounded-xl hover:bg-blue-500 transition"><i class="fa-solid fa-paper-plane"></i></button></div></div></div></div>
+    <div id="confirmModal" class="hidden fixed inset-0 z-[90] modal-backdrop flex items-center justify-center px-4"><div class="bg-[#111] border border-white/10 rounded-2xl p-6 shadow-2xl max-w-sm w-full"><h3 class="text-lg font-bold text-white mb-2">Confirmation</h3><p class="text-gray-400 text-sm mb-6">Voulez-vous vraiment supprimer cette ressource ?</p><div class="flex justify-end gap-3"><button onclick="closeConfirmModal()" class="px-4 py-2 text-gray-400 hover:text-white text-sm font-medium">Non</button><button id="confirmBtnAction" class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-bold hover:bg-red-700">Oui, supprimer</button></div></div></div>
+
+    <script>
+        var userResources = [], userStatus = {}, userTodos = [], courses = [], celebrationTimeout;
+        var userName = "", userAlias = "Docteur", userApiKey = "", chatHistory = [], currentRevisionContext = "";
+        var currentNotesMatiere = "Général", currentSuggestions = [], dailySuggestionsDone = {}, currentStatusFilter = "all", userVues = {};
+        var userAvatar = "fa-dragon"; // Default Avatar
+
+        // --- DATA ---
+        const rawItems = [
+            {id:"1", t:"Relation médecin-malade, annonce, formation patient", m:"Médecine Générale"},
+            {id:"2", t:"Valeurs professionnelles, éthique", m:"Santé Publique"},
+            {id:"3", t:"Raisonnement, EBM, décision partagée", m:"Médecine Générale"},
+            {id:"4", t:"Qualité et sécurité des soins, gestion des risques", m:"Santé Publique"},
+            {id:"5", t:"Responsabilités, erreurs, aléa thérapeutique", m:"Santé Publique"},
+            {id:"6", t:"Organisation de l'exercice clinique, parcours patient", m:"Santé Publique"},
+            {id:"7", t:"Droits individuels et collectifs du patient", m:"Médecine Légale"},
+            {id:"8", t:"Discriminations", m:"Médecine Légale"},
+            {id:"9", t:"Introduction à l'éthique médicale", m:"Médecine Légale"},
+            {id:"10", t:"Approches transversales du corps", m:"Médecine Légale"},
+            {id:"11", t:"Violences et santé", m:"Médecine Légale"},
+            {id:"12", t:"Violences sexuelles", m:"Médecine Légale"},
+            {id:"13", t:"Certificats médicaux. Décès et législation", m:"Médecine Légale"},
+            {id:"14", t:"La mort", m:"Médecine Légale"},
+            {id:"15", t:"Soins psychiatriques sans consentement", m:"Psychiatrie"},
+            {id:"16", t:"Organisation du système de soins", m:"Santé Publique"},
+            {id:"17", t:"Télémédecine et télésanté", m:"Santé Publique"},
+            {id:"18", t:"Santé et numérique", m:"Santé Publique"},
+            {id:"19", t:"Sécurité sociale, assurances, économie de la santé", m:"Santé Publique"},
+            {id:"20", t:"Méthodologie de la recherche en santé", m:"Santé Publique"},
+            {id:"21", t:"Mesure de l'état de santé de la population", m:"Santé Publique"},
+            {id:"22", t:"Maladies rares", m:"Génétique"},
+            {id:"23", t:"Grossesse normale", m:"Gynécologie"},
+            {id:"24", t:"Principales complications de la grossesse", m:"Gynécologie"},
+            {id:"25", t:"Grossesse extra-utérine", m:"Gynécologie"},
+            {id:"26", t:"Douleur abdominale aiguë chez une femme enceinte", m:"Gynécologie"},
+            {id:"27", t:"Prévention des risques fœtaux (infection, toxiques...)", m:"Gynécologie"},
+            {id:"28", t:"Infection urinaire au cours de la grossesse", m:"Gynécologie"},
+            {id:"29", t:"Risques professionnels pour la maternité", m:"Médecine du Travail"},
+            {id:"30", t:"Prématurité et RCIU", m:"Gynécologie"},
+            {id:"31", t:"Accouchement, délivrance et suites de couches", m:"Gynécologie"},
+            {id:"32", t:"Évaluation et soins du nouveau-né à terme", m:"Pédiatrie"},
+            {id:"33", t:"Allaitement maternel", m:"Gynécologie"},
+            {id:"34", t:"Suites de couches pathologiques", m:"Gynécologie"},
+            {id:"35", t:"Anomalies du cycle menstruel. Métrorragies", m:"Gynécologie"},
+            {id:"36", t:"Contraception", m:"Gynécologie"},
+            {id:"37", t:"Interruption volontaire de grossesse (IVG)", m:"Gynécologie"},
+            {id:"38", t:"Infertilité du couple", m:"Gynécologie"},
+            {id:"39", t:"Assistance médicale à la procréation (AMP)", m:"Gynécologie"},
+            {id:"40", t:"Algies pelviennes chez la femme", m:"Gynécologie"},
+            {id:"41", t:"Endométriose", m:"Gynécologie"},
+            {id:"42", t:"Aménorrhée", m:"Gynécologie"},
+            {id:"43", t:"Hémorragie génitale chez la femme", m:"Gynécologie"},
+            {id:"44", t:"Tuméfaction pelvienne chez la femme", m:"Gynécologie"},
+            {id:"45", t:"Spécificités des maladies génétiques", m:"Génétique"},
+            {id:"46", t:"Médecine génomique", m:"Génétique"},
+            {id:"47", t:"Suivi nourrisson, enfant, adolescent normal", m:"Pédiatrie"},
+            {id:"48", t:"Alimentation et besoins nutritionnels de l'enfant", m:"Pédiatrie"},
+            {id:"49", t:"Puberté normale et pathologique", m:"Pédiatrie"},
+            {id:"50", t:"Pathologie génito-scrotale garçon et homme", m:"Urologie"},
+            {id:"51", t:"Troubles de la miction chez l'enfant", m:"Pédiatrie"},
+            {id:"52", t:"Strabisme et amblyopie de l'enfant", m:"Ophtalmologie"},
+            {id:"53", t:"Retard de croissance staturo-pondérale", m:"Pédiatrie"},
+            {id:"54", t:"Boiterie chez l'enfant", m:"Pédiatrie"},
+            {id:"55", t:"Développement psychomoteur du nourrisson et de l'enfant", m:"Pédiatrie"},
+            {id:"56", t:"L'enfant handicapé", m:"Pédiatrie"},
+            {id:"57", t:"Maltraitance et enfants en danger", m:"Pédiatrie"},
+            {id:"58", t:"Sexualité normale et ses troubles", m:"Gynécologie"},
+            {id:"59", t:"Sujets en situation de précarité", m:"Médecine Générale"},
+            {id:"60", t:"Troubles psychiques : FDR, prévention, dépistage", m:"Psychiatrie"},
+            {id:"61", t:"Classifications des troubles mentaux", m:"Psychiatrie"},
+            {id:"62", t:"Organisation de l'offre de soins en psychiatrie", m:"Psychiatrie"},
+            {id:"63", t:"Troubles schizophréniques", m:"Psychiatrie"},
+            {id:"64", t:"Troubles bipolaires", m:"Psychiatrie"},
+            {id:"65", t:"Trouble délirant persistant", m:"Psychiatrie"},
+            {id:"66", t:"Troubles anxieux, dépressifs, TOC, personnalités...", m:"Psychiatrie"},
+            {id:"67", t:"Troubles du neurodéveloppement", m:"Psychiatrie"},
+            {id:"68", t:"Troubles du comportement enfant et adolescent", m:"Psychiatrie"},
+            {id:"69", t:"Troubles psychiques grossesse et post-partum", m:"Psychiatrie"},
+            {id:"70", t:"Troubles psychiques du sujet âgé", m:"Psychiatrie"},
+            {id:"71", t:"Troubles des conduites alimentaires (TCA)", m:"Psychiatrie"},
+            {id:"72", t:"Troubles à symptomatologie somatique", m:"Médecine Générale"},
+            {id:"73", t:"Techniques psychothérapeutiques", m:"Psychiatrie"},
+            {id:"74", t:"Prescription des psychotropes", m:"Thérapeutique"},
+            {id:"75", t:"Addiction au tabac", m:"Addictologie"},
+            {id:"76", t:"Addiction à l'alcool", m:"Addictologie"},
+            {id:"77", t:"Addiction aux médicaments psychotropes", m:"Addictologie"},
+            {id:"78", t:"Addiction drogues illicites (Cannabis, cocaïne...)", m:"Addictologie"},
+            {id:"79", t:"Addictions comportementales", m:"Addictologie"},
+            {id:"80", t:"Dopage et conduites dopantes", m:"Addictologie"},
+            {id:"81", t:"Altération chronique de la vision", m:"Ophtalmologie"},
+            {id:"82", t:"Altération aiguë de la vision", m:"Ophtalmologie"},
+            {id:"83", t:"Infections et inflammations oculaires", m:"Ophtalmologie"},
+            {id:"84", t:"Glaucomes", m:"Ophtalmologie"},
+            {id:"85", t:"Troubles de la réfraction", m:"Ophtalmologie"},
+            {id:"86", t:"Pathologie des paupières", m:"Ophtalmologie"},
+            {id:"87", t:"Epistaxis", m:"ORL & CMF"},
+            {id:"88", t:"Trouble aigu de la parole. Dysphonie", m:"ORL & CMF"},
+            {id:"89", t:"Altération de la fonction auditive", m:"ORL & CMF"},
+            {id:"90", t:"Pathologie des glandes salivaires", m:"ORL & CMF"},
+            {id:"91", t:"Déficit neurologique récent", m:"Neurologie"},
+            {id:"92", t:"Déficit moteur et/ou sensitif des membres", m:"Neurologie"},
+            {id:"93", t:"Compression médullaire non traumatique", m:"Neurologie"},
+            {id:"94", t:"Rachialgie", m:"Rhumatologie"},
+            {id:"95", t:"Radiculalgie et syndrome canalaire", m:"Rhumatologie"},
+            {id:"96", t:"Neuropathies périphériques", m:"Neurologie"},
+            {id:"97", t:"Guillain-Barré (Polyradiculonévrite aiguë)", m:"Neurologie"},
+            {id:"98", t:"Myasthénie", m:"Neurologie"},
+            {id:"99", t:"Migraine et algies de la face", m:"Neurologie"},
+            {id:"100", t:"Céphalée inhabituelle aiguë et chronique", m:"Neurologie"},
+            {id:"101", t:"Paralysie faciale", m:"Neurologie"},
+            {id:"102", t:"Diplopie", m:"Ophtalmologie"},
+            {id:"103", t:"Vertige", m:"ORL & CMF"},
+            {id:"104", t:"Sclérose en plaques", m:"Neurologie"},
+            {id:"105", t:"Épilepsie", m:"Neurologie"},
+            {id:"106", t:"Maladie de Parkinson", m:"Neurologie"},
+            {id:"107", t:"Mouvements anormaux", m:"Neurologie"},
+            {id:"108", t:"Confusion, démences", m:"Neurologie"},
+            {id:"109", t:"Troubles de la marche et de l'équilibre", m:"Neurologie"},
+            {id:"110", t:"Troubles du sommeil", m:"Pneumologie"},
+            {id:"111", t:"Dermatoses faciales (acné, rosacée...)", m:"Dermatologie"},
+            {id:"112", t:"Dermatoses bulleuses", m:"Dermatologie"},
+            {id:"113", t:"Hémangiomes et malformations vasculaires", m:"Dermatologie"},
+            {id:"114", t:"Exanthème et érythrodermie", m:"Dermatologie"},
+            {id:"115", t:"Toxidermies", m:"Dermatologie"},
+            {id:"116", t:"Prurit", m:"Dermatologie"},
+            {id:"117", t:"Psoriasis", m:"Dermatologie"},
+            {id:"118", t:"La personne handicapée : bases évaluation", m:"MPR"},
+            {id:"119", t:"Soins et accompagnement maladie chronique", m:"MPR"},
+            {id:"120", t:"Complications de l'immobilité et du décubitus", m:"Urgence Réanimation"},
+            {id:"121", t:"Le handicap psychique", m:"Psychiatrie"},
+            {id:"122", t:"Techniques de rééducation et réadaptation", m:"MPR"},
+            {id:"123", t:"Vieillissement normal", m:"Gériatrie"},
+            {id:"124", t:"Ménopause et andropause", m:"Gynécologie"},
+            {id:"125", t:"Incontinence urinaire adulte et sujet âgé", m:"Urologie"},
+            {id:"126", t:"Trouble de l'érection", m:"Urologie"},
+            {id:"127", t:"Hypertrophie bénigne de la prostate", m:"Urologie"},
+            {id:"128", t:"Ostéopathies fragilisantes (Ostéoporose)", m:"Rhumatologie"},
+            {id:"129", t:"Arthrose", m:"Rhumatologie"},
+            {id:"130", t:"La personne âgée malade (particularités)", m:"Gériatrie"},
+            {id:"131", t:"Troubles marche/équilibre sujet âgé", m:"Gériatrie"},
+            {id:"132", t:"Troubles cognitifs du sujet âgé", m:"Gériatrie"},
+            {id:"133", t:"Autonomie et dépendance chez le sujet âgé", m:"Gériatrie"},
+            {id:"134", t:"Douleur : physiopathologie et évaluation", m:"Douleur"},
+            {id:"135", t:"Thérapeutiques antalgiques", m:"Douleur"},
+            {id:"136", t:"Anesthésie locale, locorégionale et générale", m:"Urgence Réanimation"},
+            {id:"137", t:"Douleur chez l'enfant", m:"Pédiatrie"},
+            {id:"138", t:"Douleur chez la personne vulnérable", m:"Douleur"},
+            {id:"139", t:"Soins palliatifs (1) : repères cliniques", m:"Soins Palliatifs"},
+            {id:"140", t:"Soins palliatifs (2) : accompagnement", m:"Soins Palliatifs"},
+            {id:"141", t:"Soins palliatifs (3) : sédation, fin de vie", m:"Soins Palliatifs"},
+            {id:"142", t:"Soins palliatifs en pédiatrie", m:"Soins Palliatifs"},
+            {id:"143", t:"Soins palliatifs en réanimation", m:"Soins Palliatifs"},
+            {id:"144", t:"Deuil normal et pathologique", m:"Psychiatrie"},
+            {id:"145", t:"Surveillance des maladies transmissibles", m:"Infectiologie"},
+            {id:"146", t:"Vaccinations", m:"Infectiologie"},
+            {id:"147", t:"Fièvre aiguë chez l'enfant et l'adulte", m:"Infectiologie"},
+            {id:"148", t:"Infections naso-sinusiennes", m:"ORL & CMF"},
+            {id:"149", t:"Angines", m:"ORL & CMF"},
+            {id:"150", t:"Otites infectieuses", m:"ORL & CMF"},
+            {id:"151", t:"Méningites et méningoencéphalites", m:"Infectiologie"},
+            {id:"152", t:"Endocardite infectieuse", m:"Infectiologie"},
+            {id:"153", t:"Surveillance porteurs prothèses valvulaires", m:"Cardiologie"},
+            {id:"154", t:"Infections broncho pulmonaires (Pneumonie)", m:"Pneumologie"},
+            {id:"155", t:"Infections cutanées bactériennes et mycosiques", m:"Dermatologie"},
+            {id:"156", t:"Infections ostéo articulaires (IOA)", m:"Infectiologie"},
+            {id:"157", t:"Bactériémie / Fongémie", m:"Infectiologie"},
+            {id:"158", t:"Sepsis et choc septique", m:"Infectiologie"},
+            {id:"159", t:"Tuberculose", m:"Infectiologie"},
+            {id:"160", t:"Tétanos", m:"Infectiologie"},
+            {id:"161", t:"Infections urinaires", m:"Urologie"},
+            {id:"162", t:"IST (Gonocoque, Chlamydia, Syphilis, HPV...)", m:"Dermatologie"},
+            {id:"163", t:"Coqueluche", m:"Infectiologie"},
+            {id:"164", t:"Exanthèmes fébriles de l'enfant", m:"Pédiatrie"},
+            {id:"165", t:"Oreillons", m:"Infectiologie"},
+            {id:"166", t:"Grippe", m:"Infectiologie"},
+            {id:"167", t:"Hépatites virales", m:"Hépato-Gastro"},
+            {id:"168", t:"Infections à herpès virus", m:"Dermatologie"},
+            {id:"169", t:"Infections à VIH", m:"Infectiologie"},
+            {id:"170", t:"Paludisme", m:"Infectiologie"},
+            {id:"171", t:"Gale et pédiculose", m:"Infectiologie"},
+            {id:"172", t:"Parasitoses digestives", m:"Infectiologie"},
+            {id:"173", t:"Zoonoses", m:"Infectiologie"},
+            {id:"174", t:"Pathologie infectieuse chez les migrants", m:"Infectiologie"},
+            {id:"175", t:"Voyage en pays tropical", m:"Infectiologie"},
+            {id:"176", t:"Diarrhées infectieuses", m:"Infectiologie"},
+            {id:"177", t:"Prescription et surveillance des anti-infectieux", m:"Infectiologie"},
+            {id:"178", t:"Risques émergents, bioterrorisme", m:"Infectiologie"},
+            {id:"179", t:"Risques sanitaires eau/alimentation (TIAC)", m:"Infectiologie"},
+            {id:"180", t:"Risques sanitaires irradiations", m:"Radiologie"},
+            {id:"181", t:"Sécurité sanitaire, veille sanitaire", m:"Santé Publique"},
+            {id:"182", t:"Environnement professionnel et santé", m:"Médecine du Travail"},
+            {id:"183", t:"Organisation médecine du travail", m:"Médecine du Travail"},
+            {id:"184", t:"Accidents du travail et maladies professionnelles", m:"Médecine du Travail"},
+            {id:"185", t:"Réaction inflammatoire", m:"Immunologie"},
+            {id:"186", t:"Hypersensibilités et allergies", m:"Allergologie"},
+            {id:"187", t:"Allergies cutanées (Urticaire, Eczéma)", m:"Dermatologie"},
+            {id:"188", t:"Allergies respiratoires (Asthme, Rhinite)", m:"Pneumologie"},
+            {id:"189", t:"Déficit immunitaire", m:"Immunologie"},
+            {id:"190", t:"Fièvre prolongée", m:"Médecine Interne"},
+            {id:"191", t:"Fièvre chez un patient immunodéprimé", m:"Infectiologie"},
+            {id:"192", t:"Pathologies auto-immunes", m:"Immunologie"},
+            {id:"193", t:"Vascularites systémiques", m:"Médecine Interne"},
+            {id:"194", t:"Lupus systémique et SAPL", m:"Médecine Interne"},
+            {id:"195", t:"Artérite à cellules géantes (Horton)", m:"Médecine Interne"},
+            {id:"196", t:"Polyarthrite rhumatoïde", m:"Rhumatologie"},
+            {id:"197", t:"Spondyloarthrite", m:"Rhumatologie"},
+            {id:"198", t:"Arthropathies microcristallines (Goutte...)", m:"Rhumatologie"},
+            {id:"199", t:"SDRC (Algodystrophie)", m:"Douleur"},
+            {id:"200", t:"Arthrite d'évolution récente", m:"Rhumatologie"},
+            {id:"201", t:"Transplantation d'organes", m:"Néphrologie"},
+            {id:"202", t:"Biothérapies et thérapies ciblées", m:"Immunologie"},
+            {id:"203", t:"Dyspnée aiguë et chronique", m:"Pneumologie"},
+            {id:"204", t:"Toux chez l'enfant et chez l'adulte", m:"Pneumologie"},
+            {id:"205", t:"Hémoptysie", m:"Pneumologie"},
+            {id:"206", t:"Épanchement pleural liquidien", m:"Pneumologie"},
+            {id:"207", t:"Opacités et masses intra-thoraciques", m:"Pneumologie"},
+            {id:"208", t:"Insuffisance respiratoire chronique", m:"Pneumologie"},
+            {id:"209", t:"BPCO", m:"Pneumologie"},
+            {id:"210", t:"Pneumopathie interstitielle diffuse (PID)", m:"Pneumologie"},
+            {id:"211", t:"Sarcoïdose", m:"Pneumologie"},
+            {id:"212", t:"Hémogramme : indications et interprétation", m:"Hématologie"},
+            {id:"213", t:"Anémie", m:"Hématologie"},
+            {id:"214", t:"Thrombopénie", m:"Hématologie"},
+            {id:"215", t:"Purpuras", m:"Hématologie"},
+            {id:"216", t:"Syndrome hémorragique", m:"Hématologie"},
+            {id:"217", t:"Syndrome mononucléosique", m:"Hématologie"},
+            {id:"218", t:"Éosinophilie", m:"Hématologie"},
+            {id:"219", t:"Pathologie du fer", m:"Hématologie"},
+            {id:"220", t:"Adénopathie superficielle", m:"Hématologie"},
+            {id:"221", t:"Athérome", m:"Cardiologie"},
+            {id:"222", t:"Facteurs de risque cardio-vasculaire", m:"Cardiologie"},
+            {id:"223", t:"Dyslipidémies", m:"Endocrinologie"},
+            {id:"224", t:"Hypertension artérielle (HTA)", m:"Cardiologie"},
+            {id:"225", t:"Artériopathie (AOMI, anévrysmes)", m:"Vasculaire"},
+            {id:"226", t:"Thrombose veineuse et Embolie pulmonaire", m:"Vasculaire"},
+            {id:"227", t:"Insuffisance veineuse chronique. Varices", m:"Vasculaire"},
+            {id:"228", t:"Ulcère de jambe", m:"Vasculaire"},
+            {id:"229", t:"Abords veineux (surveillance, complications)", m:"Urgence Réanimation"},
+            {id:"230", t:"Douleur thoracique aiguë", m:"Cardiologie"},
+            {id:"231", t:"ECG : indications et interprétations", m:"Cardiologie"},
+            {id:"232", t:"Fibrillation atriale", m:"Cardiologie"},
+            {id:"233", t:"Valvulopathies", m:"Cardiologie"},
+            {id:"234", t:"Insuffisance cardiaque", m:"Cardiologie"},
+            {id:"235", t:"Péricardite aiguë", m:"Cardiologie"},
+            {id:"236", t:"Troubles de la conduction intracardiaque", m:"Cardiologie"},
+            {id:"237", t:"Palpitations", m:"Cardiologie"},
+            {id:"238", t:"Souffle cardiaque chez l'enfant", m:"Cardiologie"},
+            {id:"239", t:"Acrosyndromes (Raynaud...)", m:"Vasculaire"},
+            {id:"240", t:"Hypoglycémie", m:"Endocrinologie"},
+            {id:"241", t:"Goitre, nodules et cancers thyroïdiens", m:"Endocrinologie"},
+            {id:"242", t:"Hyperthyroïdie", m:"Endocrinologie"},
+            {id:"243", t:"Hypothyroïdie", m:"Endocrinologie"},
+            {id:"244", t:"Adénome hypophysaire", m:"Endocrinologie"},
+            {id:"245", t:"Insuffisance surrénale", m:"Endocrinologie"},
+            {id:"246", t:"Gynécomastie", m:"Endocrinologie"},
+            {id:"247", t:"Diabète sucré (type 1 et 2)", m:"Endocrinologie"},
+            {id:"248", t:"Prévention primaire par la nutrition", m:"Nutrition"},
+            {id:"249", t:"Modifications mode de vie (sport, alim)", m:"Médecine Générale"},
+            {id:"250", t:"Dénutrition", m:"Nutrition"},
+            {id:"251", t:"Amaigrissement", m:"Nutrition"},
+            {id:"252", t:"Troubles nutritionnels sujet âgé", m:"Gériatrie"},
+            {id:"253", t:"Obésité", m:"Nutrition"},
+            {id:"254", t:"Besoins nutritionnels femme enceinte", m:"Nutrition"},
+            {id:"255", t:"Diabète gestationnel", m:"Endocrinologie"},
+            {id:"256", t:"Aptitude au sport", m:"Médecine du Sport"},
+            {id:"257", t:"Œdèmes des membres inférieurs", m:"Néphrologie"},
+            {id:"258", t:"Élévation de la créatininémie", m:"Néphrologie"},
+            {id:"259", t:"Protéinurie et syndrome néphrotique", m:"Néphrologie"},
+            {id:"260", t:"Hématurie", m:"Urologie"},
+            {id:"261", t:"Néphropathie glomérulaire", m:"Néphrologie"},
+            {id:"262", t:"Néphropathies interstitielles", m:"Néphrologie"},
+            {id:"263", t:"Néphropathies vasculaires", m:"Néphrologie"},
+            {id:"264", t:"Insuffisance rénale chronique (IRC)", m:"Néphrologie"},
+            {id:"265", t:"Lithiase urinaire", m:"Urologie"},
+            {id:"266", t:"Polykystose rénale", m:"Néphrologie"},
+            {id:"267", t:"Troubles hydro-électrolytiques et acide-base", m:"Néphrologie"},
+            {id:"268", t:"Hypercalcémie", m:"Endocrinologie"},
+            {id:"269", t:"Douleurs abdominales aiguës", m:"Chirurgie Viscérale"},
+            {id:"270", t:"Douleurs lombaires aiguës", m:"Urologie"},
+            {id:"271", t:"RGO et Hernie hiatale", m:"Hépato-Gastro"},
+            {id:"272", t:"Ulcère gastrique et duodénal", m:"Hépato-Gastro"},
+            {id:"273", t:"Dysphagie", m:"Hépato-Gastro"},
+            {id:"274", t:"Vomissements", m:"Hépato-Gastro"},
+            {id:"275", t:"Splénomégalie", m:"Hématologie"},
+            {id:"276", t:"Hépatomégalie et masse abdominale", m:"Hépato-Gastro"},
+            {id:"277", t:"Lithiase biliaire", m:"Hépato-Gastro"},
+            {id:"278", t:"Ictère", m:"Hépato-Gastro"},
+            {id:"279", t:"Cirrhose et complications", m:"Hépato-Gastro"},
+            {id:"280", t:"Ascite", m:"Hépato-Gastro"},
+            {id:"281", t:"Pancréatite chronique", m:"Hépato-Gastro"},
+            {id:"282", t:"MICI (Crohn, RCH)", m:"Hépato-Gastro"},
+            {id:"283", t:"Constipation", m:"Hépato-Gastro"},
+            {id:"284", t:"Colopathie fonctionnelle (SII)", m:"Hépato-Gastro"},
+            {id:"285", t:"Diarrhée chronique", m:"Hépato-Gastro"},
+            {id:"286", t:"Diarrhée aiguë et déshydratation", m:"Pédiatrie"},
+            {id:"287", t:"Diverticulose et diverticulite", m:"Hépato-Gastro"},
+            {id:"288", t:"Pathologie hémorroïdaire", m:"Hépato-Gastro"},
+            {id:"289", t:"Hernie pariétale", m:"Chirurgie Viscérale"},
+            {id:"290", t:"Épidémiologie et prévention des cancers", m:"Cancérologie"},
+            {id:"291", t:"Cancérogénèse, oncogénétique", m:"Cancérologie"},
+            {id:"292", t:"Diagnostic des cancers", m:"Cancérologie"},
+            {id:"293", t:"Anatomie et Cytologie Pathologiques (ACP)", m:"Anatomopathologie"},
+            {id:"294", t:"Traitement des cancers", m:"Cancérologie"},
+            {id:"295", t:"Prise en charge et accompagnement cancer", m:"Cancérologie"},
+            {id:"296", t:"Agranulocytose médicamenteuse", m:"Hématologie"},
+            {id:"297", t:"Cancer de l'enfant", m:"Pédiatrie"},
+            {id:"298", t:"Tumeurs VADS (bouche, pharynx...)", m:"ORL & CMF"},
+            {id:"299", t:"Tumeurs intracrâniennes", m:"Neurologie"},
+            {id:"300", t:"Tumeurs du col et du corps utérin", m:"Gynécologie"},
+            {id:"301", t:"Tumeurs du colon et du rectum", m:"Hépato-Gastro"},
+            {id:"302", t:"Tumeurs cutanées (Mélanome...)", m:"Dermatologie"},
+            {id:"303", t:"Tumeurs de l'estomac", m:"Hépato-Gastro"},
+            {id:"304", t:"Tumeurs du foie", m:"Hépato-Gastro"},
+            {id:"305", t:"Tumeurs de l'œsophage", m:"Hépato-Gastro"},
+            {id:"306", t:"Tumeurs de l'ovaire", m:"Gynécologie"},
+            {id:"307", t:"Tumeurs des os", m:"Rhumatologie"},
+            {id:"308", t:"Tumeurs du pancréas", m:"Hépato-Gastro"},
+            {id:"309", t:"Tumeurs du poumon", m:"Pneumologie"},
+            {id:"310", t:"Tumeurs de la prostate", m:"Urologie"},
+            {id:"311", t:"Tumeurs du rein", m:"Urologie"},
+            {id:"312", t:"Tumeurs du sein", m:"Gynécologie"},
+            {id:"313", t:"Tumeurs du testicule", m:"Urologie"},
+            {id:"314", t:"Tumeurs vésicales", m:"Urologie"},
+            {id:"315", t:"Leucémies aiguës", m:"Hématologie"},
+            {id:"316", t:"Syndromes myélodysplasiques", m:"Hématologie"},
+            {id:"317", t:"Syndromes myéloprolifératifs", m:"Hématologie"},
+            {id:"318", t:"Leucémies lymphoïdes chroniques", m:"Hématologie"},
+            {id:"319", t:"Lymphomes malins", m:"Hématologie"},
+            {id:"320", t:"Myélome multiple", m:"Hématologie"},
+            {id:"321", t:"Bon usage du médicament", m:"Thérapeutique"},
+            {id:"322", t:"Décision thérapeutique personnalisée", m:"Thérapeutique"},
+            {id:"323", t:"Analyse critique des essais cliniques (LCA)", m:"Thérapeutique"},
+            {id:"324", t:"Éducation thérapeutique, observance", m:"Thérapeutique"},
+            {id:"325", t:"Iatrogénie, erreur médicamenteuse", m:"Thérapeutique"},
+            {id:"326", t:"Cadre réglementaire prescription", m:"Thérapeutique"},
+            {id:"327", t:"Médecine intégrative et complémentaire", m:"Thérapeutique"},
+            {id:"328", t:"Thérapeutiques non médicamenteuses", m:"MPR"},
+            {id:"329", t:"Produits sanguins labiles (Transfusion)", m:"Hématologie"},
+            {id:"330", t:"Prescription classes médicamenteuses courantes", m:"Thérapeutique"},
+            {id:"331", t:"Arrêt cardio-circulatoire", m:"Urgence Réanimation"},
+            {id:"332", t:"État de choc", m:"Urgence Réanimation"},
+            {id:"333", t:"Situations exceptionnelles (SSE)", m:"Urgence Réanimation"},
+            {id:"334", t:"Traumatologie grave (Polytrauma, brûlé...)", m:"Urgence Réanimation"},
+            {id:"335", t:"Traumatisme crânio-facial et oculaire", m:"ORL & CMF"},
+            {id:"336", t:"Coma non traumatique", m:"Urgence Réanimation"},
+            {id:"337", t:"Intoxications aiguës", m:"Urgence Réanimation"},
+            {id:"338", t:"Œdème de Quincke et anaphylaxie", m:"Urgence Réanimation"},
+            {id:"339", t:"Syndromes coronariens aigus (SCA)", m:"Cardiologie"},
+            {id:"340", t:"Accidents vasculaires cérébraux (AVC)", m:"Neurologie"},
+            {id:"341", t:"Hémorragie méningée", m:"Neurologie"},
+            {id:"342", t:"Malaise, perte de connaissance", m:"Urgence Réanimation"},
+            {id:"343", t:"État confusionnel", m:"Neurologie"},
+            {id:"344", t:"Pré-éclampsie (urgence)", m:"Gynécologie"},
+            {id:"345", t:"Malaise grave et mort inattendue nourrisson", m:"Pédiatrie"},
+            {id:"346", t:"Convulsions enfant", m:"Pédiatrie"},
+            {id:"347", t:"Rétention aiguë d'urine", m:"Urologie"},
+            {id:"348", t:"Insuffisance rénale aiguë - Anurie", m:"Néphrologie"},
+            {id:"349", t:"Infection aiguë des parties molles", m:"Infectiologie"},
+            {id:"350", t:"Grosse jambe rouge aiguë", m:"Dermatologie"},
+            {id:"351", t:"Agitation et délire aigu", m:"Psychiatrie"},
+            {id:"352", t:"Crise d'angoisse et attaque de panique", m:"Psychiatrie"},
+            {id:"353", t:"Risque suicidaire", m:"Psychiatrie"},
+            {id:"354", t:"Syndrome occlusif", m:"Chirurgie Viscérale"},
+            {id:"355", t:"Hémorragie digestive", m:"Hépato-Gastro"},
+            {id:"356", t:"Appendicite", m:"Chirurgie Viscérale"},
+            {id:"357", t:"Péritonite aiguë", m:"Chirurgie Viscérale"},
+            {id:"358", t:"Pancréatite aiguë", m:"Hépato-Gastro"},
+            {id:"359", t:"Détresse respiratoire aiguë nourrisson/enfant", m:"Pédiatrie"},
+            {id:"360", t:"Pneumothorax", m:"Pneumologie"},
+            {id:"361", t:"Lésions ligamentaires (entorses)", m:"Orthopédie"},
+            {id:"362", t:"Prothèses et ostéosynthèses", m:"Orthopédie"},
+            {id:"363", t:"Fractures fréquentes adulte", m:"Orthopédie"},
+            {id:"364", t:"Fractures chez l'enfant", m:"Pédiatrie"},
+            {id:"365", t:"Surveillance malade sous plâtre", m:"Orthopédie"},
+            {id:"366", t:"AES (Liquides biologiques)", m:"Infectiologie"},
+            {id:"367", t:"Impact de l'environnement sur la santé", m:"Santé Publique"}
+        ];
+
+        const matiereConfig = {
+            'Cardiologie': { color: 'red', icon: 'fa-heart-pulse', gradient: 'from-red-500 to-rose-600' },
+            'Pneumologie': { color: 'sky', icon: 'fa-lungs', gradient: 'from-sky-400 to-blue-600' },
+            'Neurologie': { color: 'indigo', icon: 'fa-brain', gradient: 'from-indigo-500 to-violet-600' },
+            'Hépato-Gastro': { color: 'amber', icon: 'fa-utensils', gradient: 'from-amber-400 to-orange-600' },
+            'Urgence Réanimation': { color: 'rose', icon: 'fa-truck-medical', gradient: 'from-rose-600 to-red-700' },
+            'Infectiologie': { color: 'yellow', icon: 'fa-virus', gradient: 'from-yellow-400 to-yellow-600' },
+            'Néphrologie': { color: 'orange', icon: 'fa-filter', gradient: 'from-orange-400 to-red-500' },
+            'Urologie': { color: 'orange', icon: 'fa-droplet', gradient: 'from-orange-500 to-red-600' },
+            'Endocrinologie': { color: 'pink', icon: 'fa-dna', gradient: 'from-pink-500 to-rose-500' },
+            'Gynécologie': { color: 'pink', icon: 'fa-person-pregnant', gradient: 'from-pink-400 to-rose-400' },
+            'Pédiatrie': { color: 'cyan', icon: 'fa-baby', gradient: 'from-cyan-400 to-blue-500' },
+            'Dermatologie': { color: 'rose', icon: 'fa-hand-dots', gradient: 'from-rose-400 to-pink-600' },
+            'Psychiatrie': { color: 'violet', icon: 'fa-head-side-virus', gradient: 'from-violet-500 to-purple-600' },
+            'Ophtalmologie': { color: 'blue', icon: 'fa-eye', gradient: 'from-blue-600 to-indigo-700' },
+            'ORL & CMF': { color: 'teal', icon: 'fa-ear-listen', gradient: 'from-teal-400 to-emerald-600' },
+            'Rhumatologie': { color: 'lime', icon: 'fa-bone', gradient: 'from-lime-500 to-green-600' },
+            'Orthopédie': { color: 'emerald', icon: 'fa-crutch', gradient: 'from-emerald-500 to-green-600' },
+            'Hématologie': { color: 'red', icon: 'fa-vial', gradient: 'from-red-600 to-rose-800' },
+            'Santé Publique': { color: 'emerald', icon: 'fa-users', gradient: 'from-emerald-500 to-green-600' },
+            'Médecine Légale': { color: 'indigo', icon: 'fa-scale-balanced', gradient: 'from-indigo-500 to-purple-600' },
+            'Médecine Interne': { color: 'purple', icon: 'fa-user-doctor', gradient: 'from-purple-700 to-indigo-900' },
+            'Gériatrie': { color: 'stone', icon: 'fa-person-cane', gradient: 'from-stone-500 to-stone-700' },
+            'Chirurgie Viscérale': { color: 'amber', icon: 'fa-scalpel', gradient: 'from-amber-600 to-orange-700' },
+            'Médecine du Travail': { color: 'amber', icon: 'fa-helmet-safety', gradient: 'from-amber-500 to-yellow-600' },
+            'Addictologie': { color: 'fuchsia', icon: 'fa-wine-bottle', gradient: 'from-fuchsia-600 to-pink-700' },
+            'Douleur': { color: 'rose', icon: 'fa-face-frown-open', gradient: 'from-rose-300 to-pink-400' },
+            'MPR': { color: 'green', icon: 'fa-wheelchair', gradient: 'from-green-600 to-emerald-700' },
+            'Immunologie': { color: 'purple', icon: 'fa-shield-virus', gradient: 'from-purple-400 to-violet-600' },
+            'Nutrition': { color: 'lime', icon: 'fa-apple-whole', gradient: 'from-lime-500 to-green-500' },
+            'Soins Palliatifs': { color: 'teal', icon: 'fa-hands-holding', gradient: 'from-teal-400 to-cyan-500' },
+            'Génétique': { color: 'indigo', icon: 'fa-dna', gradient: 'from-indigo-300 to-blue-500' },
+            'Cancérologie': { color: 'stone', icon: 'fa-ribbon', gradient: 'from-stone-600 to-gray-800' },
+            'Thérapeutique': { color: 'cyan', icon: 'fa-pills', gradient: 'from-cyan-400 to-blue-500' },
+            'Médecine Générale': { color: 'blue', icon: 'fa-stethoscope', gradient: 'from-blue-500 to-indigo-600' },
+            'Vasculaire': { color: 'red', icon: 'fa-road', gradient: 'from-red-500 to-red-700' },
+            'Médecine du Sport': { color: 'orange', icon: 'fa-person-running', gradient: 'from-orange-500 to-amber-600' },
+            'Anatomopathologie': { color: 'rose', icon: 'fa-microscope', gradient: 'from-rose-800 to-pink-900' },
+            'Allergologie': { color: 'sky', icon: 'fa-hand-dots', gradient: 'from-sky-300 to-blue-400' },
+            'Radiologie': { color: 'slate', icon: 'fa-x-ray', gradient: 'from-slate-700 to-gray-900' },
+            'Anesthésie-Réa': { color: 'sky', icon: 'fa-syringe', gradient: 'from-sky-600 to-blue-700' }
+        };
+
+        const defaultConfig = { color: 'gray', icon: 'fa-book-medical', gradient: 'from-gray-700 to-gray-900' };
+
+        const availableAvatars = [
+            'fa-dragon', 'fa-cat', 'fa-dog', 'fa-crow', 'fa-otter', 
+            'fa-fish', 'fa-spider', 'fa-horse', 'fa-frog', 'fa-dove'
+        ];
+
+        // --- TOAST SYSTEM ---
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            let icon = 'fa-info-circle';
+            if(type === 'success') icon = 'fa-check-circle';
+            if(type === 'error') icon = 'fa-exclamation-circle';
+
+            toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${message}</span>`;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'toastSlide 0.3s ease-in reverse forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // --- CONFIRM MODAL SYSTEM ---
+        var pendingConfirmAction = null;
+        
+        function openConfirmModal(action) {
+            pendingConfirmAction = action;
+            document.getElementById('confirmModal').classList.remove('hidden');
+            document.getElementById('confirmModal').classList.add('flex');
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').classList.add('hidden');
+            document.getElementById('confirmModal').classList.remove('flex');
+            pendingConfirmAction = null;
+        }
+
+        document.getElementById('confirmBtnAction').addEventListener('click', () => {
+            if(pendingConfirmAction) {
+                pendingConfirmAction();
+                closeConfirmModal();
+            }
+        });
+
+
+        // --- INIT & PERSISTENCE ---
+        function initApp() {
+            const options = { weekday: 'long', day: 'numeric', month: 'long' };
+            document.getElementById('dateToday').innerText = new Date().toLocaleDateString('fr-FR', options);
+            
+            // Load Profile Data
+            loadProfile();
+            
+            // Set Greeting
+            updateGreetingDisplay();
+            
+            // Load Other Data
+            const savedRes = localStorage.getItem('flashmed_resources');
+            if(savedRes) userResources = JSON.parse(savedRes);
+            
+            const savedStatus = localStorage.getItem('flashmed_status');
+            if(savedStatus) userStatus = JSON.parse(savedStatus);
+            
+            const savedTodos = localStorage.getItem('flashmed_todos');
+            if(savedTodos) userTodos = JSON.parse(savedTodos);
+            
+            // Load Vues (New)
+            const savedVues = localStorage.getItem('flashmed_vues');
+            if(savedVues) userVues = JSON.parse(savedVues);
+
+            // Load daily suggestion state (persisted by date)
+            loadDailySuggestionState();
+            
+            // Initialize Notes
+            initNotes();
+            
+            // Initialisation Compte à Rebours
+            const savedDate = localStorage.getItem('flashmed_examDate');
+            if(savedDate) {
+                updateCountdownDisplay(savedDate);
+                document.getElementById('examDateInput').value = savedDate;
+            }
+            
+            // Initialisation API Key
+            const savedKey = localStorage.getItem('flashmed_apiKey');
+            if(savedKey) {
+                userApiKey = savedKey;
+                document.getElementById('apiKeyInput').value = savedKey;
+            }
+            
+            // Events
+            document.getElementById('searchInput').addEventListener('input', render);
+            
+            // Notes Save Event Listener
+            document.getElementById('quickNotes').addEventListener('input', (e) => {
+                saveNotes(e.target.value);
+            });
+
+            const todoInput = document.getElementById('todoInput');
+            const autoList = document.getElementById('autocompleteList');
+            
+            todoInput.addEventListener('input', (e) => {
+                const val = e.target.value.toLowerCase();
+                if(!val) { autoList.classList.add('hidden'); return; }
+                
+                const matches = rawItems.filter(i => 
+                    i.id.includes(val) || i.t.toLowerCase().includes(val) || i.m.toLowerCase().includes(val)
+                ).slice(0, 5);
+                
+                if(matches.length === 0) { autoList.classList.add('hidden'); return; }
+                
+                autoList.innerHTML = matches.map(m => `
+                    <div class="autocomplete-item" onclick="addSpecificTodo('${m.id}', '${m.t.replace(/'/g, "&apos;")}')">
+                        <span class="font-bold text-blue-400">#${m.id}</span> ${m.t}
+                    </div>
+                `).join('');
+                autoList.classList.remove('hidden');
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (!todoInput.contains(e.target) && !autoList.contains(e.target)) {
+                    autoList.classList.add('hidden');
+                }
+            });
+            
+            // Event listener pour la prévisualisation de la date dans la modale
+            document.getElementById('examDateInput').addEventListener('change', (e) => {
+                calculatePreview(e.target.value);
+            });
+
+            buildCourses();
+            populateFilters();
+            updateStats();
+            render();
+            renderTodos();
+        }
+        
+        function handleFilterChange(selectElement) {
+            const val = selectElement.value;
+            updateGlobalGlow(val);
+            
+            // Update Filter Icon Color
+            const icon = document.getElementById('filterIcon');
+            
+            // Reset base classes
+            icon.className = "fa-solid text-xs transition-colors duration-300";
+            
+            if (val === 'all') {
+                icon.classList.add('fa-filter', 'text-gray-400', 'group-hover:text-white');
+            } else {
+                const config = matiereConfig[val] || defaultConfig;
+                // Change to the subject icon and color
+                icon.classList.remove('fa-filter');
+                icon.classList.add(config.icon, `text-${config.color}-400`);
+            }
+            
+            render(); 
+        }
+        
+        function filterByStatus(status) {
+            currentStatusFilter = currentStatusFilter === status ? 'all' : status; 
+            render();
+            const statusMessage = currentStatusFilter === 'lu' ? "Affichez: Lus" : currentStatusFilter === 'maitrise' ? "Affichez: Maîtrisés" : "Affichez: Tous";
+            showToast(statusMessage, 'info');
+            window.scrollTo({top: document.getElementById('filterBar').offsetTop - 100, behavior: 'smooth'}); 
+        }
+
+
+        function loadProfile() {
+            const savedName = localStorage.getItem('flashmed_userName');
+            if(savedName) userName = savedName;
+
+            const savedAlias = localStorage.getItem('flashmed_userAlias');
+            if(savedAlias) userAlias = savedAlias;
+            
+            const savedKey = localStorage.getItem('flashmed_apiKey');
+            if(savedKey) userApiKey = savedKey;
+
+            const savedAvatar = localStorage.getItem('flashmed_userAvatar');
+            if(savedAvatar) userAvatar = savedAvatar;
+        }
+
+        function saveData() {
+            localStorage.setItem('flashmed_resources', JSON.stringify(userResources));
+            localStorage.setItem('flashmed_status', JSON.stringify(userStatus));
+            localStorage.setItem('flashmed_todos', JSON.stringify(userTodos));
+            localStorage.setItem('flashmed_vues', JSON.stringify(userVues)); 
+            updateStats(); 
+            // Removed render() here to allow specific UI updates
+        }
+
+        // --- NOTES LOGIC ---
+        function initNotes() {
+            const select = document.getElementById('notesMatiereSelect');
+            const matieres = [...new Set(rawItems.map(i => i.m))].sort();
+            
+            let options = '<option value="Général">-- Général (Global) --</option>';
+            options += matieres.map(m => `<option value="${m}">${m}</option>`).join('');
+            select.innerHTML = options;
+            
+            const savedMatiere = localStorage.getItem('flashmed_notes_matiere') || "Général";
+            if (matieres.includes(savedMatiere) || savedMatiere === "Général") {
+                currentNotesMatiere = savedMatiere;
+            }
+            select.value = currentNotesMatiere;
+
+            renderNotesPanel();
+        }
+
+        function getNotesMatiereConfig(matiereName) {
+            if (matiereName === "Général") {
+                return { name: "Notes Générales", color: 'gray', icon: 'fa-sticky-note', background: 'rgba(15, 15, 15, 0.3)', text: 'text-gray-400' };
+            }
+            const config = matiereConfig[matiereName] || defaultConfig;
+            return {
+                name: matiereName,
+                color: config.color,
+                icon: config.icon,
+                background: `rgba(${getMatiereColorValue(config.color)}, 0.1)`, 
+                text: `text-${config.color}-400`
+            };
+        }
+
+        function getMatiereColorValue(colorName) {
+            const colorMap = {
+                'red': '185, 28, 28', 'sky': '14, 165, 233', 'indigo': '79, 70, 229', 'amber': '245, 158, 11', 'rose': '244, 63, 94', 
+                'yellow': '250, 204, 21', 'orange': '251, 146, 60', 'pink': '236, 72, 153', 'cyan': '6, 182, 212', 'violet': '139, 92, 246',
+                'teal': '20, 184, 166', 'lime': '132, 204, 22', 'emerald': '16, 185, 129', 'purple': '168, 85, 247', 'stone': '120, 113, 108',
+                'blue': '59, 130, 246', 'gray': '107, 114, 128', 'slate': '100, 116, 139', 'fuchsia': '217, 70, 239', 'green': '34, 197, 94'
+            };
+            return colorMap[colorName] || '15, 15, 15'; 
+        }
+
+        function updateGlobalGlow(matiereName) {
+            const glowOverlay = document.getElementById('matiereGlowOverlay');
+            const config = getNotesMatiereConfig(matiereName);
+            const colorValues = getMatiereColorValue(config.color);
+
+            if (matiereName === "Général" || matiereName === "all" || !matiereName) {
+                glowOverlay.style.opacity = '0';
+            } else {
+                glowOverlay.style.background = `radial-gradient(circle at center, rgba(${colorValues}, 0.1), rgba(${colorValues}, 0) 60%)`;
+                glowOverlay.style.opacity = '1';
+                glowOverlay.style.filter = 'blur(100px)';
+            }
+        }
+
+        function renderNotesPanel() {
+            const notesPanel = document.getElementById('notesPanel');
+            const notesIcon = document.getElementById('notesIcon');
+            const notesTitle = document.getElementById('notesTitle');
+            const notesArea = document.getElementById('quickNotes');
+            
+            const config = getNotesMatiereConfig(currentNotesMatiere);
+
+            notesIcon.className = `fa-solid ${config.icon} text-xs text-gray-300 group-hover:text-white transition-colors`; // Reset icon style for container
+            notesTitle.innerText = config.name;
+            
+            // No need to manually remove text classes if we reset className above
+            
+            notesPanel.classList.forEach(cls => {
+                 if (cls.startsWith('bg-')) notesPanel.classList.remove(cls); 
+            });
+            notesPanel.style.backgroundColor = config.background; 
+            
+            updateGlobalGlow(currentNotesMatiere);
+
+            const savedContent = localStorage.getItem(`flashmed_notes_${currentNotesMatiere}`) || "";
+            notesArea.value = savedContent;
+        }
+
+        function changeNotesMatiere(newMatiere) {
+            saveNotes(document.getElementById('quickNotes').value); 
+            currentNotesMatiere = newMatiere;
+            localStorage.setItem('flashmed_notes_matiere', newMatiere);
+            renderNotesPanel();
+            showToast(`Notes basculées sur ${newMatiere}`, 'info');
+        }
+
+        function saveNotes(content) {
+            localStorage.setItem(`flashmed_notes_${currentNotesMatiere}`, content);
+            const indicator = document.getElementById('saveIndicator');
+            indicator.classList.remove('opacity-0');
+            setTimeout(() => indicator.classList.add('opacity-0'), 1000);
+        }
+
+        // --- PROFILE LOGIC (MODERNIZED) ---
+        function openProfileModal() {
+            document.getElementById('profileModal').classList.remove('hidden');
+            document.getElementById('profileModal').classList.add('flex');
+            document.getElementById('profileNameInput').value = userName;
+            document.getElementById('profileAliasInput').value = userAlias !== "Docteur" ? userAlias : '';
+            
+            renderAvatarSelection();
+        }
+
+        function renderAvatarSelection() {
+            const grid = document.getElementById('avatarGrid');
+            grid.innerHTML = availableAvatars.map(icon => {
+                const isSelected = icon === userAvatar;
+                const borderClass = isSelected ? 'border-blue-500 bg-blue-500/20 text-white' : 'border-white/10 bg-white/5 text-gray-500 hover:bg-white/10 hover:text-gray-300';
+                
+                return `
+                    <button onclick="selectAvatar('${icon}')" class="aspect-square rounded-xl border ${borderClass} flex items-center justify-center transition-all duration-300">
+                        <i class="fa-solid ${icon} text-xl"></i>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function selectAvatar(icon) {
+            userAvatar = icon;
+            renderAvatarSelection();
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profileModal').classList.add('hidden');
+            document.getElementById('profileModal').classList.remove('flex');
+        }
+
+        function saveProfile() {
+            const name = document.getElementById('profileNameInput').value.trim();
+            const alias = document.getElementById('profileAliasInput').value.trim() || "Docteur";
+
+            if (name) localStorage.setItem('flashmed_userName', name); else localStorage.removeItem('flashmed_userName');
+            if (alias !== "Docteur") localStorage.setItem('flashmed_userAlias', alias); else localStorage.removeItem('flashmed_userAlias');
+            
+            localStorage.setItem('flashmed_userAvatar', userAvatar);
+
+            userName = name;
+            userAlias = alias;
+            
+            updateGreetingDisplay();
+            closeProfileModal();
+            showToast('Profil mis à jour', 'success');
+        }
+
+        function updateGreetingDisplay() {
+            const hour = new Date().getHours();
+            const greeting = hour >= 18 || hour < 5 ? "Bonsoir" : "Bonjour";
+            const targetName = userName || userAlias;
+            document.getElementById('greetingDisplay').innerText = `${greeting}, ${targetName}.`;
+            const aliasDisplay = document.getElementById('userAliasDisplay');
+            if (aliasDisplay) aliasDisplay.innerText = userAlias;
+            
+            // Update Navbar Icon
+            const navIcon = document.getElementById('navbarIcon');
+            navIcon.className = `fa-solid ${userAvatar} text-3xl text-white relative z-10 group-hover:scale-110 transition-transform`;
+        }
+
+        // --- COUNTDOWN & SETTINGS LOGIC ---
+        function openSettingsModal() {
+            const modal = document.getElementById('settingsModal');
+            const content = document.getElementById('settingsModalContent');
+            modal.classList.remove('hidden');
+            
+            requestAnimationFrame(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+            });
+
+            const savedDate = localStorage.getItem('flashmed_examDate');
+            if(savedDate) {
+                document.getElementById('examDateInput').value = savedDate;
+                calculatePreview(savedDate);
+            }
+
+            const savedKey = localStorage.getItem('flashmed_apiKey');
+            if(savedKey) {
+                document.getElementById('apiKeyInput').value = savedKey;
+            }
+        }
+        
+        function closeSettingsModal() {
+            const modal = document.getElementById('settingsModal');
+            const content = document.getElementById('settingsModalContent');
+            
+            modal.classList.add('opacity-0');
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        function calculatePreview(dateString) {
+            if (!dateString) return;
+            const target = new Date(dateString);
+            const today = new Date();
+            const diffTime = target - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+            
+            const previewEl = document.getElementById('previewCountdown');
+            if (diffDays >= 0) {
+                previewEl.innerHTML = `${diffDays} jours`;
+                previewEl.className = "font-mono text-gold-400 font-bold";
+            } else {
+                previewEl.innerHTML = "Date passée !";
+                previewEl.className = "font-mono text-red-400 font-bold";
+            }
+        }
+        
+        function saveAllSettings() {
+            const date = document.getElementById('examDateInput').value;
+            const key = document.getElementById('apiKeyInput').value.trim();
+            
+            if (!date && !key) {
+                closeSettingsModal();
+                return;
+            }
+
+            if(date) {
+                localStorage.setItem('flashmed_examDate', date);
+                
+                const displayElement = document.getElementById('countdownDisplay');
+                const containerElement = displayElement.parentElement.parentElement;
+                
+                containerElement.classList.add('animate-warp-speed');
+
+                let interval = setInterval(() => {
+                    displayElement.innerText = Math.floor(Math.random() * 999);
+                    displayElement.style.color = '#fbbf24'; 
+                }, 50);
+
+                setTimeout(() => {
+                    clearInterval(interval);
+                    containerElement.classList.remove('animate-warp-speed');
+                    displayElement.style.color = ''; 
+                    
+                    updateCountdownDisplay(date);
+                    
+                    containerElement.classList.add('ring-4', 'ring-gold-500');
+                    setTimeout(() => containerElement.classList.remove('ring-4', 'ring-gold-500'), 500);
+                }, 800);
+            }
+
+            if(key) {
+                localStorage.setItem('flashmed_apiKey', key);
+                userApiKey = key;
+            }
+            
+            closeSettingsModal();
+            showToast('Paramètres enregistrés avec succès', 'success');
+        }
+        
+        function updateCountdownDisplay(dateStr) {
+            if(!dateStr) return;
+            const examDate = new Date(dateStr);
+            const today = new Date();
+            const diffTime = examDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            const displayEl = document.getElementById('countdownDisplay');
+            const iconEl = document.getElementById('countdownIcon');
+            const miniDateEl = document.getElementById('targetDateMini');
+
+            const options = { day: 'numeric', month: 'short', year: 'numeric' };
+            if(miniDateEl) miniDateEl.innerText = examDate.toLocaleDateString('fr-FR', options);
+            
+            if (diffDays < 0) {
+                displayEl.innerText = "Terminé";
+                displayEl.className = "text-white font-mono font-bold text-xl tracking-wider digit-scroll";
+                iconEl.className = "fa-solid fa-check text-green-500 text-lg";
+            } else if (diffDays === 0) {
+                 displayEl.innerText = "JOUR J";
+                 displayEl.className = "text-green-400 font-mono font-bold text-xl tracking-wider digit-scroll animate-pulse";
+                 iconEl.className = "fa-solid fa-flag-checkered text-green-400 text-lg";
+            } else {
+                displayEl.innerText = diffDays;
+                if (diffDays > 100) { 
+                      displayEl.className = "text-white font-mono font-bold text-xl tracking-wider digit-scroll";
+                      iconEl.className = "fa-solid fa-hourglass-half text-gold-400 text-lg";
+                }
+                else if (diffDays > 30) { 
+                      displayEl.className = "text-white font-mono font-bold text-xl tracking-wider digit-scroll";
+                      iconEl.className = "fa-solid fa-hourglass-half text-gold-400 text-lg";
+                }
+                else { 
+                      displayEl.className = "text-red-500 font-mono font-bold text-xl tracking-wider digit-scroll animate-pulse";
+                      iconEl.className = "fa-solid fa-triangle-exclamation text-red-500 text-lg animate-bounce"; 
+                }
+            }
+        }
+
+        // --- TIMER LOGIC ---
+        var timerInterval;
+        var seconds = 0;
+        var isTimerRunning = false;
+        
+        const DINO_IDLE = 'fa-dragon'; 
+        const DINO_RUN = 'fa-dragon fa-bounce'; 
+        const DINO_JUMP = 'fa-dragon fa-beat'; 
+
+        function triggerDinoJump() {
+            const dinoIcon = document.getElementById('dinoIcon');
+            const visuals = getDinoVisuals();
+
+            if (!isTimerRunning) {
+                dinoIcon.className = `fa-solid ${DINO_JUMP} text-6xl text-gray-500 transition-colors duration-300`;
+                setTimeout(() => {
+                    dinoIcon.className = `fa-solid ${DINO_IDLE} text-6xl text-gray-500 transition-colors duration-300 animate-dino-sleep`;
+                }, 500);
+            }
+            else {
+                dinoIcon.className = `fa-solid ${DINO_JUMP} text-6xl ${visuals.color} transition-all duration-300`;
+                setTimeout(() => {
+                    updateDinoVisuals(); 
+                }, 500);
+            }
+        }
+
+        function getDinoVisuals() {
+            if (seconds >= 21600) return { color: 'text-red-500 drop-shadow-[0_0_30px_rgba(239,68,68,1)]', glow: 'rgba(239, 68, 68, 0.6)', hex: '#ef4444' };
+            if (seconds >= 14400) return { color: 'text-cyan-400 drop-shadow-[0_0_25px_rgba(34,211,238,0.9)]', glow: 'rgba(34, 211, 238, 0.5)', hex: '#22d3ee' };
+            if (seconds >= 7200) return { color: 'text-purple-500 drop-shadow-[0_0_20px_rgba(168,85,247,0.8)]', glow: 'rgba(168, 85, 247, 0.4)', hex: '#a855f7' };
+            if (seconds >= 3600) return { color: 'text-yellow-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.7)]', glow: 'rgba(250, 204, 21, 0.3)', hex: '#facc15' };
+            return { color: 'text-blue-400', glow: 'rgba(59, 130, 246, 0.2)', hex: '#3b82f6' };
+        }
+
+        function updateDinoVisuals() {
+            const dino = document.getElementById('dinoIcon');
+            const glow = document.getElementById('timerGlow');
+            const visuals = getDinoVisuals();
+
+            const animationClass = dino.classList.contains('fa-beat') ? DINO_JUMP : DINO_RUN;
+            dino.className = `fa-solid ${animationClass} text-6xl transition-all duration-500 ${visuals.color}`;
+
+            const scale = 1 + (seconds / 21600) * 0.5; 
+            glow.style.backgroundColor = visuals.glow;
+            glow.style.transform = `scale(${scale})`;
+            glow.style.opacity = Math.min(1, 0.3 + (seconds / 3600) * 0.1);
+        }
+
+        function toggleTimer() {
+            const btn = document.getElementById('timerBtn');
+            const icon = document.getElementById('timerIcon');
+            const glow = document.getElementById('timerGlow');
+            const dinoIcon = document.getElementById('dinoIcon');
+            const dinoZzz = document.getElementById('dinoZzz');
+            
+            if(isTimerRunning) {
+                clearInterval(timerInterval);
+                icon.classList.remove('fa-pause'); icon.classList.add('fa-play');
+                btn.classList.remove('animate-button-pulse');
+                glow.classList.remove('scale-100', 'opacity-100'); glow.classList.add('scale-50', 'opacity-0');
+                glow.style = ''; 
+                document.getElementById('timerDisplay').classList.remove('timer-active');
+                dinoIcon.className = `fa-solid ${DINO_IDLE} text-6xl text-gray-500 transition-colors duration-300 animate-dino-sleep`;
+                dinoZzz.classList.remove('hidden');
+            } else {
+                timerInterval = setInterval(() => { seconds++; updateTimerDisplay(); updateDinoVisuals(); checkTimerMilestones(); }, 1000);
+                icon.classList.remove('fa-play'); icon.classList.add('fa-pause');
+                btn.classList.add('animate-button-pulse');
+                glow.classList.remove('scale-50', 'opacity-0'); glow.classList.add('scale-100', 'opacity-100');
+                document.getElementById('timerDisplay').classList.add('timer-active');
+                
+                updateDinoVisuals();
+                dinoZzz.classList.add('hidden');
+            }
+            isTimerRunning = !isTimerRunning;
+        }
+
+        function resetTimer() {
+             clearInterval(timerInterval); isTimerRunning = false; seconds = 0; updateTimerDisplay();
+             const btn = document.getElementById('timerBtn');
+             const icon = document.getElementById('timerIcon');
+             const glow = document.getElementById('timerGlow');
+             const dinoIcon = document.getElementById('dinoIcon');
+             const dinoZzz = document.getElementById('dinoZzz');
+             icon.classList.remove('fa-pause'); icon.classList.add('fa-play');
+             btn.classList.remove('animate-button-pulse');
+             glow.classList.remove('scale-100', 'opacity-100'); glow.classList.add('scale-50', 'opacity-0');
+             glow.style = ''; 
+             document.getElementById('timerDisplay').classList.remove('timer-active');
+             dinoIcon.className = `fa-solid ${DINO_IDLE} text-6xl text-gray-500 transition-colors duration-300`;
+             dinoZzz.classList.remove('hidden');
+        }
+
+        function updateTimerDisplay() {
+            const hrs = Math.floor(seconds / 3600).toString().padStart(2, '0');
+            const mins = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+            const secs = (seconds % 60).toString().padStart(2, '0');
+            
+            if (seconds >= 3600) {
+                document.getElementById('timerDisplay').innerText = `${hrs}:${mins}:${secs}`;
+                document.getElementById('timerDisplay').classList.replace('text-6xl', 'text-5xl');
+            } else {
+                document.getElementById('timerDisplay').innerText = `${mins}:${secs}`;
+                document.getElementById('timerDisplay').classList.replace('text-5xl', 'text-6xl');
+            }
+        }
+
+        const motivationalQuotes = ["INCROYABLE !", "MASTERCLASS !", "FOCUS ABSOLU", "LÉGENDE !", "LÂCHE RIEN", "MACHINE !", "FUTUR PU-PH", "DOMINATION TOTALE"];
+        
+        function checkTimerMilestones() {
+            const milestones = [3600, 7200, 14400, 21600];
+
+            if (milestones.includes(seconds)) {
+                showFocusMilestone(motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)]);
+                
+                const dinoIcon = document.getElementById('dinoIcon');
+                const visuals = getDinoVisuals(); 
+                
+                dinoIcon.className = `fa-solid ${DINO_JUMP} text-6xl ${visuals.color} transition-all duration-300`;
+                
+                const timerFlame = document.getElementById('timerFlame');
+                timerFlame.style.backgroundColor = visuals.hex;
+                timerFlame.style.opacity = '0.1';
+                timerFlame.classList.remove('hidden');
+
+                triggerScreenParticles(visuals.hex);
+                
+                setTimeout(() => { 
+                    if(isTimerRunning) updateDinoVisuals(); 
+                    timerFlame.classList.add('hidden');
+                }, 3000);
+            } 
+            else if (seconds % 20 === 0 && seconds > 0) {
+                const dino = document.getElementById('dinoWrapper');
+                dino.classList.add('animate-dino-bounce');
+                setTimeout(() => dino.classList.remove('animate-dino-bounce'), 1000);
+            }
+        }
+
+        function triggerScreenParticles(colorHex) {
+            const flash = document.createElement('div');
+            flash.className = 'screen-flash';
+            flash.style.backgroundColor = colorHex || '#3b82f6';
+            document.body.appendChild(flash);
+            setTimeout(() => flash.remove(), 600);
+
+            for(var i=0; i<40; i++) { 
+                var p = document.createElement('div'); p.classList.add('particle');
+                p.style.left = Math.random() * 100 + 'vw'; p.style.top = Math.random() * 100 + 'vh';
+                p.style.backgroundColor = colorHex || '#3b82f6'; 
+                p.style.boxShadow = `0 0 10px ${colorHex || '#3b82f6'}`;
+                p.style.animationDuration = (Math.random() * 1.5 + 0.5) + 's';
+                document.body.appendChild(p); setTimeout(() => p.remove(), 2000);
+            }
+
+            const shock = document.createElement('div'); 
+            shock.className = 'shockwave-ring';
+            shock.style.borderColor = colorHex || '#3b82f6'; 
+            document.getElementById('shockwaveContainer').appendChild(shock); 
+            setTimeout(() => shock.remove(), 1000);
+        }
+
+        function showFocusMilestone(quote) {
+             const overlay = document.getElementById('focusOverlay');
+             document.getElementById('focusQuote').innerText = quote;
+             overlay.classList.remove('hidden'); void overlay.offsetWidth; overlay.classList.remove('opacity-0');
+             setTimeout(() => { overlay.classList.add('opacity-0'); setTimeout(() => overlay.classList.add('hidden'), 1000); }, 2500);
+        }
+
+        // --- TODO LOGIC ---
+        function addTodo() {
+            const input = document.getElementById('todoInput');
+            const val = input.value.trim();
+            if(val) {
+                var foundId = null;
+                const match = val.match(/(\d+)/);
+                if (match) {
+                      const possibleId = match[1];
+                      if (rawItems.find(i => i.id === possibleId)) foundId = possibleId;
+                }
+                
+                userTodos.push({ text: val, done: false, id: Date.now(), linkedItemId: foundId });
+                input.value = '';
+                saveData();
+                renderTodos();
+            }
+        }
+        
+        function addSpecificTodo(id, title) {
+            userTodos.push({ text: `Item ${id} - ${title.substring(0, 25)}...`, done: false, id: Date.now(), linkedItemId: id });
+            document.getElementById('todoInput').value = '';
+            document.getElementById('autocompleteList').classList.add('hidden');
+            saveData();
+            renderTodos();
+            showToast('Objectif ajouté', 'success');
+        }
+
+        function toggleTodo(id) {
+            const todo = userTodos.find(t => t.id === id);
+            if(todo) { 
+                todo.done = !todo.done; 
+                
+                if (todo.done && todo.linkedItemId) {
+                    if (userStatus[todo.linkedItemId] !== 'maitrise') {
+                        userStatus[todo.linkedItemId] = 'lu';
+                        buildCourses(); 
+                        render();
+                        showToast('Marqué comme LU', 'info');
+                    }
+                }
+                
+                saveData(); 
+                renderTodos();
+            }
+        }
+        
+        function deleteTodo(id) {
+             userTodos = userTodos.filter(t => t.id !== id);
+             saveData(); renderTodos();
+        }
+
+        function renderTodos() {
+            const list = document.getElementById('todoList');
+            list.innerHTML = userTodos.map(t => `
+                <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition group">
+                    <button onclick="toggleTodo(${t.id})" class="w-5 h-5 rounded border ${t.done ? 'bg-green-500 border-green-500 text-black' : 'border-gray-500 text-transparent'} flex items-center justify-center transition"><i class="fa-solid fa-check text-xs"></i></button>
+                    <span class="text-sm ${t.done ? 'text-gray-500 line-through' : 'text-white'} flex-grow font-medium truncate">${t.text}</span>
+                    <button onclick="deleteTodo(${t.id})" class="text-gray-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition"><i class="fa-solid fa-trash text-xs"></i></button>
+                </div>
+            `).join('');
+            if(userTodos.length === 0) list.innerHTML = '<div class="text-center text-gray-600 text-xs mt-10 italic">Sélectionnez vos priorités.</div>';
+        }
+
+        // --- MAIN APP LOGIC ---
+        function buildCourses() {
+            courses = rawItems.map(item => {
+                const attached = userResources.filter(r => r.itemId === item.id);
+                const status = userStatus[item.id] || null;
+                const vues = userVues[item.id] || 0; 
+                return { id: item.id, item: item.id, title: item.t, matiere: item.m, videoLink: attached.find(r => r.type === 'video')?.link, audioLink: attached.find(r => r.type === 'audio')?.link, flashLink: attached.find(r => r.type === 'flash')?.link, ficheLink: attached.find(r => r.type === 'fiche')?.link, status: status, vues: vues };
+            });
+        }
+        
+        function incrementVues(itemId) {
+            userVues[itemId] = (userVues[itemId] || 0) + 1;
+            
+            const MAX_VUES_FOR_MAITRISE = 5;
+            
+            // Instant DOM Update for smooth experience
+            const vuesContainer = document.getElementById(`vues-container-${itemId}`);
+            if(vuesContainer) {
+                vuesContainer.innerHTML = getVuesBarHTML(userVues[itemId], itemId);
+            }
+
+            if (userVues[itemId] >= MAX_VUES_FOR_MAITRISE && userStatus[itemId] !== 'maitrise') {
+                userStatus[itemId] = 'maitrise';
+                saveData(); // Save state
+                buildCourses(); // Rebuild course object state
+                render(); // Full render needed for status change visual update
+                showCelebration();
+                showToast(`Item ${itemId} MAÎTRISÉ (5 vues atteintes) !`, 'success');
+                return; 
+            }
+
+            saveData(); // Save but skip full render
+            // Note: we don't call render() here because we manually updated the innerHTML
+            showToast(`Vue #${userVues[itemId]} enregistrée pour Item ${itemId}`, 'info');
+        }
+
+        function resetVues(itemId) {
+            userVues[itemId] = 0;
+            const vuesContainer = document.getElementById(`vues-container-${itemId}`);
+            if(vuesContainer) {
+                vuesContainer.innerHTML = getVuesBarHTML(0, itemId);
+            }
+            saveData();
+            showToast('Nombre de lectures réinitialisé.', 'info');
+        }
+
+        function updateStats() {
+            const total = rawItems.length;
+            const totalLu = Object.values(userStatus).filter(s => s === 'lu' || s === 'maitrise').length;
+            const totalMaitrise = Object.values(userStatus).filter(s => s === 'maitrise').length;
+            const pctLu = Math.round((totalLu / total) * 100);
+            const pctMaitrise = Math.round((totalMaitrise / total) * 100);
+            document.getElementById('countLu').innerText = totalLu; document.getElementById('pctLu').innerText = pctLu + '%'; document.getElementById('ringLu').setAttribute('stroke-dasharray', `${pctLu}, 100`);
+            document.getElementById('countMaitrise').innerText = totalMaitrise; document.getElementById('pctMaitrise').innerText = pctMaitrise + '%'; document.getElementById('ringMaitrise').setAttribute('stroke-dasharray', `${pctMaitrise}, 100`);
+            
+            const subjects = {};
+            rawItems.forEach(i => { if(!subjects[i.m]) subjects[i.m] = { total: 0, done: 0 }; subjects[i.m].total++; if(userStatus[i.id] === 'maitrise') subjects[i.m].done++; });
+            const sortedSubjects = Object.entries(subjects).map(([name, stats]) => { return { name, pct: Math.round((stats.done / stats.total) * 100), ...stats }; }).sort((a, b) => b.pct - a.pct);
+            document.getElementById('subjectProgressContainer').innerHTML = sortedSubjects.map(s => {
+                const style = matiereConfig[s.name] || defaultConfig;
+                return `<div onclick="filterByMatiere('${s.name}')" class="min-w-[140px] bg-[#111] border border-white/5 rounded-xl p-3 cursor-pointer hover:bg-white/5 transition group"><div class="flex items-center justify-between mb-2"><i class="fa-solid ${style.icon} text-${style.color}-400"></i><span class="text-xs font-bold text-white">${s.pct}%</span></div><p class="text-[10px] font-bold uppercase text-gray-400 truncate mb-1 group-hover:text-white transition">${s.name}</p><div class="w-full h-1 bg-gray-800 rounded-full overflow-hidden"><div class="h-full bg-${style.color}-500" style="width: ${s.pct}%"></div></div></div>`;
+            }).join('');
+
+            renderSuggestions();
+        }
+        
+        // --- SUGGESTIONS LOGIC ---
+        function getTodayKey() {
+            return new Date().toISOString().slice(0, 10);
+        }
+
+        function loadDailySuggestionState() {
+            const savedState = localStorage.getItem('flashmed_daily_suggestions');
+            if (savedState) {
+                const state = JSON.parse(savedState);
+                // Basic validation to prevent "undefined" issues from old data
+                if (state.date === getTodayKey() && state.suggestions && state.suggestions.length > 0 && state.suggestions[0].theme) {
+                    currentSuggestions = state.suggestions;
+                    dailySuggestionsDone = state.done || {};
+                    return;
+                }
+            }
+            currentSuggestions = [];
+            dailySuggestionsDone = {};
+        }
+
+        function saveDailySuggestionState() {
+            const state = {
+                date: getTodayKey(),
+                suggestions: currentSuggestions,
+                done: dailySuggestionsDone
+            };
+            localStorage.setItem('flashmed_daily_suggestions', JSON.stringify(state));
+        }
+
+        function generateNewSuggestions() {
+            const todoCourses = courses.filter(c => !userStatus[c.id]);
+            const newSuggestions = [];
+            const suggestionsCount = Math.min(6, todoCourses.length);
+            
+            const usedIndices = new Set();
+            
+            for (let i = 0; i < suggestionsCount; i++) {
+                let randomIndex;
+                do {
+                    randomIndex = Math.floor(Math.random() * todoCourses.length);
+                } while (usedIndices.has(randomIndex));
+                
+                usedIndices.add(randomIndex);
+                
+                const item = todoCourses[randomIndex];
+                // Use fallback if matiere config missing
+                const config = matiereConfig[item.matiere] || defaultConfig;
+
+                newSuggestions.push({
+                    id: item.id,
+                    title: item.title,
+                    matiere: item.matiere, 
+                    theme: item.matiere || "Général", // Fallback to prevent "undefined"
+                    icon: config.icon
+                });
+            }
+
+            currentSuggestions = newSuggestions;
+            dailySuggestionsDone = {};
+            currentSuggestions.forEach(s => { dailySuggestionsDone[s.id] = false; });
+            saveDailySuggestionState();
+            showToast(`Nouvelles suggestions générées: ${currentSuggestions.length} items.`, 'info');
+        }
+
+        // --- UPDATED SUGGESTION HTML GENERATION ---
+        function getSuggestionCardHTML(c) {
+            const courseInfo = courses.find(item => item.id === c.id);
+            if (!courseInfo) return '';
+            const isDone = dailySuggestionsDone[c.id];
+
+            const searchAction = `filterByMatiere('${courseInfo.matiere}'); document.getElementById('searchInput').value = '${c.id}'; render(); window.scrollTo({top: document.getElementById('filterBar').offsetTop - 100, behavior: 'smooth'});`;
+            
+            // MODERNIZED CARD HTML: Dark background with slight transparency to fit theme
+            return `
+                <div class="bg-black/20 border border-white/5 hover:border-orange-500/30 backdrop-blur-sm rounded-2xl p-4 cursor-pointer transition-all duration-300 group flex flex-col justify-between h-full suggestion-card hover:-translate-y-1 hover:bg-black/30 ${isDone ? 'done' : ''}" data-item-id="${c.id}">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center">
+                                <i class="fa-solid ${c.icon} text-orange-400 text-[10px]"></i>
+                            </div>
+                            <span class="text-[10px] font-bold text-gray-400 uppercase truncate max-w-[100px]">${c.theme}</span>
+                        </div>
+                    </div>
+                    
+                    <div onclick="${searchAction}" class="flex-grow mb-4">
+                        <p class="text-sm text-white font-bold leading-snug line-clamp-2 group-hover:text-orange-400 transition-colors">${courseInfo.title}</p>
+                        <div class="mt-2 text-[10px] text-gray-500 font-mono border border-white/5 inline-block px-1.5 py-0.5 rounded">ITEM ${c.id}</div>
+                    </div>
+
+                    <div class="mt-auto pt-3 border-t border-white/5 flex justify-between items-center">
+                        <button onclick="toggleSuggestionDone('${c.id}')" class="w-full py-2 rounded-xl border flex items-center justify-center gap-2 transition-all duration-300 ${isDone ? 'bg-green-500 border-green-500 text-black font-bold shadow-[0_0_15px_rgba(34,197,94,0.4)]' : 'border-white/10 bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'}">
+                            <i class="fa-solid ${isDone ? 'fa-check-circle' : 'fa-circle'} text-sm"></i>
+                            <span class="text-xs font-bold uppercase tracking-wide">${isDone ? 'Fait' : 'Valider'}</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleSuggestionDone(itemId) {
+            dailySuggestionsDone[itemId] = !dailySuggestionsDone[itemId];
+            saveDailySuggestionState();
+            renderSuggestions(false, true); 
+            checkAllSuggestionsDone();
+        }
+
+        function checkAllSuggestionsDone() {
+            if (currentSuggestions.length > 0 && currentSuggestions.every(s => dailySuggestionsDone[s.id])) {
+                showCelebrationSuggestions();
+            }
+        }
+
+        function showCelebrationSuggestions() {
+            const overlay = document.getElementById('celebrationOverlay');
+            const celebrationContent = document.getElementById('celebrationContent');
+            
+            overlay.classList.add('hidden');
+            overlay.classList.remove('opacity-100');
+            overlay.classList.add('opacity-0');
+            celebrationContent.classList.add('scale-0');
+
+            document.querySelector('#celebrationOverlay h2').innerText = 'VICTOIRE !';
+            document.querySelector('#celebrationOverlay span').innerText = 'Suggestions du jour complétées';
+            document.getElementById('iconCrown').classList.add('hidden'); 
+            document.getElementById('iconDragon').classList.add('hidden'); 
+            document.getElementById('iconTrophy').classList.remove('hidden'); 
+
+            void overlay.offsetWidth;
+
+            overlay.classList.remove('hidden');
+            
+            requestAnimationFrame(() => {
+                 overlay.classList.remove('opacity-0');
+                 overlay.classList.add('active'); 
+                 celebrationContent.classList.remove('scale-0');
+            });
+            
+            setTimeout(() => {
+                overlay.classList.remove('active');
+                overlay.classList.add('opacity-0');
+                celebrationContent.classList.add('scale-0');
+                setTimeout(() => overlay.classList.add('hidden'), 500);
+            }, 3500);
+        }
+
+        function renderSuggestions(forceRefresh = false, skipCheck = false) {
+            const container = document.getElementById('suggestionList');
+            const block = document.getElementById('suggestionBlock');
+
+            if (forceRefresh || currentSuggestions.length === 0) {
+                generateNewSuggestions();
+            }
+            
+            if (currentSuggestions.length > 0) {
+                container.innerHTML = currentSuggestions.map(getSuggestionCardHTML).join('');
+                block.classList.remove('hidden');
+            } else {
+                if (courses.filter(c => !userStatus[c.id]).length === 0) {
+                    block.classList.add('hidden');
+                    container.innerHTML = `<div class="col-span-full text-center py-6 text-green-500 font-bold">Bravo ! Tous les items sont soit "Lu" soit "Maîtrisé".</div>`;
+                } else {
+                    container.innerHTML = `<div class="col-span-full text-center py-6 text-gray-500">Aucune suggestion disponible pour le moment. Essayez de <span class="font-bold cursor-pointer hover:text-white transition" onclick="renderSuggestions(true)">Rafraîchir</span>.</div>`;
+                    block.classList.remove('hidden');
+                }
+            }
+
+            if (!skipCheck) {
+                checkAllSuggestionsDone();
+            }
+        }
+
+        // --- UPDATED VUES COUNTER ---
+        function getVuesBarHTML(vues, itemId) {
+            const maxVues = 5;
+            const progress = Math.min(vues, maxVues);
+            const bars = Array(maxVues).fill(0).map((_, index) => {
+                const isLit = index < progress;
+                // Neon effect for active bars
+                const litColor = isLit ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-white/10';
+                return `<div class="flex-1 h-full rounded-full transition-all duration-500 ${litColor}"></div>`;
+            }).join('');
+            
+            // Add an ID to the outer div so we can target it for instant updates
+            return `
+                <div id="vues-container-${itemId}" class="w-full">
+                    <div class="flex items-center gap-3 mt-2 w-full">
+                        <!-- ADD VUE BTN -->
+                        <button onclick="incrementVues('${itemId}')" class="w-6 h-6 rounded-md bg-white/5 border border-white/10 text-green-400 hover:bg-green-500/20 hover:border-green-500/30 hover:text-green-300 transition flex items-center justify-center flex-shrink-0 group/add" title="Ajouter une vue (Vues: ${vues})">
+                            <i class="fa-solid fa-plus text-[10px] group-hover/add:scale-110 transition-transform"></i>
+                        </button>
+                        
+                        <!-- RESET BTN ADDED HERE -->
+                         <button onclick="resetVues('${itemId}')" class="w-6 h-6 rounded-md bg-white/5 border border-white/10 text-gray-500 hover:bg-red-500/20 hover:border-red-500/30 hover:text-red-400 transition flex items-center justify-center flex-shrink-0 group/reset" title="Réinitialiser les lectures">
+                            <i class="fa-solid fa-rotate-left text-[10px] group-hover/reset:-rotate-90 transition-transform"></i>
+                        </button>
+
+                        <div class="flex flex-grow items-center gap-1 h-1.5 w-full rounded-full">
+                            ${bars}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getCardHTML(c) {
+            const style = matiereConfig[c.matiere] || defaultConfig;
+            const statusClass = c.status === 'maitrise' ? 'status-maitrise' : (c.status === 'lu' ? 'status-lu' : '');
+            const isMaitrise = c.status === 'maitrise';
+            const isLu = c.status === 'lu' || isMaitrise;
+
+            const btn = (link, type, icon, color) => {
+                if (link) {
+                    // Logic for active icon: Play for video, Music for audio, Bolt for flash, Eye for fiche
+                    const activeIcon = type === 'video' ? 'fa-play' : 
+                                     type === 'audio' ? 'fa-music' : 
+                                     type === 'flash' ? 'fa-bolt' : 'fa-eye';
+
+                    return `<div class="relative group/btn">
+                        <button onclick="openPlayer('${link}', '${type}', '${c.title.replace(/'/g, "&apos;")}')" class="w-12 h-12 rounded-2xl border flex items-center justify-center transition transform active:scale-95 text-${color}-400 border-${color}-500/30 bg-${color}-500/10 hover:bg-${color}-500/20 shadow-lg backdrop-blur-sm" title="Lire ${type}">
+                            <i class="fa-solid ${activeIcon} text-lg"></i>
+                        </button>
+                        <button onclick="removeResource('${c.id}', '${type}')" class="absolute -top-2 -right-2 w-5 h-5 bg-red-600 text-white rounded-full text-[10px] flex items-center justify-center opacity-0 group-hover/btn:opacity-100 transition hover:bg-red-700 shadow-lg cursor-pointer z-10" title="Supprimer">
+                            <i class="fa-solid fa-times"></i>
+                        </button>
+                    </div>`;
+                } else {
+                    return `<button onclick="openModalForItem('${c.id}', '${type}')" class="w-12 h-12 rounded-2xl border border-white/5 bg-black/20 text-gray-600 hover:text-gray-400 hover:border-white/10 flex items-center justify-center transition group/empty" title="Ajouter ${type}">
+                        <i class="fa-solid ${icon} text-sm opacity-40 group-hover/empty:opacity-100 transition-opacity"></i>
+                    </button>`;
+                }
+            }
+            
+            const tutorBtn = `<button onclick="startRevisionChat('${c.id}', '${c.title.replace(/'/g, "&apos;")}')" class="w-8 h-8 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-400 hover:text-white hover:bg-indigo-500/40 flex items-center justify-center transition shadow-[0_0_10px_rgba(99,102,241,0.2)]" title="Tuteur IA">
+                <i class="fa-solid fa-brain text-[10px]"></i>
+            </button>`;
+
+            const titleContent = `<span class="group-hover:text-blue-400 transition">${c.title}</span>`;
+
+            return `
+                <div class="card-cinema rounded-2xl flex flex-col ${statusClass} h-full relative group overflow-hidden">
+                    <div class="absolute top-3 left-3 z-20 flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-${style.color}-500/20 flex items-center justify-center border border-${style.color}-500/30 shadow-lg">
+                            <i class="fa-solid ${style.icon} text-${style.color}-400 text-xs"></i>
+                        </div>
+                        <span class="text-[10px] font-black bg-black/50 border border-white/10 px-2 py-1 rounded-full text-white backdrop-blur-md">ITEM ${c.item}</span>
+                    </div>
+                    
+                    <div class="absolute top-3 right-3 z-20 flex gap-2">
+                        <button onclick="toggleStatus('${c.id}', 'lu')" class="w-8 h-8 rounded-full border ${isLu ? 'bg-green-500 border-green-500 text-black' : 'border-white/10 text-gray-600 hover:text-green-500'} flex items-center justify-center backdrop-blur-md transition"><i class="fa-solid fa-check text-xs"></i></button>
+                        <button onclick="toggleStatus('${c.id}', 'maitrise')" class="w-8 h-8 rounded-full border ${isMaitrise ? 'bg-yellow-500 border-yellow-500 text-black' : 'border-white/10 text-gray-600 hover:text-yellow-500'} flex items-center justify-center backdrop-blur-md transition"><i class="fa-solid fa-trophy text-xs"></i></button>
+                    </div>
+
+                    <div class="p-5 z-10 flex-grow pt-14 flex flex-col">
+                        <div class="mb-2 pr-2 min-h-[3rem] flex items-end">
+                            <h3 class="text-white font-bold text-lg leading-tight line-clamp-2">${titleContent}</h3>
+                        </div>
+                        
+                        <div class="mt-auto my-3">
+                            <!-- Increased gap and padding for spacing -->
+                            <div class="bg-black/40 border border-white/5 rounded-3xl py-3 px-4 flex justify-center items-center gap-5 backdrop-blur-sm shadow-inner">
+                                ${btn(c.videoLink, 'video', 'fa-video', 'red')}
+                                ${btn(c.audioLink, 'audio', 'fa-headphones', 'yellow')}
+                                ${btn(c.flashLink, 'flash', 'fa-bolt', 'purple')}
+                                ${btn(c.ficheLink, 'fiche', 'fa-file-pdf', 'blue')}
+                            </div>
+                        </div>
+
+                        <div class="flex items-end justify-between gap-3">
+                            <div class="flex-grow">
+                                ${getVuesBarHTML(c.vues, c.id)}
+                            </div>
+                            <div class="pb-1 pl-2 border-l border-white/5">
+                                ${tutorBtn}
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+        }
+        
+        function render() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const matiere = document.getElementById('matiereFilter').value;
+            const status = currentStatusFilter; 
+            
+            const header = document.getElementById('subjectHeader');
+            if(matiere !== 'all') {
+                const style = matiereConfig[matiere] || defaultConfig;
+                header.classList.remove('hidden');
+                document.getElementById('subjectTitle').innerText = matiere;
+                document.getElementById('subjectIcon').className = `fa-solid ${style.icon} text-3xl text-${style.color}-400`;
+            } else { header.classList.add('hidden'); }
+
+            const filtered = courses.filter(c => {
+                const matchS = c.title.toLowerCase().includes(search) || c.item.toString().includes(search);
+                const matchM = matiere === 'all' || c.matiere === matiere;
+                
+                let matchSt = true;
+                if(status === 'lu') matchSt = c.status === 'lu' || c.status === 'maitrise';
+                else if(status === 'maitrise') matchSt = c.status === 'maitrise';
+                else if(status === 'todo') matchSt = !c.status;
+
+                return matchS && matchM && matchSt;
+            });
+
+            document.getElementById('coursesGrid').innerHTML = filtered.map(getCardHTML).join('');
+            if(filtered.length === 0) document.getElementById('emptyState').classList.remove('hidden');
+            else document.getElementById('emptyState').classList.add('hidden');
+        }
+
+        // --- UTILS ---
+        function populateFilters() { const select = document.getElementById('matiereFilter'); const matieres = [...new Set(rawItems.map(i => i.m))].sort(); select.innerHTML = '<option value="all">Toutes</option>' + matieres.map(m => `<option value="${m}">${m}</option>`).join(''); }
+        function toggleStatus(id, type) { const isUpgrade = type === 'maitrise' && userStatus[id] !== 'maitrise'; userStatus[id] = userStatus[id] === type ? null : type; saveData(); buildCourses(); updateStats(); render(); if(isUpgrade) showCelebration(); }
+        
+        function showCelebration() {
+            const overlay = document.getElementById('celebrationOverlay');
+            const celebrationContent = document.getElementById('celebrationContent');
+            
+            overlay.classList.add('hidden');
+            overlay.classList.remove('opacity-100');
+            overlay.classList.add('opacity-0');
+            celebrationContent.classList.add('scale-0');
+
+            document.querySelector('#celebrationOverlay h2').innerText = 'MAÎTRISÉ';
+            document.querySelector('#celebrationOverlay span').innerText = 'Item Validé';
+            document.getElementById('iconCrown').classList.remove('hidden'); 
+            document.getElementById('iconDragon').classList.remove('hidden'); 
+            document.getElementById('iconTrophy').classList.add('hidden'); 
+
+            void overlay.offsetWidth;
+
+            overlay.classList.remove('hidden');
+            
+            requestAnimationFrame(() => {
+                 overlay.classList.remove('opacity-0');
+                 overlay.classList.add('active'); 
+                 celebrationContent.classList.remove('scale-0');
+            });
+            
+            setTimeout(() => {
+                overlay.classList.remove('active');
+                overlay.classList.add('opacity-0');
+                celebrationContent.classList.add('scale-0');
+                setTimeout(() => overlay.classList.add('hidden'), 500);
+            }, 2500);
+        }
+
+        function filterByMatiere(m) { 
+            document.getElementById('matiereFilter').value = m; 
+            handleFilterChange(document.getElementById('matiereFilter')); 
+            render(); 
+            window.scrollTo({top: document.getElementById('filterBar').offsetTop - 100, behavior: 'smooth'}); 
+        }
+        function resetView() { 
+            document.getElementById('matiereFilter').value = 'all'; 
+            handleFilterChange(document.getElementById('matiereFilter')); // Trigger visual update
+            document.getElementById('searchInput').value = ''; 
+            currentStatusFilter = 'all'; 
+            render(); 
+            window.scrollTo(0,0); 
+        }
+
+        // --- MODALS & PLAYER ---
+        const addModal = document.getElementById('addModal');
+        const playerModal = document.getElementById('playerModal');
+        const aiModal = document.getElementById('aiModal'); 
+
+        function openGeneralModal() { addModal.classList.remove('hidden'); addModal.classList.add('flex'); document.getElementById('modalTitle').innerText = 'Ajouter'; document.getElementById('itemInputGroup').classList.remove('hidden'); document.getElementById('typeInputGroup').classList.remove('hidden'); document.getElementById('targetItem').value = ''; document.getElementById('newLink').value = ''; }
+        function closeModal() { addModal.classList.add('hidden'); addModal.classList.remove('flex'); }
+        function openModalForItem(id, type) { addModal.classList.remove('hidden'); addModal.classList.add('flex'); document.getElementById('targetItem').value = id; const radios = document.getElementsByName('resType'); for(const r of radios) if(r.value === type) r.checked = true; document.getElementById('modalTitle').innerText = `Ajouter ${type.toUpperCase()}`; document.getElementById('itemInputGroup').classList.add('hidden'); document.getElementById('typeInputGroup').classList.add('hidden'); document.getElementById('newLink').focus(); }
+        
+        function closeAiModal() { 
+            aiModal.classList.add('hidden');
+            aiModal.classList.remove('flex');
+            document.getElementById('tutorChatInterface').classList.add('hidden');
+            document.getElementById('aiContent').classList.add('hidden');
+        }
+
+        function convertToEmbed(url) {
+            if (url.includes('drive.google.com')) return url.replace(/\/view.*/, '/preview').replace(/\/edit.*/, '/preview').replace(/\/file\/d\/(.*?)\/.*/, '/file/d/$1/preview');
+            if (url.includes('youtube.com') || url.includes('youtu.be')) { var videoId = url.split('v=')[1]; if(!videoId && url.includes('youtu.be')) videoId = url.split('/').pop(); if(videoId) { const ampersandPosition = videoId.indexOf('&'); if(ampersandPosition != -1) videoId = videoId.substring(0, ampersandPosition); return `https://www.youtube.com/embed/${videoId}`; } }
+            return url;
+        }
+
+        function openPlayer(link, type, title) {
+            playerModal.classList.remove('hidden'); playerModal.classList.add('flex'); void playerModal.offsetWidth; playerModal.classList.remove('opacity-0', 'scale-95');
+            document.getElementById('playerTitle').innerText = title || "Lecture";
+            const container = document.getElementById('playerContainer'); const wrapper = document.getElementById('playerWrapper'); const loader = document.getElementById('playerLoader');
+            const oldIframe = container.querySelector('iframe, audio'); if(oldIframe) oldIframe.remove();
+            
+            wrapper.className = "bg-[#111] border border-white/10 rounded-2xl shadow-2xl relative overflow-hidden flex flex-col transition-all duration-500 ease-out"; 
+
+            loader.classList.remove('hidden');
+            
+            if (type === 'video' || type === 'flash') wrapper.classList.add('w-full', 'max-w-6xl', 'aspect-video');
+            else if (type === 'audio') wrapper.classList.add('w-full', 'max-w-2xl', 'h-64');
+            else if (type === 'fiche') wrapper.classList.add('w-full', 'max-w-[95vw]', 'h-[95vh]');
+
+            const embedUrl = convertToEmbed(link);
+            if (type === 'audio' && (link.endsWith('.mp3') || link.endsWith('.wav'))) {
+                 container.insertAdjacentHTML('beforeend', `<div class="absolute inset-0 flex items-center justify-center gap-1 opacity-20 pointer-events-none">${Array(20).fill('<div class="bar"></div>').join('')}</div><audio controls autoplay class="w-3/4 z-10 relative"><source src="${link}" type="audio/mpeg">Votre navigateur ne supporte pas l'audio.</audio>`);
+                 loader.classList.add('hidden');
+            } else {
+                 container.insertAdjacentHTML('beforeend', `<iframe src="${embedUrl}" class="w-full h-full border-none opacity-0 transition-opacity duration-700 relative z-10" allow="autoplay; fullscreen" allowfullscreen onload="this.classList.remove('opacity-0'); document.getElementById('playerLoader').classList.add('hidden');"></iframe>`);
+            }
+        }
+
+        function closePlayer() {
+            playerModal.classList.add('opacity-0', 'scale-95');
+            setTimeout(() => { playerModal.classList.add('hidden'); playerModal.classList.remove('flex'); const container = document.getElementById('playerContainer'); const oldIframe = container.querySelector('iframe, audio'); if(oldIframe) oldIframe.remove(); }, 300);
+        }
+
+        function attachResource() {
+            const id = document.getElementById('targetItem').value; var type = 'video'; document.getElementsByName('resType').forEach(r => { if(r.checked) type = r.value; }); const link = document.getElementById('newLink').value;
+            if(id && link) { 
+                userResources = userResources.filter(r => !(r.itemId === id && r.type === type)); 
+                userResources.push({ itemId: id, type, link }); 
+                saveData(); 
+                buildCourses(); 
+                render(); 
+                closeModal(); 
+                showToast('Ressource attachée avec succès', 'success');
+            } else {
+                showToast('Veuillez remplir tous les champs', 'error');
+            }
+        }
+
+        function removeResource(id, type) {
+            openConfirmModal(() => {
+                 userResources = userResources.filter(r => !(r.itemId === id && r.type === type));
+                 saveData();
+                 buildCourses();
+                 render();
+                 showToast('Ressource supprimée', 'info');
+            });
+        }
+        
+        // --- AI FEATURE 1: FLASHCARD SYNTHESIS ---
+        async function generateFlashcard(item, title) {
+            const modal = document.getElementById('playerModal');
+            const playerTitle = document.getElementById('playerTitle');
+            const container = document.getElementById('playerContainer');
+            const loader = document.getElementById('playerLoader');
+            const wrapper = document.getElementById('playerWrapper');
+            
+            if (!userApiKey) {
+                showToast("Veuillez configurer votre clé API Google Gemini dans les paramètres.", "info");
+                openSettingsModal();
+                return;
+            }
+
+            playerTitle.innerText = `Synthèse IA pour Item ${item} - ${title}`;
+            modal.classList.remove('hidden', 'opacity-0', 'scale-95');
+            modal.classList.add('flex');
+            loader.classList.remove('hidden');
+            
+            container.innerHTML = '';
+            
+            wrapper.className = "bg-[#111] border border-white/10 rounded-2xl shadow-2xl relative overflow-hidden flex flex-col transition-all duration-500 ease-out w-full max-w-4xl h-[80vh]";
+
+            const systemPrompt = "Tu es un assistant de révision médicale ultra-concis. Ton rôle est de synthétiser les informations d'un item du programme R2C. Fournis une synthèse structurée pour une révision rapide.";
+            const userQuery = `Synthétise l'Item R2C ${item}: "${title}". Produis un format idéal pour des flashcards : un paragraphe de résumé et une liste à puces des 5 à 7 points clés à connaître. Réponds uniquement en Markdown.`;
+
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${userApiKey}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                tools: [{ "google_search": {} }], 
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                
+                const result = await response.json();
+                const text = result.candidates?.[0]?.content?.parts?.[0]?.text || "Erreur de génération IA. Le modèle n'a pas pu produire de réponse.";
+
+                const contentHtml = marked.parse(text);
+                container.insertAdjacentHTML('beforeend', `<div class="p-6 overflow-y-auto w-full h-full flashcard-content">${contentHtml}</div>`);
+                
+                loader.classList.add('hidden');
+
+            } catch (e) {
+                loader.classList.add('hidden');
+                container.innerHTML = `<div class="p-6 text-red-400">Erreur lors de la connexion à l'IA ou de la génération : ${e.message}. Vérifiez votre clé API ou le réseau.</div>`;
+                showToast("Erreur IA. Voir modal pour les détails.", "error");
+            }
+        }
+
+        // --- AI FEATURE : REVISION TUTOR CHAT ---
+
+        function startRevisionChat(item, title) {
+            const modal = document.getElementById('aiModal');
+            const chatInterface = document.getElementById('tutorChatInterface');
+            const contentArea = document.getElementById('aiContent');
+            const chatHistoryDiv = document.getElementById('chatHistory');
+
+            if (!userApiKey) {
+                showToast("Veuillez configurer votre clé API Google Gemini dans les paramètres.", "info");
+                openSettingsModal();
+                return;
+            }
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.getElementById('aiModalTitle').innerHTML = `<i class="fa-solid fa-brain text-indigo-400"></i> Tuteur: ${title}`;
+            
+            contentArea.classList.add('hidden');
+            chatInterface.classList.remove('hidden');
+            document.getElementById('aiLoading').classList.remove('hidden'); 
+
+            chatHistory = [];
+            chatHistoryDiv.innerHTML = '';
+            
+            currentRevisionContext = `Tu es un tuteur de révision pour un étudiant en médecine. Ton sujet est l'Item R2C ${item}: "${title}". 
+            Ton but est d'aider l'étudiant à clarifier des concepts, tester ses connaissances, et mémoriser les points clés de cet item. 
+            Réponds de manière pédagogique et encourageante, en t'appuyant sur des faits médicaux pour cet item précis. Ne donne pas le cours entier d'un coup.
+            Commence par souhaiter la bienvenue à l'étudiant et lui demander par où il souhaite commencer.`;
+
+            generateAIResponse([], true);
+        }
+
+        async function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            addMessageToChat(msg, 'user');
+            input.value = '';
+            
+            chatHistory.push({ role: "user", parts: [{ text: msg }] });
+
+            const loadingId = addLoadingBubble();
+            
+            await generateAIResponse(chatHistory, false, loadingId);
+        }
+
+        async function generateAIResponse(history, isInit = false, loadingId = null) {
+            
+            const contents = [
+                { role: "user", parts: [{ text: currentRevisionContext }] }, 
+                ...history
+            ];
+
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${userApiKey}`;
+            
+            if (!userApiKey) {
+                if(loadingId) {
+                    const loadingEl = document.getElementById(loadingId);
+                    if(loadingEl) loadingEl.remove();
+                }
+                showToast("Clé API manquante.", "error");
+                document.getElementById('aiLoading').classList.add('hidden');
+                return;
+            }
+
+            try {
+                const response = await fetch(apiUrl, { 
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify({ 
+                        contents: contents, 
+                        tools: [{ "google_search": {} }] 
+                    }) 
+                }); 
+
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                
+                const data = await response.json();
+                const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Erreur de réponse. (Vérifiez la clé API ou le réseau.)";
+
+                if(loadingId) {
+                    const loadingEl = document.getElementById(loadingId);
+                    if(loadingEl) loadingEl.remove();
+                }
+                document.getElementById('aiLoading').classList.add('hidden');
+
+                addMessageToChat(responseText, 'ai');
+                
+                chatHistory.push({ role: "model", parts: [{ text: responseText }] });
+                
+            } catch (e) {
+                if(loadingId) {
+                    const loadingEl = document.getElementById(loadingId);
+                    if(loadingEl) loadingEl.remove();
+                }
+                document.getElementById('aiLoading').classList.add('hidden');
+                addMessageToChat("Erreur de connexion : " + e.message, 'ai');
+                showToast("Erreur de connexion IA", "error");
+            }
+        }
+
+        function addMessageToChat(text, sender) {
+            const div = document.getElementById('chatHistory');
+            const bubble = document.createElement('div');
+            bubble.className = `chat-bubble ${sender === 'user' ? 'chat-user' : 'chat-ai'}`;
+            bubble.innerHTML = marked.parse(text); 
+            div.appendChild(bubble);
+            div.scrollTop = div.scrollHeight;
+        }
+
+        function addLoadingBubble() {
+            const div = document.getElementById('chatHistory');
+            const id = 'loading-' + Date.now();
+            const bubble = document.createElement('div');
+            bubble.id = id;
+            bubble.className = `chat-bubble chat-ai animate-pulse`;
+            bubble.innerHTML = '...';
+            div.appendChild(bubble);
+            div.scrollTop = div.scrollHeight;
+            return id;
+        }
+
+        // Init App
+        initApp();
+    </script>
+</body>
+</html>
