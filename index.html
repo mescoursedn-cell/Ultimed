@@ -430,7 +430,7 @@
     </main>
 
     <!-- Modals -->
-    <div id="settingsModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity duration-300 opacity-0">
+<div id="settingsModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity duration-300 opacity-0">
         <div class="glass-panel w-full max-w-md p-8 rounded-2xl transform scale-95 transition-all duration-300 relative overflow-hidden" id="settingsModalContent">
             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-gold-500 to-transparent opacity-50"></div>
             <div class="text-center mb-6">
@@ -438,6 +438,7 @@
                 <h2 class="text-2xl font-display font-bold text-white uppercase tracking-wide">Paramètres</h2>
                 <p class="text-gray-400 text-sm mt-1">Configurez votre objectif et vos outils.</p>
             </div>
+            
             <div class="space-y-6">
                 <div class="relative">
                     <label class="block text-xs text-gray-500 uppercase font-bold mb-2 ml-1">Date du Concours</label>
@@ -447,11 +448,26 @@
                     <div class="flex justify-between items-center text-sm text-gray-300 mb-1"><span>Temps restant :</span><span id="previewCountdown" class="font-mono text-gold-400 font-bold">-- jours</span></div>
                     <div class="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden mt-2"><div class="h-full bg-gold-500 w-2/3 animate-pulse"></div></div>
                 </div>
+                
                 <div class="border-t border-white/10 pt-4">
-                     <label class="block text-xs font-bold uppercase text-gray-500 mb-2">Clé API Google Gemini (IA)</label>
+                    <label class="block text-xs font-bold uppercase text-gray-500 mb-2">Clé API Google Gemini (IA)</label>
                     <input type="password" id="apiKeyInput" placeholder="Collez votre clé API ici..." class="w-full bg-[#222] border border-[#333] rounded-xl px-4 py-3 text-white focus:border-white transition mb-2">
                 </div>
-                <div class="flex gap-3 mt-6"><button onclick="closeSettingsModal()" class="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10 transition font-medium">Annuler</button><button onclick="saveAllSettings()" class="flex-1 px-4 py-3 rounded-xl btn-gold shadow-lg flex items-center justify-center gap-2"><span>Confirmer</span><i class="fa-solid fa-rocket"></i></button></div>
+                
+                <div class="flex gap-3 pt-2">
+                    <button onclick="exportData()" class="flex-1 px-3 py-2 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 hover:bg-blue-600/40 text-xs font-bold transition">
+                        <i class="fa-solid fa-download mr-2"></i>Exporter Config
+                    </button>
+                    <button onclick="document.getElementById('importFile').click()" class="flex-1 px-3 py-2 rounded-xl bg-purple-600/20 border border-purple-500/30 text-purple-400 hover:bg-purple-600/40 text-xs font-bold transition">
+                        <i class="fa-solid fa-upload mr-2"></i>Importer Config
+                    </button>
+                    <input type="file" id="importFile" class="hidden" onchange="importData(this)">
+                </div>
+
+                <div class="flex gap-3 mt-6 border-t border-white/10 pt-6">
+                    <button onclick="closeSettingsModal()" class="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10 transition font-medium">Annuler</button>
+                    <button onclick="saveAllSettings()" class="flex-1 px-4 py-3 rounded-xl btn-gold shadow-lg flex items-center justify-center gap-2"><span>Confirmer</span><i class="fa-solid fa-rocket"></i></button>
+                </div>
             </div>
         </div>
     </div>
@@ -2331,6 +2347,61 @@
 
         // Init App
         initApp();
+
+// --- FONCTIONS DE PARTAGE (EXPORT/IMPORT) ---
+
+function exportData() {
+    const dataToExport = {};
+    // On récupère tout ce qui commence par 'flashmed_' dans le stockage local
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith('flashmed_')) {
+            // ATTENTION: On exclut la clé API pour ne pas la donner aux autres par erreur
+            if (key !== 'flashmed_apiKey') {
+                dataToExport[key] = localStorage.getItem(key);
+            }
+        }
+    }
+    
+    // Création du fichier JSON téléchargeable
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToExport));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "flashmed_config.json");
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+    
+    showToast("Configuration exportée !", "success");
+}
+
+function importData(inputElement) {
+    const file = inputElement.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const content = JSON.parse(e.target.result);
+            
+            // On demande confirmation car cela va écraser les données actuelles
+            if(confirm("Attention : Ceci va remplacer vos données actuelles par celles du fichier. Continuer ?")) {
+                // On sauvegarde les nouvelles données
+                for (const key in content) {
+                    localStorage.setItem(key, content[key]);
+                }
+                alert("Importation réussie ! La page va se recharger.");
+                location.reload(); // On recharge pour afficher les changements
+            }
+        } catch (err) {
+            alert("Erreur : Le fichier est invalide.");
+            console.error(err);
+        }
+    };
+    reader.readAsText(file);
+    // Reset l'input pour pouvoir réimporter le même fichier si besoin
+    inputElement.value = ''; 
+}
     </script>
 </body>
 </html>
