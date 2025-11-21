@@ -2204,8 +2204,22 @@ document.getElementById('newLink').focus();
         }
 
         function closeModal() { addModal.classList.add('hidden'); addModal.classList.remove('flex'); }
-        function openModalForItem(id, type) { addModal.classList.remove('hidden'); addModal.classList.add('flex'); document.getElementById('targetItem').value = id; const radios = document.getElementsByName('resType'); for(const r of radios) if(r.value === type) r.checked = true; document.getElementById('modalTitle').innerText = `Ajouter ${type.toUpperCase()}`; document.getElementById('itemInputGroup').classList.add('hidden'); document.getElementById('typeInputGroup').classList.add('hidden'); document.getElementById('newLink').focus(); }
-        
+
+function openModalForItem(id, type) { 
+            addModal.classList.remove('hidden'); 
+            addModal.classList.add('flex'); 
+            
+            document.getElementById('targetItem').value = id; 
+            
+            const radios = document.getElementsByName('resType'); 
+            for(const r of radios) if(r.value === type) r.checked = true; 
+            
+            document.getElementById('modalTitle').innerText = `Ajouter ${type.toUpperCase()}`; 
+            document.getElementById('itemInputGroup').classList.add('hidden'); 
+            document.getElementById('typeInputGroup').classList.add('hidden'); 
+            document.getElementById('newLink').value = ''; 
+            document.getElementById('newLink').focus(); 
+        }
         function closeAiModal() { 
             aiModal.classList.add('hidden');
             aiModal.classList.remove('flex');
