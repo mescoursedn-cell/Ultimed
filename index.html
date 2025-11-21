@@ -544,16 +544,26 @@
             ==========================================
         */
 
-        // --- GLOBAL VARIABLES ---
+// --- GLOBAL VARIABLES ---
         var userResources = [], userStatus = {}, userTodos = [], courses = [], celebrationTimeout;
         var userName = "", userAlias = "Docteur", userApiKey = "", chatHistory = [], currentRevisionContext = "";
         var currentNotesMatiere = "Général", currentSuggestions = [], dailySuggestionsDone = {}, currentStatusFilter = "all", userVues = {};
-        var userAvatar = "fa-dragon"; // Default Avatar
+        var userAvatar = "fa-dragon"; 
+        var userUnlockedAvatars = ['fa-dragon'];
+        var sessionViewedResources = {};
+        var seconds = 0;
+        var isTimerRunning = false;
+        var timerInterval;
 
-        // --- CONSTANTS FOR ANIMATIONS ---
-        const DINO_IDLE = 'fa-dragon'; 
-        const DINO_RUN = 'fa-dragon animate-pulse'; 
-        const DINO_JUMP = 'fa-dragon fa-beat';
+        // --- MOTIVATIONAL QUOTES (POUR LES MILESTONES DU TIMER) ---
+        const motivationalQuotes = [
+            "La douleur est temporaire, la fierté est éternelle.",
+            "Chaque minute compte.",
+            "Ne lâche rien, Docteur.",
+            "Focus maximum activé.",
+            "La réussite est au bout de l'effort.",
+            "Discipline = Liberté."
+        ];
 
         // --- DINO MESSAGES (TECH STYLE) ---
         const dinoMessages = [
@@ -969,7 +979,7 @@
             'Anesthésie-Réa': { color: 'sky', icon: 'fa-syringe', gradient: 'from-sky-600 to-blue-700' }
         };
 
-        const defaultConfig = { color: 'gray', icon: 'fa-book-medical', gradient: 'from-gray-700 to-gray-900' };
+const defaultConfig = { color: 'gray', icon: 'fa-book-medical', gradient: 'from-gray-700 to-gray-900' };
         const availableAvatars = ['fa-dragon', 'fa-cat', 'fa-dog', 'fa-crow', 'fa-otter', 'fa-fish', 'fa-spider', 'fa-horse', 'fa-frog', 'fa-dove'];
 
         // --- TOAST SYSTEM (DÉSACTIVÉ) ---
@@ -1133,6 +1143,15 @@ function initApp() {
 
             const savedAvatar = localStorage.getItem('flashmed_userAvatar');
             if(savedAvatar) userAvatar = savedAvatar;
+
+            // AJOUT : Chargement des avatars débloqués
+            const savedUnlocks = localStorage.getItem('flashmed_unlocked_avatars');
+            if(savedUnlocks) {
+                userUnlockedAvatars = JSON.parse(savedUnlocks);
+            } else {
+                // Si c'est la première fois, on sauvegarde le dragon par défaut
+                localStorage.setItem('flashmed_unlocked_avatars', JSON.stringify(['fa-dragon']));
+            }
         }
 
         function saveData() {
@@ -1277,16 +1296,28 @@ function initApp() {
         function renderGlobalAvatarSelection() {
             const grid = document.getElementById('avatarGrid');
             grid.innerHTML = availableAvatars.map(icon => {
+                const isUnlocked = userUnlockedAvatars.includes(icon);
                 const isSelected = icon === userAvatar;
-                const activeClass = isSelected 
-                    ? 'bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.5)]' 
-                    : 'bg-[#151515] text-gray-600 border-white/5 hover:bg-white/10 hover:text-gray-300';
                 
-                return `
-                    <button onclick="userAvatar = '${icon}'; renderGlobalAvatarSelection()" class="aspect-square rounded-xl border ${activeClass} flex items-center justify-center transition-all duration-300 text-lg">
-                        <i class="fa-solid ${icon}"></i>
-                    </button>
-                `;
+                if (isUnlocked) {
+                    // CAS 1 : DÉBLOQUÉ (Affichage normal)
+                    const activeClass = isSelected 
+                        ? 'bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.5)]' 
+                        : 'bg-[#151515] text-gray-600 border-white/5 hover:bg-white/10 hover:text-gray-300';
+                    
+                    return `
+                        <button onclick="userAvatar = '${icon}'; renderGlobalAvatarSelection()" class="aspect-square rounded-xl border ${activeClass} flex items-center justify-center transition-all duration-300 text-lg">
+                            <i class="fa-solid ${icon}"></i>
+                        </button>
+                    `;
+                } else {
+                    // CAS 2 : BLOQUÉ (Cadenas)
+                    return `
+                        <div class="aspect-square rounded-xl border border-white/5 bg-black/40 text-gray-700 flex items-center justify-center cursor-not-allowed" title="Verrouillé : Complétez une série de suggestions pour débloquer">
+                            <i class="fa-solid fa-lock text-xs"></i>
+                        </div>
+                    `;
+                }
             }).join('');
         }
 
@@ -1325,6 +1356,10 @@ function initApp() {
             }
 
             updateGreetingDisplay();
+
+            const dinoIcon = document.getElementById('dinoIcon');
+            dinoIcon.className = `fa-solid ${userAvatar} text-6xl text-gray-500 transition-colors duration-300`;
+
             showToast("Configuration enregistrée !", "success");
             closeGlobalSettings();
         }
@@ -1340,7 +1375,7 @@ function initApp() {
             navIcon.className = `fa-solid ${userAvatar} text-3xl text-white relative z-10 group-hover:scale-110 transition-transform`;
         }
 
-        function updateCountdownDisplay(dateStr) {
+function updateCountdownDisplay(dateStr) {
             if(!dateStr) return;
             const examDate = new Date(dateStr);
             const today = new Date();
@@ -1369,22 +1404,60 @@ function initApp() {
                       displayEl.className = "text-red-500 font-mono font-bold text-xl tracking-wider digit-scroll animate-pulse";
                 }
             }
+        } // <--- CETTE ACCOLADE FERMANTE MANQUAIT ICI POUR FERMER LA FONCTION PRECEDENTE
+
+        // Cette fonction doit être EN DEHORS de updateCountdownDisplay
+        function trackResourceView(itemId, type) {
+            if (!sessionViewedResources[itemId]) {
+                sessionViewedResources[itemId] = [];
+            }
+            if (!sessionViewedResources[itemId].includes(type)) {
+                sessionViewedResources[itemId].push(type);
+            }
         }
 
-        // --- TIMER ANIMATION (DIAMOND) ---
+// --- TIMER ANIMATION & LOGIQUE ---
+        
+function triggerChronoAnimation() {
+            const overlay = document.getElementById('chronoStartOverlay');
+            if(!overlay) return;
+            
+            // --- AJOUT : Mise à jour de l'icône avec l'avatar du profil ---
+            const icon = overlay.querySelector('i');
+            if (icon) {
+                // On conserve les styles (couleur cyan, taille, effet neon) et on injecte userAvatar
+                icon.className = `fa-solid ${userAvatar} text-5xl text-cyan-400 drop-shadow-[0_0_15px_rgba(34,211,238,0.8)] animate-pulse`;
+            }
+            // ---------------------------------------------------------------
+
+            overlay.classList.remove('hidden');
+            // Petit délai pour laisser le temps au navigateur d'afficher le bloc avant de changer l'opacité
+            setTimeout(() => {
+                overlay.classList.remove('opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                overlay.classList.add('opacity-0');
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                }, 700);
+            }, 2500);
+        }
+
+        // 2. Animation du Dinosaure (Clic)
         function triggerDinoJump() {
             const dinoIcon = document.getElementById('dinoIcon');
             const dinoWrapper = document.getElementById('dinoWrapper');
             const dinoZzz = document.getElementById('dinoZzz');
             
             if (isTimerRunning) {
-                dinoIcon.className = `fa-solid ${DINO_JUMP} text-6xl text-white transition-all duration-300`;
+                dinoIcon.className = `fa-solid ${userAvatar} fa-beat text-6xl text-white transition-all duration-300`;
                 setTimeout(() => updateDinoVisuals(), 500);
                 return;
             }
 
             dinoZzz.classList.add('opacity-0');
-            dinoIcon.className = `fa-solid fa-dragon text-6xl transition-all duration-300 dino-woke`;
+            dinoIcon.className = `fa-solid ${userAvatar} text-6xl transition-all duration-300 dino-woke`;
             
             const msg = dinoMessages[Math.floor(Math.random() * dinoMessages.length)];
             showToast(msg, 'info'); 
@@ -1394,8 +1467,10 @@ function initApp() {
             }
 
             setTimeout(() => {
-                dinoIcon.className = `fa-solid ${DINO_IDLE} text-6xl text-gray-500 transition-colors duration-500 animate-dino-sleep`;
-                dinoZzz.classList.remove('opacity-0');
+                if (!isTimerRunning) {
+                    dinoIcon.className = `fa-solid ${userAvatar} text-6xl text-gray-500 transition-colors duration-500 animate-dino-sleep`;
+                    dinoZzz.classList.remove('opacity-0');
+                }
             }, 1500);
         }
 
@@ -1423,8 +1498,8 @@ function initApp() {
             const glow = document.getElementById('timerGlow');
             const visuals = getDinoVisuals();
 
-            const animationClass = dino.classList.contains('fa-beat') ? DINO_JUMP : DINO_RUN;
-            dino.className = `fa-solid ${animationClass} text-6xl transition-all duration-500 ${visuals.color}`;
+            const animationClass = dino.classList.contains('fa-beat') ? 'fa-beat' : 'animate-pulse';
+            dino.className = `fa-solid ${userAvatar} ${animationClass} text-6xl transition-all duration-500 ${visuals.color}`;
 
             const scale = 1 + (seconds / 21600) * 0.5; 
             glow.style.backgroundColor = visuals.glow;
@@ -1446,7 +1521,8 @@ function initApp() {
                 glow.classList.remove('scale-100', 'opacity-100'); glow.classList.add('scale-50', 'opacity-0');
                 glow.style = ''; 
                 document.getElementById('timerDisplay').classList.remove('timer-active');
-                dinoIcon.className = `fa-solid ${DINO_IDLE} text-6xl text-gray-500 transition-colors duration-300 animate-dino-sleep`;
+                
+                dinoIcon.className = `fa-solid ${userAvatar} text-6xl text-gray-500 transition-colors duration-300 animate-dino-sleep`;
                 dinoZzz.classList.remove('hidden');
             } else {
                 if (seconds === 0) {
@@ -1476,7 +1552,8 @@ function initApp() {
              glow.classList.remove('scale-100', 'opacity-100'); glow.classList.add('scale-50', 'opacity-0');
              glow.style = ''; 
              document.getElementById('timerDisplay').classList.remove('timer-active');
-             dinoIcon.className = `fa-solid ${DINO_IDLE} text-6xl text-gray-500 transition-colors duration-300`;
+             
+             dinoIcon.className = `fa-solid ${userAvatar} text-6xl text-gray-500 transition-colors duration-300`;
              dinoZzz.classList.remove('hidden');
         }
 
@@ -1493,8 +1570,6 @@ function initApp() {
                 document.getElementById('timerDisplay').classList.replace('text-5xl', 'text-6xl');
             }
         }
-
-        const motivationalQuotes = ["INCROYABLE !", "MASTERCLASS !", "FOCUS ABSOLU", "LÉGENDE !", "LÂCHE RIEN", "MACHINE !", "FUTUR PU-PH", "DOMINATION TOTALE"];
         
         function checkTimerMilestones() {
             const milestones = [3600, 7200, 14400, 21600];
@@ -1505,7 +1580,7 @@ function initApp() {
                 const dinoIcon = document.getElementById('dinoIcon');
                 const visuals = getDinoVisuals(); 
                 
-                dinoIcon.className = `fa-solid ${DINO_JUMP} text-6xl ${visuals.color} transition-all duration-300`;
+                dinoIcon.className = `fa-solid ${userAvatar} fa-beat text-6xl ${visuals.color} transition-all duration-300`;
                 
                 const timerFlame = document.getElementById('timerFlame');
                 timerFlame.style.backgroundColor = visuals.hex;
@@ -1781,24 +1856,81 @@ function initApp() {
             `;
         }
 
-        function toggleSuggestionDone(itemId) {
-            dailySuggestionsDone[itemId] = !dailySuggestionsDone[itemId];
-            saveDailySuggestionState();
-            
-            renderSuggestions(false); 
-            
-            if (dailySuggestionsDone[itemId]) {
-                checkAllSuggestionsDone();
-            }
+function toggleSuggestionDone(itemId) {
+    // 1. Si l'item est déjà validé, on permet de le dé-valider sans restriction
+    if (dailySuggestionsDone[itemId]) {
+        dailySuggestionsDone[itemId] = false;
+        saveDailySuggestionState();
+        renderSuggestions(false);
+        return;
+    }
+
+    // 2. Identifier les ressources DISPONIBLES pour cet item (base de données)
+    const availableResources = userResources.filter(r => r.itemId === itemId);
+    
+    // 3. Identifier les ressources VUES (session actuelle)
+    const viewedTypes = sessionViewedResources[itemId] || [];
+
+    // 4. Vérifier ce qu'il manque
+    const requiredTypes = ['video', 'audio', 'flash', 'fiche'];
+    const missingTypes = [];
+
+    requiredTypes.forEach(type => {
+        // Si la ressource existe (est attachée) MAIS n'a pas été vue
+        const resourceExists = availableResources.some(r => r.type === type);
+        if (resourceExists && !viewedTypes.includes(type)) {
+            missingTypes.push(type);
+        }
+    });
+
+    // 5. Blocage si incomplet
+    if (missingTypes.length > 0) {
+        const labels = { video: 'Vidéo', audio: 'Audio', flash: 'Flash', fiche: 'Fiche' };
+        const missingNames = missingTypes.map(t => labels[t]).join(', ');
+        
+        // Animation de secousse (shake) sur la carte
+        const card = document.querySelector(`.suggestion-card[data-item-id="${itemId}"]`);
+        if(card) {
+            card.classList.add('animate-pulse'); // Simple feedback visuel
+            setTimeout(() => card.classList.remove('animate-pulse'), 500);
         }
 
-        function checkAllSuggestionsDone() {
-            if (currentSuggestions.length > 0 && currentSuggestions.every(s => dailySuggestionsDone[s.id])) {
-                showCelebrationSuggestions();
-            }
-        }
+        showToast(`Validation impossible. Vous devez consulter : ${missingNames}`, 'error');
+        return; // On arrête tout ici
+    }
 
-        function showCelebrationSuggestions() {
+    // 6. Tout est bon : Validation
+    dailySuggestionsDone[itemId] = true;
+    saveDailySuggestionState();
+    renderSuggestions(false);
+    
+    if (dailySuggestionsDone[itemId]) {
+        checkAllSuggestionsDone();
+    }
+}
+        function showUnlockToast(icon) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            // Design doré/spécial pour le déblocage
+            toast.className = `toast border-l-4 border-gold-500 flex items-center gap-4`;
+            toast.style.background = "linear-gradient(135deg, rgba(20,20,20,0.95), rgba(50,40,10,0.9))";
+            
+            toast.innerHTML = `
+                <div class="w-10 h-10 rounded-full bg-gold-500/20 flex items-center justify-center border border-gold-500 text-gold-400">
+                    <i class="fa-solid ${icon} text-lg animate-bounce"></i>
+                </div>
+                <div>
+                    <h4 class="text-gold-400 font-bold text-xs uppercase tracking-wide">Nouvel Avatar !</h4>
+                    <span class="text-white text-sm">Vérifiez votre profil.</span>
+                </div>
+            `;
+            
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = 'toastSlide 0.3s ease-in reverse forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, 5000); // Reste affiché plus longtemps (5s)
+        }        function showCelebrationSuggestions() {
             const overlay = document.getElementById('celebrationOverlay');
             const celebrationContent = document.getElementById('celebrationContent');
             
@@ -1897,19 +2029,19 @@ function initApp() {
                                      type === 'flash' ? 'fa-bolt' : 'fa-eye';
 
                     return `<div class="relative group/btn">
-                        <button onclick="openPlayer('${link}', '${type}', '${c.title.replace(/'/g, "&apos;")}')" class="w-12 h-12 rounded-2xl border flex items-center justify-center transition transform active:scale-95 text-${color}-400 border-${color}-500/30 bg-${color}-500/10 hover:bg-${color}-500/20 shadow-lg backdrop-blur-sm" title="Lire ${type}">
-                            <i class="fa-solid ${activeIcon} text-lg"></i>
-                        </button>
-                        <button onclick="removeResource('${c.id}', '${type}')" class="absolute -top-2 -right-2 w-5 h-5 bg-red-600 text-white rounded-full text-[10px] flex items-center justify-center opacity-0 group-hover/btn:opacity-100 transition hover:bg-red-700 shadow-lg cursor-pointer z-10" title="Supprimer">
-                            <i class="fa-solid fa-times"></i>
-                        </button>
-                    </div>`;
-                } else {
+            <button onclick="trackResourceView('${c.id}', '${type}'); openPlayer('${link}', '${type}', '${c.title.replace(/'/g, "&apos;")}')" class="w-12 h-12 rounded-2xl border flex items-center justify-center transition transform active:scale-95 text-${color}-400 border-${color}-500/30 bg-${color}-500/10 hover:bg-${color}-500/20 shadow-lg backdrop-blur-sm" title="Lire ${type}">
+                <i class="fa-solid ${activeIcon} text-lg"></i>
+            </button>
+            <button onclick="removeResource('${c.id}', '${type}')" class="absolute -top-2 -right-2 w-5 h-5 bg-red-600 text-white rounded-full text-[10px] flex items-center justify-center opacity-0 group-hover/btn:opacity-100 transition hover:bg-red-700 shadow-lg cursor-pointer z-10" title="Supprimer">
+                <i class="fa-solid fa-times"></i>
+            </button>
+        </div>`;
+    } else {
                     return `<button onclick="openModalForItem('${c.id}', '${type}')" class="w-12 h-12 rounded-2xl border border-white/5 bg-black/20 text-gray-600 hover:text-gray-400 hover:border-white/10 flex items-center justify-center transition group/empty" title="Ajouter ${type}">
-                        <i class="fa-solid ${icon} text-sm opacity-40 group-hover/empty:opacity-100 transition-opacity"></i>
-                    </button>`;
-                }
-            }
+            <i class="fa-solid ${icon} text-sm opacity-40 group-hover/empty:opacity-100 transition-opacity"></i>
+        </button>`;
+    }
+}
             
             const tutorBtn = `<button onclick="startRevisionChat('${c.id}', '${c.title.replace(/'/g, "&apos;")}')" class="w-8 h-8 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-400 hover:text-white hover:bg-indigo-500/40 flex items-center justify-center transition shadow-[0_0_10px_rgba(99,102,241,0.2)]" title="Tuteur IA">
                 <i class="fa-solid fa-brain text-[10px]"></i>
