@@ -593,6 +593,18 @@
             "Données synchronisées."
         ];
 
+// --- SYSTEME SONORE ---
+const audioSystem = {
+    enabled: true,
+    sounds: {
+        success: new Audio('https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3'),
+        error: new Audio('https://assets.mixkit.co/active_storage/sfx/2572/2572-preview.mp3'),
+        click: new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3'),
+        levelUp: new Audio('https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3'),
+        chronoStart: new Audio('https://assets.mixkit.co/active_storage/sfx/2986/2986-preview.mp3')
+    }
+};
+
         // --- DATA (ITEMS R2C) ---
         const rawItems = [
             {id:"1", t:"Relation médecin-malade, annonce, formation patient", m:"Médecine Générale"},
@@ -1449,7 +1461,8 @@ function triggerChronoAnimation() {
                 // On conserve les styles (couleur cyan, taille, effet neon) et on injecte userAvatar
                 icon.className = `fa-solid ${userAvatar} text-5xl text-cyan-400 drop-shadow-[0_0_15px_rgba(34,211,238,0.8)] animate-pulse`;
             }
-            // ---------------------------------------------------------------
+
+            playSound('chronoStart');
 
             overlay.classList.remove('hidden');
             // Petit délai pour laisser le temps au navigateur d'afficher le bloc avant de changer l'opacité
@@ -1529,6 +1542,7 @@ function triggerChronoAnimation() {
         }
 
         function toggleTimer() {
+playSound('click');
             const btn = document.getElementById('timerBtn');
             const icon = document.getElementById('timerIcon');
             const glow = document.getElementById('timerGlow');
@@ -1878,7 +1892,7 @@ function triggerChronoAnimation() {
         }
 
 function toggleSuggestionDone(itemId) {
-    // 1. Si l'item est déjà validé, on annule (dé-validation)
+    // 1. Si l'item est déjà validé, on le décoche (annulation)
     if (dailySuggestionsDone[itemId]) {
         dailySuggestionsDone[itemId] = false;
         saveDailySuggestionState();
@@ -1886,48 +1900,58 @@ function toggleSuggestionDone(itemId) {
         return;
     }
 
-    // 2. Vérification des ressources
+    // 2. Vérification : Est-ce que l'utilisateur a tout consulté ?
     const availableResources = userResources.filter(r => r.itemId === itemId);
     const viewedTypes = sessionViewedResources[itemId] || [];
     const requiredTypes = ['video', 'audio', 'flash', 'fiche'];
     const missingTypes = [];
 
     requiredTypes.forEach(type => {
-        // Si la ressource existe pour cet item MAIS n'a pas été vue
         if (availableResources.some(r => r.type === type) && !viewedTypes.includes(type)) {
             missingTypes.push(type);
         }
     });
 
-    // 3. BLOCAGE & ANIMATION EN CAS D'ERREUR
+    // 3. BLOCAGE (Si incomplet)
     if (missingTypes.length > 0) {
         const labels = { video: 'la Vidéo', audio: 'l\'Audio', flash: 'le Flash', fiche: 'la Fiche' };
         const missingNames = missingTypes.map(t => labels[t]).join(', ');
         
-        // Ciblage de la carte spécifique
+        playSound('error'); // Son d'erreur
+
         const card = document.querySelector(`.suggestion-card[data-item-id="${itemId}"]`);
-        
         if(card) {
-            // Ajout du style rouge et de l'animation
             card.classList.add('validation-error', 'animate-shake');
-            
-            // Retrait du style après 1 seconde
             setTimeout(() => {
                 card.classList.remove('validation-error', 'animate-shake');
             }, 1000);
         }
-
-        showToast(`Incomplet ! Vous devez consulter : ${missingNames}`, 'error');
+        showToast(`Incomplet ! Consultez : ${missingNames}`, 'error');
         return; 
     }
 
-    // 4. Succès : Validation
+    // 4. SUCCÈS (Si tout est bon)
     dailySuggestionsDone[itemId] = true;
     saveDailySuggestionState();
+    
+    playSound('success'); // Son de validation simple ("Ding")
+    
     renderSuggestions(false);
     
-    if (dailySuggestionsDone[itemId]) {
-        checkAllSuggestionsDone();
+    // 5. VÉRIFICATION FINALE : Est-ce que c'était le dernier ?
+    checkAllSuggestionsDone(); 
+}
+
+function checkAllSuggestionsDone() {
+    // On vérifie si la liste n'est pas vide ET si tous les items sont validés
+    if (currentSuggestions.length > 0 && currentSuggestions.every(s => dailySuggestionsDone[s.id])) {
+        
+        // C'est le grand chelem !
+        setTimeout(() => {
+            playSound('levelUp'); // Son de victoire majeure
+            showCelebrationSuggestions(); // L'animation visuelle
+            tryUnlockNewAvatar(); // Tentative de débloquer un avatar
+        }, 500); // Petit délai pour laisser le temps au "Ding" de finir
     }
 }
 
@@ -1953,38 +1977,46 @@ function toggleSuggestionDone(itemId) {
                 toast.style.animation = 'toastSlide 0.3s ease-in reverse forwards';
                 setTimeout(() => toast.remove(), 300);
             }, 5000); // Reste affiché plus longtemps (5s)
-        }        function showCelebrationSuggestions() {
-            const overlay = document.getElementById('celebrationOverlay');
-            const celebrationContent = document.getElementById('celebrationContent');
-            
-            overlay.classList.add('hidden');
-            overlay.classList.remove('opacity-100');
-            overlay.classList.add('opacity-0');
-            celebrationContent.classList.add('scale-0');
+        }      
+function showCelebrationSuggestions() {
+    const overlay = document.getElementById('celebrationOverlay');
+    const celebrationContent = document.getElementById('celebrationContent');
+    
+    // Réinitialisation des classes pour relancer l'anim si besoin
+    overlay.classList.add('hidden');
+    overlay.classList.remove('opacity-100');
+    overlay.classList.add('opacity-0');
+    celebrationContent.classList.add('scale-0');
 
-            document.querySelector('#celebrationOverlay h2').innerText = 'VICTOIRE !';
-            document.querySelector('#celebrationOverlay span').innerText = 'Suggestions du jour complétées';
-            document.getElementById('iconCrown').classList.add('hidden'); 
-            document.getElementById('iconDragon').classList.add('hidden'); 
-            document.getElementById('iconTrophy').classList.remove('hidden'); 
+    // Mise à jour du texte
+    document.querySelector('#celebrationOverlay h2').innerText = 'VICTOIRE !';
+    document.querySelector('#celebrationOverlay span').innerText = 'Suggestions du jour complétées';
+    
+    // Gestion des icônes (Affiche le trophée, cache les autres)
+    document.getElementById('iconCrown').classList.add('hidden'); 
+    document.getElementById('iconDragon').classList.add('hidden'); 
+    document.getElementById('iconTrophy').classList.remove('hidden'); 
 
-            void overlay.offsetWidth;
+    // Force le redessin du navigateur (Reflow)
+    void overlay.offsetWidth;
 
-            overlay.classList.remove('hidden');
-            
-            requestAnimationFrame(() => {
-                 overlay.classList.remove('opacity-0');
-                 overlay.classList.add('active'); 
-                 celebrationContent.classList.remove('scale-0');
-            });
-            
-            setTimeout(() => {
-                overlay.classList.remove('active');
-                overlay.classList.add('opacity-0');
-                celebrationContent.classList.add('scale-0');
-                setTimeout(() => overlay.classList.add('hidden'), 500);
-            }, 3500);
-        }
+    // Affichage
+    overlay.classList.remove('hidden');
+    
+    requestAnimationFrame(() => {
+            overlay.classList.remove('opacity-0');
+            overlay.classList.add('active'); 
+            celebrationContent.classList.remove('scale-0');
+    });
+    
+    // Masquage automatique après 3.5 secondes
+    setTimeout(() => {
+        overlay.classList.remove('active');
+        overlay.classList.add('opacity-0');
+        celebrationContent.classList.add('scale-0');
+        setTimeout(() => overlay.classList.add('hidden'), 500);
+    }, 3500);
+}
 
         function renderSuggestions(forceRefresh = false) {
             const container = document.getElementById('suggestionList');
@@ -2146,6 +2178,16 @@ function toggleSuggestionDone(itemId) {
         function populateFilters() { const select = document.getElementById('matiereFilter'); const matieres = [...new Set(rawItems.map(i => i.m))].sort(); select.innerHTML = '<option value="all">Toutes</option>' + matieres.map(m => `<option value="${m}">${m}</option>`).join(''); }
         function toggleStatus(id, type) { const isUpgrade = type === 'maitrise' && userStatus[id] !== 'maitrise'; userStatus[id] = userStatus[id] === type ? null : type; saveData(); buildCourses(); updateStats(); render(); if(isUpgrade) showCelebration(); }
         
+function playSound(type) {
+            if (!audioSystem.enabled) return;
+            const sound = audioSystem.sounds[type];
+            if (sound) {
+                sound.currentTime = 0;
+                sound.volume = 0.14;
+                sound.play().catch(e => console.log("Audio bloqué par le navigateur"));
+            }
+        }
+
         function showCelebration() {
             const overlay = document.getElementById('celebrationOverlay');
             const celebrationContent = document.getElementById('celebrationContent');
@@ -2346,7 +2388,7 @@ function openModalForItem(id, type) {
 
         // --- AI FEATURE : REVISION TUTOR CHAT ---
 
-        function startRevisionChat(item, title) {
+function startRevisionChat(item, title) {
             const modal = document.getElementById('aiModal');
             const chatInterface = document.getElementById('tutorChatInterface');
             const contentArea = document.getElementById('aiContent');
@@ -2369,10 +2411,20 @@ function openModalForItem(id, type) {
             chatHistory = [];
             chatHistoryDiv.innerHTML = '';
             
-            currentRevisionContext = `Tu es un tuteur de révision pour un étudiant en médecine. Ton sujet est l'Item R2C ${item}: "${title}". 
-            Ton but est d'aider l'étudiant à clarifier des concepts, tester ses connaissances, et mémoriser les points clés de cet item. 
-            Réponds de manière pédagogique et encourageante, en t'appuyant sur des faits médicaux pour cet item précis. Ne donne pas le cours entier d'un coup.
-            Commence par souhaiter la bienvenue à l'étudiant et lui demander par où il souhaite commencer.`;
+            // --- MODIFICATION DU PROMPT DE SECURITÉ ---
+            currentRevisionContext = `
+            Tu es un tuteur expert pour la préparation des ECN/EDN (R2C) en France.
+            Sujet : Item ${item} - "${title}".
+            
+            RÈGLES ABSOLUES :
+            1. Tes réponses doivent être basées UNIQUEMENT sur les recommandations françaises officielles (HAS, Collèges des enseignants, CNGE, etc.).
+            2. Si une notion diffère entre la pratique internationale et le consensus français R2C, précise bien : "Selon le référentiel français...".
+            3. Si tu as un doute ou si le sujet est controversé, demande à l'étudiant de vérifier dans son collège.
+            4. Sois concis, pédagogique et bienveillant.
+            
+            Commence par demander à l'étudiant s'il veut un quiz, un résumé des points clés, ou s'il veut coller une partie de son cours pour que tu l'interroges dessus.
+            `;
+            // -------------------------------------------
 
             generateAIResponse([], true);
         }
@@ -2467,6 +2519,7 @@ function openModalForItem(id, type) {
             div.scrollTop = div.scrollHeight;
             return id;
         }
+
 
         // --- FONCTIONS DE PARTAGE (EXPORT/IMPORT) ---
 
