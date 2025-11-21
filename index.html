@@ -155,6 +155,27 @@
         }
         .suggestion-card.done h3 { text-decoration: line-through; color: #6b7280; }
 
+@keyframes shakeError {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-8px); }
+            40% { transform: translateX(8px); }
+            60% { transform: translateX(-4px); }
+            80% { transform: translateX(4px); }
+        }
+
+        .animate-shake {
+            animation: shakeError 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        .validation-error {
+            border-color: #ef4444 !important;
+            background-color: rgba(239, 68, 68, 0.15) !important;
+            box-shadow: 0 0 25px rgba(239, 68, 68, 0.4) !important;
+        }
+        .validation-error h3, .validation-error p {
+            color: #fca5a5 !important;
+        }
+
         .custom-checkbox input:checked + div { background-color: #22c55e; border-color: #22c55e; }
         .custom-checkbox input:checked + div i { opacity: 1; animation: check-pop 0.3s ease-out forwards; }
         
@@ -1857,7 +1878,7 @@ function triggerChronoAnimation() {
         }
 
 function toggleSuggestionDone(itemId) {
-    // 1. Si l'item est déjà validé, on permet de le dé-valider sans restriction
+    // 1. Si l'item est déjà validé, on annule (dé-validation)
     if (dailySuggestionsDone[itemId]) {
         dailySuggestionsDone[itemId] = false;
         saveDailySuggestionState();
@@ -1865,41 +1886,42 @@ function toggleSuggestionDone(itemId) {
         return;
     }
 
-    // 2. Identifier les ressources DISPONIBLES pour cet item (base de données)
+    // 2. Vérification des ressources
     const availableResources = userResources.filter(r => r.itemId === itemId);
-    
-    // 3. Identifier les ressources VUES (session actuelle)
     const viewedTypes = sessionViewedResources[itemId] || [];
-
-    // 4. Vérifier ce qu'il manque
     const requiredTypes = ['video', 'audio', 'flash', 'fiche'];
     const missingTypes = [];
 
     requiredTypes.forEach(type => {
-        // Si la ressource existe (est attachée) MAIS n'a pas été vue
-        const resourceExists = availableResources.some(r => r.type === type);
-        if (resourceExists && !viewedTypes.includes(type)) {
+        // Si la ressource existe pour cet item MAIS n'a pas été vue
+        if (availableResources.some(r => r.type === type) && !viewedTypes.includes(type)) {
             missingTypes.push(type);
         }
     });
 
-    // 5. Blocage si incomplet
+    // 3. BLOCAGE & ANIMATION EN CAS D'ERREUR
     if (missingTypes.length > 0) {
-        const labels = { video: 'Vidéo', audio: 'Audio', flash: 'Flash', fiche: 'Fiche' };
+        const labels = { video: 'la Vidéo', audio: 'l\'Audio', flash: 'le Flash', fiche: 'la Fiche' };
         const missingNames = missingTypes.map(t => labels[t]).join(', ');
         
-        // Animation de secousse (shake) sur la carte
+        // Ciblage de la carte spécifique
         const card = document.querySelector(`.suggestion-card[data-item-id="${itemId}"]`);
+        
         if(card) {
-            card.classList.add('animate-pulse'); // Simple feedback visuel
-            setTimeout(() => card.classList.remove('animate-pulse'), 500);
+            // Ajout du style rouge et de l'animation
+            card.classList.add('validation-error', 'animate-shake');
+            
+            // Retrait du style après 1 seconde
+            setTimeout(() => {
+                card.classList.remove('validation-error', 'animate-shake');
+            }, 1000);
         }
 
-        showToast(`Validation impossible. Vous devez consulter : ${missingNames}`, 'error');
-        return; // On arrête tout ici
+        showToast(`Incomplet ! Vous devez consulter : ${missingNames}`, 'error');
+        return; 
     }
 
-    // 6. Tout est bon : Validation
+    // 4. Succès : Validation
     dailySuggestionsDone[itemId] = true;
     saveDailySuggestionState();
     renderSuggestions(false);
@@ -1908,6 +1930,7 @@ function toggleSuggestionDone(itemId) {
         checkAllSuggestionsDone();
     }
 }
+
         function showUnlockToast(icon) {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
