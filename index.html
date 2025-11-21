@@ -113,7 +113,7 @@
         input:focus, select:focus, textarea:focus { border-color: white; outline: none; }
         
         .hide-scrollbar::-webkit-scrollbar { display: none; } .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .circular-chart { display: block; margin: 0 auto; max-width: 80%; max-height: 250px; }
+        .circular-chart { display: block; margin: 0 auto; max-width: 80%; max-height: 250px; overflow: visible; }
         .circle-bg { fill: none; stroke: #222; stroke-width: 2.5; }
         .circle { fill: none; stroke-width: 2.5; stroke-linecap: round; transition: stroke-dasharray 0.5s ease; }
         .timer-active { text-shadow: 0 0 15px rgba(59, 130, 246, 0.8); }
@@ -601,7 +601,8 @@ const audioSystem = {
         error: new Audio('https://assets.mixkit.co/active_storage/sfx/2572/2572-preview.mp3'),
         click: new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3'),
         levelUp: new Audio('https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3'),
-        chronoStart: new Audio('https://assets.mixkit.co/active_storage/sfx/2986/2986-preview.mp3')
+        chronoStart: new Audio('https://assets.mixkit.co/active_storage/sfx/2986/2986-preview.mp3'),
+	mastery: new Audio('https://assets.mixkit.co/active_storage/sfx/657/657-preview.mp3')
     }
 };
 
@@ -1978,6 +1979,7 @@ function checkAllSuggestionsDone() {
                 setTimeout(() => toast.remove(), 300);
             }, 5000); // Reste affiché plus longtemps (5s)
         }      
+
 function showCelebrationSuggestions() {
     const overlay = document.getElementById('celebrationOverlay');
     const celebrationContent = document.getElementById('celebrationContent');
@@ -2175,8 +2177,25 @@ function showCelebrationSuggestions() {
         }
 
         // --- UTILS ---
+
         function populateFilters() { const select = document.getElementById('matiereFilter'); const matieres = [...new Set(rawItems.map(i => i.m))].sort(); select.innerHTML = '<option value="all">Toutes</option>' + matieres.map(m => `<option value="${m}">${m}</option>`).join(''); }
-        function toggleStatus(id, type) { const isUpgrade = type === 'maitrise' && userStatus[id] !== 'maitrise'; userStatus[id] = userStatus[id] === type ? null : type; saveData(); buildCourses(); updateStats(); render(); if(isUpgrade) showCelebration(); }
+
+function toggleStatus(id, type) { 
+            const isUpgrade = type === 'maitrise' && userStatus[id] !== 'maitrise'; 
+            if (type === 'maitrise' && userStatus[id] === 'maitrise') {
+                userStatus[id] = 'lu';
+            } else {
+                userStatus[id] = userStatus[id] === type ? null : type; 
+            }
+            // ------------------------
+
+            saveData(); 
+            buildCourses(); 
+            updateStats(); 
+            render(); 
+            
+            if(isUpgrade) showCelebration(); 
+        }
         
 function playSound(type) {
             if (!audioSystem.enabled) return;
@@ -2191,7 +2210,9 @@ function playSound(type) {
         function showCelebration() {
             const overlay = document.getElementById('celebrationOverlay');
             const celebrationContent = document.getElementById('celebrationContent');
-            
+
+            playSound('mastery');
+
             overlay.classList.add('hidden');
             overlay.classList.remove('opacity-100');
             overlay.classList.add('opacity-0');
@@ -2200,7 +2221,11 @@ function playSound(type) {
             document.querySelector('#celebrationOverlay h2').innerText = 'MAÎTRISÉ';
             document.querySelector('#celebrationOverlay span').innerText = 'Item Validé';
             document.getElementById('iconCrown').classList.remove('hidden'); 
-            document.getElementById('iconDragon').classList.remove('hidden'); 
+const dragonIcon = document.getElementById('iconDragon');
+            // On ajoute la classe jaune doré pour qu'il brille
+            dragonIcon.classList.add('text-yellow-400', 'drop-shadow-[0_0_10px_rgba(250,204,21,0.5)]'); 
+            // On l'affiche
+            dragonIcon.classList.remove('hidden');
             document.getElementById('iconTrophy').classList.add('hidden'); 
 
             void overlay.offsetWidth;
