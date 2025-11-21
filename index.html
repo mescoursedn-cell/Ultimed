@@ -210,6 +210,70 @@
             color: #67e8f9; /* Cyan-300 */
             filter: drop-shadow(0 0 20px rgba(34, 211, 238, 0.6));
         }
+/* --- CUSTOM DRIVER.JS THEME (Glassmorphism) --- */
+        
+        /* La bulle principale */
+        .driver-popover {
+            background-color: rgba(15, 15, 15, 0.85) !important; /* Fond noir transparent */
+            backdrop-filter: blur(20px) !important; /* L'effet de flou "Verre" */
+            border: 1px solid rgba(255, 255, 255, 0.1) !important; /* Bordure subtile */
+            color: white !important;
+            border-radius: 24px !important; /* Coins bien arrondis */
+            box-shadow: 0 20px 50px -10px rgba(0,0,0,0.8), inset 0 0 20px rgba(255,255,255,0.05) !important;
+            padding: 20px !important;
+            min-width: 300px !important;
+        }
+
+        /* Le Titre */
+        .driver-popover-title {
+            font-family: 'Montserrat', sans-serif !important;
+            font-size: 18px !important;
+            font-weight: 900 !important;
+            color: #fbbf24 !important; /* Gold (comme votre thème) */
+            margin-bottom: 8px !important;
+            letter-spacing: 0.05em !important;
+            text-transform: uppercase !important;
+        }
+
+        /* Le Texte */
+        .driver-popover-description {
+            font-family: 'Inter', sans-serif !important;
+            color: #e5e7eb !important; /* Gris clair lisible */
+            font-size: 14px !important;
+            line-height: 1.6 !important;
+            font-weight: 400 !important;
+        }
+
+        /* Les Boutons (Suivant / Précédent) */
+        .driver-popover-footer button {
+            background-color: rgba(255, 255, 255, 0.1) !important;
+            color: white !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            border-radius: 12px !important;
+            text-shadow: none !important;
+            font-weight: bold !important;
+            font-size: 12px !important;
+            padding: 8px 16px !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .driver-popover-footer button:hover {
+            background-color: rgba(255, 255, 255, 0.2) !important;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+        
+        /* Bouton "Terminé" en bleu */
+        .driver-popover-done-btn {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+            border: none !important;
+        }
+
+        /* La petite flèche (Triangle) pour qu'elle se fonde dans le décor */
+        .driver-popover-arrow-side-left.driver-popover-arrow { border-left-color: rgba(15, 15, 15, 0.9) !important; }
+        .driver-popover-arrow-side-right.driver-popover-arrow { border-right-color: rgba(15, 15, 15, 0.9) !important; }
+        .driver-popover-arrow-side-top.driver-popover-arrow { border-top-color: rgba(15, 15, 15, 0.9) !important; }
+        .driver-popover-arrow-side-bottom.driver-popover-arrow { border-bottom-color: rgba(15, 15, 15, 0.9) !important; }
 
     </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css"/>
@@ -320,10 +384,18 @@
                 <div id="timerGlow" class="absolute w-40 h-40 bg-blue-600/10 rounded-full blur-[70px] transition-all duration-1000 opacity-0 scale-50 pointer-events-none"></div>
                 <div id="timerFlame" class="hidden absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-full bg-yellow-500/5 blur-xl z-0"></div>
                 <div class="flex-grow flex items-end justify-center pb-6 w-full">
-                    <div id="dinoWrapper" class="relative transition-transform duration-300 cursor-pointer" onclick="triggerDinoJump()">
-                        <i class="fa-solid fa-dragon text-6xl text-gray-500 transition-colors duration-300" id="dinoIcon"></i>
-                        <div id="dinoZzz" class="absolute -top-6 -right-6 text-lg font-bold text-gray-600 animate-pulse">Zzz</div>
-                    </div>
+<div id="dinoWrapper" class="relative transition-transform duration-300 cursor-pointer group" onclick="triggerDinoJump()">
+    
+    <div id="dinoSpeechBubble" class="absolute bottom-full mb-4 left-1/2 -translate-x-1/2 w-64 p-4 rounded-2xl bg-[#0f0f0f]/90 backdrop-blur-xl border border-white/10 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.8)] hidden opacity-0 transition-all duration-300 z-30">
+        <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-[#0f0f0f]/90 border-r border-b border-white/10 rotate-45"></div>
+        
+        <h4 class="text-gold-500 font-display font-black text-xs uppercase tracking-widest mb-1">Animal de compagnie</h4>
+        <p id="dinoSpeechText" class="text-gray-200 text-sm font-medium leading-relaxed">Prêt à majorer ?</p>
+    </div>
+
+    <i class="fa-solid fa-dragon text-6xl text-gray-500 transition-colors duration-300" id="dinoIcon"></i>
+    <div id="dinoZzz" class="absolute -top-6 -right-6 text-lg font-bold text-gray-600 animate-pulse">Zzz</div>
+</div>
                 </div>
                 <div class="flex flex-col items-center z-10 mb-4">
                     <div id="timerDisplay" class="text-6xl font-mono font-black text-white tracking-widest transition-all duration-500 tabular-nums drop-shadow-lg">00:00</div>
@@ -1541,35 +1613,83 @@ function triggerChronoAnimation() {
         }
 
         // 2. Animation du Dinosaure (Clic)
-        function triggerDinoJump() {
-            const dinoIcon = document.getElementById('dinoIcon');
-            const dinoWrapper = document.getElementById('dinoWrapper');
-            const dinoZzz = document.getElementById('dinoZzz');
-            
-            if (isTimerRunning) {
-                dinoIcon.className = `fa-solid ${userAvatar} fa-beat text-6xl text-white transition-all duration-300`;
-                setTimeout(() => updateDinoVisuals(), 500);
-                return;
-            }
+// Liste étendue de messages motivants
+const motivationMessages = [
+    "Tu as le potentiel d'un Major. Au travail !",
+    "La douleur de la discipline ou la douleur du regret. Choisis.",
+    "Une heure de focus maintenant, c'est une place gagnée demain.",
+    "Respire un bon coup. On y retourne.",
+    "Ne regarde pas le sommet, regarde la prochaine marche.",
+    "Ton futur toi te remerciera pour cette session.",
+    "Pas d'excuses. Juste des résultats.",
+    "La médecine s'apprend par la répétition. Encore une fois !",
+    "Concentre-toi. Tu es plus fort que ta distraction."
+];
 
-            dinoZzz.classList.add('opacity-0');
-            dinoIcon.className = `fa-solid ${userAvatar} text-6xl transition-all duration-300 dino-woke`;
-            
-            const msg = dinoMessages[Math.floor(Math.random() * dinoMessages.length)];
-            showToast(msg, 'info'); 
+function triggerDinoJump() {
+    const dinoIcon = document.getElementById('dinoIcon');
+    const dinoWrapper = document.getElementById('dinoWrapper');
+    const dinoZzz = document.getElementById('dinoZzz');
+    
+    // Éléments de la bulle
+    const bubble = document.getElementById('dinoSpeechBubble');
+    const bubbleText = document.getElementById('dinoSpeechText');
 
-            for (let i = 0; i < 3; i++) {
-                createDiamondParticle(dinoWrapper);
-            }
+    // 1. Si le chrono tourne déjà
+    if (isTimerRunning) {
+        dinoIcon.className = `fa-solid ${userAvatar} fa-beat text-6xl text-white transition-all duration-300`;
+        
+        // Message "Focus"
+        bubbleText.innerText = "Je surveille le chrono. Reste concentré !";
+        showBubble();
+        
+        setTimeout(() => updateDinoVisuals(), 1000);
+        return;
+    }
 
-            setTimeout(() => {
-                if (!isTimerRunning) {
-                    dinoIcon.className = `fa-solid ${userAvatar} text-6xl text-gray-500 transition-colors duration-500 animate-dino-sleep`;
-                    dinoZzz.classList.remove('opacity-0');
-                }
-            }, 1500);
+    // 2. Si le chrono est à l'arrêt (Réveil du Dino)
+    dinoZzz.classList.add('opacity-0');
+    dinoIcon.className = `fa-solid ${userAvatar} text-6xl transition-all duration-300 dino-woke`;
+    
+    // Choix d'un message aléatoire
+    const msg = motivationMessages[Math.floor(Math.random() * motivationMessages.length)];
+    bubbleText.innerText = msg;
+    
+    // Affichage de la bulle
+    showBubble();
+
+    // Effets de particules (Diamants)
+    for (let i = 0; i < 3; i++) {
+        createDiamondParticle(dinoWrapper);
+    }
+
+    // Retour au sommeil après 3 secondes
+    setTimeout(() => {
+        if (!isTimerRunning) {
+            dinoIcon.className = `fa-solid ${userAvatar} text-6xl text-gray-500 transition-colors duration-500 animate-dino-sleep`;
+            dinoZzz.classList.remove('opacity-0');
+            hideBubble(); // On cache la bulle
         }
+    }, 3500); // La bulle reste affichée 3.5 secondes
+}
 
+// Fonctions utilitaires pour la bulle
+function showBubble() {
+    const bubble = document.getElementById('dinoSpeechBubble');
+    bubble.classList.remove('hidden');
+    // Petit délai pour permettre la transition CSS d'opacité
+    setTimeout(() => {
+        bubble.classList.remove('opacity-0', 'translate-y-2');
+    }, 10);
+}
+
+function hideBubble() {
+    const bubble = document.getElementById('dinoSpeechBubble');
+    bubble.classList.add('opacity-0', 'translate-y-2');
+    setTimeout(() => {
+        bubble.classList.add('hidden');
+    }, 300);
+}
         function createDiamondParticle(parent) {
             const particle = document.createElement('i');
             particle.className = `fa-solid fa-gem text-cyan-300 diamond-particle`;
@@ -2302,7 +2422,7 @@ function startTutorial() {
                 element: '#dinoWrapper', 
                 popover: { 
                     title: 'Mode Focus', 
-                    description: 'Cliquez sur le Dinosaure ou le bouton Play pour lancer le chrono. Des sons et animations vous accompagneront.', 
+                    description: 'Cliquez sur le Dragon pour de l\'encourouragement le bouton Play pour lancer le chrono. Des sons et animations vous accompagneront.', 
                     side: "right", 
                     align: 'center' 
                 } 
