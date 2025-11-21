@@ -546,7 +546,7 @@
             </div>
             <div class="text-center space-y-3">
                 <h2 class="text-4xl md:text-5xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-200 to-blue-500 tracking-[0.15em] uppercase drop-shadow-2xl animate-fade-in-up">
-                    ACTIVATION
+                    MODE MACHINE ACTIVÉ 
                 </h2>
                 <div class="flex items-center justify-center gap-4 opacity-80">
                     <div class="h-px w-12 bg-gradient-to-r from-transparent to-cyan-500"></div>
@@ -2199,7 +2199,10 @@ function toggleSuggestionDone(itemId) {
         const playerModal = document.getElementById('playerModal');
         const aiModal = document.getElementById('aiModal'); 
 
-        function openGeneralModal() { addModal.classList.remove('hidden'); addModal.classList.add('flex'); document.getElementById('modalTitle').innerText = 'Ajouter'; document.getElementById('itemInputGroup').classList.remove('hidden'); document.getElementById('typeInputGroup').classList.remove('hidden'); document.getElementById('targetItem').value = ''; document.getElementById('newLink').value = ''; }
+        function openGeneralModal() { addModal.classList.remove('hidden'); addModal.classList.add('flex'); document.getElementById('modalTitle').innerText = 'Ajouter'; document.getElementById('itemInputGroup').classList.remove('hidden'); document.getElementById('typeInputGroup').classList.remove('hidden'); document.getElementById('targetItem').value = ''; document.getElementById('newLink').value = '';             
+document.getElementById('newLink').focus(); 
+        }
+
         function closeModal() { addModal.classList.add('hidden'); addModal.classList.remove('flex'); }
         function openModalForItem(id, type) { addModal.classList.remove('hidden'); addModal.classList.add('flex'); document.getElementById('targetItem').value = id; const radios = document.getElementsByName('resType'); for(const r of radios) if(r.value === type) r.checked = true; document.getElementById('modalTitle').innerText = `Ajouter ${type.toUpperCase()}`; document.getElementById('itemInputGroup').classList.add('hidden'); document.getElementById('typeInputGroup').classList.add('hidden'); document.getElementById('newLink').focus(); }
         
