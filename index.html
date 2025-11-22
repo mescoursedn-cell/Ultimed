@@ -354,19 +354,13 @@
                 </div>
                 <h1 class="hidden sm:block text-sm font-display font-bold tracking-[0.2em] text-white uppercase group-hover:text-blue-400 transition">FlashMed</h1>
             </div>
-            <div class="flex items-center gap-4">
-                <a href="https://notebooklm.google.com/" target="_blank" class="hidden lg:flex items-center gap-2 bg-blue-900/20 px-3 py-1.5 rounded-lg border border-blue-500/20 hover:bg-blue-900/40 hover:border-blue-500/40 transition group" title="Accéder à NotebookLM">
-                    <i class="fa-solid fa-book text-blue-400 group-hover:text-blue-300 text-xs"></i>
-                    <span class="text-xs font-bold text-blue-100/80 group-hover:text-white">NOTEBOOKLM</span>
-                </a>
-                <a href="https://univ.theia.fr/login" target="_blank" class="hidden lg:flex items-center gap-2 bg-green-900/20 px-3 py-1.5 rounded-lg border border-green-500/20 hover:bg-green-900/40 hover:border-green-500/40 transition group" title="Accéder à Theia">
-                    <i class="fa-solid fa-graduation-cap text-green-400 group-hover:text-green-300 text-xs"></i>
-                    <span class="text-xs font-bold text-green-100/80 group-hover:text-white">THEIA</span>
-                </a>
-                <a href="https://www.hypocampus.fr/app/dashboard" target="_blank" class="hidden lg:flex items-center gap-2 bg-purple-900/20 px-3 py-1.5 rounded-lg border border-purple-500/20 hover:bg-purple-900/40 hover:border-purple-500/40 transition group" title="Accéder à Hypocampus">
-                    <i class="fa-solid fa-brain text-purple-400 group-hover:text-purple-300 text-xs"></i>
-                    <span class="text-xs font-bold text-purple-100/80 group-hover:text-white">HYPOCAMPUS</span>
-                </a>
+            <div class="flex items-center gap-2">
+                <div id="customLinksContainer" class="hidden lg:flex items-center gap-2"></div>
+                
+                <button onclick="openLinkModal()" class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition group" title="Ajouter un raccourci web">
+                    <i class="fa-solid fa-plus text-xs group-hover:rotate-90 transition-transform"></i>
+                </button>
+	</div>
 
 <div class="hidden md:flex items-center gap-3 bg-black/40 px-4 py-1.5 rounded-lg border border-white/5 transition-all duration-300 hover:bg-white/10 hover:border-gold-500/50 hover:shadow-[0_0_20px_rgba(251,191,36,0.15)] cursor-default">
                     <div class="flex flex-col items-end leading-none">
@@ -700,6 +694,29 @@
 
     <div id="playerModal" class="hidden fixed inset-0 z-[80] modal-backdrop flex items-center justify-center px-4 transition-all duration-300 opacity-0 scale-95"><div id="playerWrapper" class="bg-[#111] border border-white/10 rounded-2xl shadow-2xl relative overflow-hidden flex flex-col transition-all duration-500 ease-out"><div class="bg-black/50 backdrop-blur-sm px-6 py-4 border-b border-white/5 flex justify-between items-center z-20 absolute top-0 w-full"><h3 class="text-sm font-bold text-white font-display truncate pr-4 drop-shadow-md" id="playerTitle">Lecture</h3><button onclick="closePlayer()" class="w-8 h-8 rounded-full bg-black/50 flex items-center justify-center text-gray-300 hover:text-white hover:bg-red-500/80 transition"><i class="fa-solid fa-times"></i></button></div><div class="relative bg-black flex items-center justify-center w-full h-full" id="playerContainer"><div id="playerLoader" class="absolute inset-0 flex flex-col items-center justify-center bg-[#0a0a0a] z-10"><div class="w-12 h-12 bg-white text-black flex items-center justify-center font-display font-black text-xl tracking-tighter rounded-sm animate-pulse-fast">FM</div></div></div></div></div>
     <div id="addModal" class="hidden fixed inset-0 z-[60] modal-backdrop flex items-center justify-center px-4"><div class="bg-[#111] border border-white/10 rounded-3xl w-full max-w-md p-6 shadow-2xl transform transition-all scale-100"><div class="flex justify-between items-center mb-6"><h3 class="text-xl font-bold text-white font-display" id="modalTitle">Ajouter</h3><button onclick="closeModal()" class="text-gray-500 hover:text-white"><i class="fa-solid fa-times text-xl"></i></button></div><div class="space-y-4"><div id="itemInputGroup"><label class="block text-xs font-bold uppercase text-gray-500 mb-2">Numéro d'Item</label><input type="number" id="targetItem" placeholder="Ex: 331" class="w-full bg-[#222] border border-[#333] rounded-xl px-4 py-3 text-white focus:border-white transition"></div><div id="typeInputGroup"><label class="block text-xs font-bold uppercase text-gray-500 mb-2">Format</label><div class="grid grid-cols-2 gap-3"><label class="cursor-pointer"><input type="radio" name="resType" value="video" class="peer sr-only" checked><div class="p-3 bg-[#222] rounded-xl text-center text-gray-500 peer-checked:text-red-500 peer-checked:bg-red-500/10 border border-transparent peer-checked:border-red-500/20 transition"><i class="fa-solid fa-video"></i> Vidéo</div></label><label class="cursor-pointer"><input type="radio" name="resType" value="audio" class="peer sr-only"><div class="p-3 bg-[#222] rounded-xl text-center text-gray-500 peer-checked:text-yellow-500 peer-checked:bg-yellow-500/10 border border-transparent peer-checked:border-yellow-500/20 transition"><i class="fa-solid fa-headphones"></i> Audio</div></label><label class="cursor-pointer"><input type="radio" name="resType" value="flash" class="peer sr-only"><div class="p-3 bg-[#222] rounded-xl text-center text-gray-500 peer-checked:text-purple-500 peer-checked:bg-purple-500/10 border border-transparent peer-checked:border-purple-500/20 transition"><i class="fa-solid fa-bolt"></i> Flash</div></label><label class="cursor-pointer"><input type="radio" name="resType" value="fiche" class="peer sr-only"><div class="p-3 bg-[#222] rounded-xl text-center text-gray-500 peer-checked:text-blue-500 peer-checked:bg-blue-500/10 border border-transparent peer-checked:border-blue-500/20 transition"><i class="fa-solid fa-file-pdf"></i> Fiche</div></label></div></div><div><label class="block text-xs font-bold uppercase text-gray-500 mb-2">Lien URL</label><input type="text" id="newLink" placeholder="https://..." class="w-full bg-[#222] border border-[#333] rounded-xl px-4 py-3 text-white text-sm focus:border-white transition"></div></div><div class="flex justify-end gap-3 mt-8"><button onclick="closeModal()" class="px-4 py-2 text-gray-400 hover:text-white text-sm font-medium">Annuler</button><button onclick="attachResource()" class="px-8 py-3 bg-white text-black rounded-xl text-sm font-bold hover:bg-gray-200 transition shadow-lg">Enregistrer</button></div></div></div>
+<div id="linkModal" class="fixed inset-0 z-[110] hidden flex items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity duration-300 opacity-0">
+        <div class="glass-panel w-full max-w-sm p-6 rounded-2xl transform scale-95 transition-all duration-300">
+            <h3 class="text-lg font-display font-bold text-white mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-link text-blue-400"></i> Nouveau Raccourci
+            </h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-gray-500 mb-2">Nom du site</label>
+                    <input type="text" id="linkName" placeholder="Ex: SIDES, AnkiWeb..." class="w-full bg-[#151515] border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blue-500 transition text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-gray-500 mb-2">URL (Lien)</label>
+                    <input type="text" id="linkUrl" placeholder="https://..." class="w-full bg-[#151515] border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blue-500 transition text-sm">
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 mt-6">
+                <button onclick="closeLinkModal()" class="px-4 py-2 text-gray-400 hover:text-white text-sm font-medium">Annuler</button>
+                <button onclick="saveCustomLink()" class="px-6 py-2 bg-white text-black rounded-xl text-sm font-bold hover:bg-gray-200 transition shadow-lg">Ajouter</button>
+            </div>
+        </div>
+    </div>
     <div id="aiModal" class="hidden fixed inset-0 z-[60] modal-backdrop flex items-center justify-center px-4"><div class="bg-[#111] border border-white/10 rounded-3xl w-full max-w-2xl h-[80vh] flex flex-col shadow-2xl"><div class="px-6 py-4 border-b border-white/5 flex justify-between items-center"><h3 class="font-bold text-white flex items-center gap-2" id="aiModalTitle"><i class="fa-solid fa-brain text-indigo-400"></i> Assistant IA</h3><button onclick="closeAiModal()" class="text-gray-500 hover:text-white"><i class="fa-solid fa-times"></i></button></div><div id="aiLoading" class="hidden absolute inset-0 z-50 bg-[#0a0a0a] flex flex-col items-center justify-center"><div class="w-12 h-12 bg-white text-black flex items-center justify-center font-display font-black text-xl tracking-tighter rounded-sm animate-pulse-fast">IA</div><p class="mt-4 text-gray-500 text-sm">Réflexion en cours...</p></div><div id="aiContent" class="flex-grow overflow-y-auto p-6 bg-[#0a0a0a] flashcard-content max-w-none prose prose-invert prose-p:text-gray-300 prose-headings:text-white hidden"></div><div id="tutorChatInterface" class="hidden flex flex-col h-full overflow-hidden"><div id="chatHistory" class="flex-grow overflow-y-auto p-4 space-y-4 bg-[#0a0a0a] scroll-smooth"></div><div class="p-4 border-t border-white/10 bg-[#111] flex gap-2"><input type="text" id="chatInput" class="flex-grow bg-[#222] border border-[#333] rounded-xl px-4 py-3 text-white focus:border-blue-500 transition text-sm" placeholder="Posez votre question sur l'item..." onkeypress="if(event.key === 'Enter') sendChatMessage()"><button onclick="sendChatMessage()" class="w-12 h-12 flex items-center justify-center bg-blue-600 text-white rounded-xl hover:bg-blue-500 transition"><i class="fa-solid fa-paper-plane"></i></button></div></div></div></div>
     <div id="confirmModal" class="hidden fixed inset-0 z-[90] modal-backdrop flex items-center justify-center px-4"><div class="bg-[#111] border border-white/10 rounded-2xl p-6 shadow-2xl max-w-sm w-full"><h3 class="text-lg font-bold text-white mb-2">Confirmation</h3><p class="text-gray-400 text-sm mb-6">Voulez-vous vraiment supprimer cette ressource ?</p><div class="flex justify-end gap-3"><button onclick="closeConfirmModal()" class="px-4 py-2 text-gray-400 hover:text-white text-sm font-medium">Non</button><button id="confirmBtnAction" class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-bold hover:bg-red-700">Oui, supprimer</button></div></div></div>
 
@@ -748,6 +765,7 @@
         var timerInterval;
 	var userXP = 0;
 	var userLevel = 0;
+	var userLinks = [];
 
 	// --- CONFIGURATION DES RÉCOMPENSES (NIVEAUX) ---
 	const levelRewards = {
@@ -1253,6 +1271,11 @@ function initApp() {
     }
     	updateXPDisplay(); // On affichera la barre
             
+// Chargement des liens perso
+    const savedLinks = localStorage.getItem('flashmed_custom_links');
+    if(savedLinks) userLinks = JSON.parse(savedLinks);
+    renderHeaderLinks(); // On affiche les boutons
+
             // 3. Charger les données
             const savedRes = localStorage.getItem('flashmed_resources');
             if(savedRes) userResources = JSON.parse(savedRes);
@@ -2566,6 +2589,76 @@ function render() {
         }
 
         // --- UTILS ---
+// --- GESTION DES LIENS PERSONNALISÉS ---
+
+function openLinkModal() {
+    const modal = document.getElementById('linkModal');
+    document.getElementById('linkName').value = '';
+    document.getElementById('linkUrl').value = '';
+    
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        modal.querySelector('.glass-panel').classList.remove('scale-95');
+        modal.querySelector('.glass-panel').classList.add('scale-100');
+    }, 10);
+    document.getElementById('linkName').focus();
+}
+
+function closeLinkModal() {
+    const modal = document.getElementById('linkModal');
+    modal.classList.add('opacity-0');
+    modal.querySelector('.glass-panel').classList.remove('scale-100');
+    modal.querySelector('.glass-panel').classList.add('scale-95');
+    setTimeout(() => modal.classList.add('hidden'), 300);
+}
+
+function saveCustomLink() {
+    const name = document.getElementById('linkName').value.trim();
+    let url = document.getElementById('linkUrl').value.trim();
+    
+    if (name && url) {
+        if (!url.startsWith('http')) url = 'https://' + url;
+        
+        userLinks.push({ name, url });
+        localStorage.setItem('flashmed_custom_links', JSON.stringify(userLinks));
+        
+        renderHeaderLinks();
+        closeLinkModal();
+        playSound('success');
+        showToast('Raccourci ajouté !', 'success');
+    } else {
+        playSound('error');
+        showToast('Veuillez remplir les champs.', 'error');
+    }
+}
+
+function deleteLink(index) {
+    if(confirm('Supprimer ce raccourci ?')) {
+        userLinks.splice(index, 1);
+        localStorage.setItem('flashmed_custom_links', JSON.stringify(userLinks));
+        renderHeaderLinks();
+        playSound('click');
+    }
+}
+
+function renderHeaderLinks() {
+    const container = document.getElementById('customLinksContainer');
+    if (!container) return;
+    
+    container.innerHTML = userLinks.map((link, index) => `
+        <div class="relative group">
+            <a href="${link.url}" target="_blank" onclick="playSound('click')" class="flex items-center gap-2 bg-blue-900/20 px-3 py-1.5 rounded-lg border border-blue-500/20 hover:bg-blue-900/40 hover:border-blue-500/40 transition" title="${link.name}">
+                <i class="fa-solid fa-globe text-blue-400 group-hover:text-blue-300 text-xs"></i>
+                <span class="text-xs font-bold text-blue-100/80 group-hover:text-white uppercase max-w-[100px] truncate">${link.name}</span>
+            </a>
+            <button onclick="deleteLink(${index})" class="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 text-white rounded-full text-[8px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition shadow-md hover:scale-110">
+                <i class="fa-solid fa-times"></i>
+            </button>
+        </div>
+    `).join('');
+}
+
 function toggleSoundPreview(checkbox) {
             const icon = document.getElementById('soundIconSettings');
             const bg = document.getElementById('soundIconBg');
