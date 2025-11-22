@@ -194,7 +194,7 @@
             pointer-events: none;
             animation: floatDiamond 1.2s ease-out forwards;
             font-size: 1rem;
-            z-index: 20;
+            z-index: 30;
             text-shadow: 0 0 10px rgba(103, 232, 249, 0.8);
         }
 
@@ -274,6 +274,35 @@
         .driver-popover-arrow-side-right.driver-popover-arrow { border-right-color: rgba(15, 15, 15, 0.9) !important; }
         .driver-popover-arrow-side-top.driver-popover-arrow { border-top-color: rgba(15, 15, 15, 0.9) !important; }
         .driver-popover-arrow-side-bottom.driver-popover-arrow { border-bottom-color: rgba(15, 15, 15, 0.9) !important; }
+
+/* --- AJOUT : Animation Lueur Multicolore --- */
+/* --- Animation "Spectre Complet" (Toutes les matières) --- */
+        @keyframes spectralPulse {
+            0%   { color: #ef4444; filter: drop-shadow(0 0 15px rgba(239, 68, 68, 0.8)); }   /* Rouge (Cardio) */
+            6%   { color: #f97316; filter: drop-shadow(0 0 15px rgba(249, 115, 22, 0.8)); }  /* Orange (Néphro) */
+            12%  { color: #f59e0b; filter: drop-shadow(0 0 15px rgba(245, 158, 11, 0.8)); }  /* Amber (Gastro) */
+            18%  { color: #eab308; filter: drop-shadow(0 0 15px rgba(234, 179, 8, 0.8)); }   /* Jaune (Infectio) */
+            24%  { color: #84cc16; filter: drop-shadow(0 0 15px rgba(132, 204, 22, 0.8)); }  /* Lime (Rhumato) */
+            30%  { color: #22c55e; filter: drop-shadow(0 0 15px rgba(34, 197, 94, 0.8)); }   /* Vert (MPR) */
+            36%  { color: #10b981; filter: drop-shadow(0 0 15px rgba(16, 185, 129, 0.8)); }  /* Emerald (Santé Pub) */
+            42%  { color: #14b8a6; filter: drop-shadow(0 0 15px rgba(20, 184, 166, 0.8)); }  /* Teal (ORL) */
+            48%  { color: #06b6d4; filter: drop-shadow(0 0 15px rgba(6, 182, 212, 0.8)); }   /* Cyan (Pédia) */
+            54%  { color: #0ea5e9; filter: drop-shadow(0 0 15px rgba(14, 165, 233, 0.8)); }  /* Sky (Pneumo) */
+            60%  { color: #3b82f6; filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.8)); }  /* Bleu (Ophtalmo) */
+            66%  { color: #6366f1; filter: drop-shadow(0 0 15px rgba(99, 102, 241, 0.8)); }  /* Indigo (Neuro) */
+            72%  { color: #8b5cf6; filter: drop-shadow(0 0 15px rgba(139, 92, 246, 0.8)); }  /* Violet (Psy) */
+            78%  { color: #a855f7; filter: drop-shadow(0 0 15px rgba(168, 85, 247, 0.8)); }  /* Purple (Interne) */
+            84%  { color: #d946ef; filter: drop-shadow(0 0 15px rgba(217, 70, 239, 0.8)); }  /* Fuchsia (Addicto) */
+            90%  { color: #ec4899; filter: drop-shadow(0 0 15px rgba(236, 72, 153, 0.8)); }  /* Pink (Gynéco) */
+            96%  { color: #f43f5e; filter: drop-shadow(0 0 15px rgba(244, 63, 94, 0.8)); }   /* Rose (Dermato) */
+            100% { color: #ef4444; filter: drop-shadow(0 0 15px rgba(239, 68, 68, 0.8)); }   /* Retour au Rouge */
+        }
+
+        .animate-spectral {
+            /* Durée de 20s pour que chaque couleur reste visible environ 1.2 à 1.5 secondes */
+            /* C'est une transition douce et continue (linear) */
+            animation: spectralPulse 20s linear infinite; 
+        }
 
     </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css"/>
@@ -386,11 +415,14 @@
                 <div class="flex-grow flex items-end justify-center pb-6 w-full">
 <div id="dinoWrapper" class="relative transition-transform duration-300 cursor-pointer group" onclick="triggerDinoJump()">
     
-    <div id="dinoSpeechBubble" class="absolute bottom-full mb-4 left-1/2 -translate-x-1/2 w-64 p-4 rounded-2xl bg-[#0f0f0f]/90 backdrop-blur-xl border border-white/10 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.8)] hidden opacity-0 transition-all duration-300 z-30">
-        <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-[#0f0f0f]/90 border-r border-b border-white/10 rotate-45"></div>
+    <div id="dinoSpeechBubble" class="absolute bottom-full mb-7 left-1/2 -translate-x-1/2 w-64 p-4 rounded-2xl bg-slate-900/80 backdrop-blur-xl border border-cyan-500/30 shadow-[0_0_30px_-5px_rgba(6,182,212,0.2),inset_0_0_20px_rgba(6,182,212,0.05)] hidden opacity-0 transition-all duration-300 z-30">
         
-        <h4 class="text-gold-500 font-display font-black text-xs uppercase tracking-widest mb-1">Animal de compagnie</h4>
-        <p id="dinoSpeechText" class="text-gray-200 text-sm font-medium leading-relaxed">Prêt à majorer ?</p>
+        <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-slate-900/80 backdrop-blur-xl border-r border-b border-cyan-500/30 rotate-45"></div>
+        
+        <h4 class="text-cyan-400 font-display font-black text-xs uppercase tracking-widest mb-1 drop-shadow-md flex items-center gap-2">
+            <i class="fa-solid fa-robot"></i> Coach Dino
+        </h4>
+        <p id="dinoSpeechText" class="text-cyan-50 text-sm font-medium leading-relaxed drop-shadow-sm">Prêt à majorer ?</p>
     </div>
 
     <i class="fa-solid fa-dragon text-6xl text-gray-500 transition-colors duration-300" id="dinoIcon"></i>
@@ -477,7 +509,7 @@
                     </div>
                 </div>
             </div>
-            <div class="mb-4"><div class="flex justify-between items-end mb-3 px-2"><h3 class="text-white text-sm font-bold">Progression par Matière</h3><span class="text-[10px] text-gray-500 uppercase tracking-wider">Scroll Horizontal</span></div><div class="flex gap-4 overflow-x-auto hide-scrollbar pb-4" id="subjectProgressContainer"></div></div>
+            <div class="mb-4"><div class="flex justify-between items-end mb-3 px-2"><h3 class="text-white text-sm font-bold">Progression par Matière</h3><span class="text-[10px] text-gray-500 uppercase tracking-wider">Scroll Horizontal</span></div><div class="flex gap-4 overflow-x-auto hide-scrollbar p-4" id="subjectProgressContainer"></div></div>
         </section>
 
         <section id="suggestionBlock" class="mb-12 animate-fade-in-up hidden" style="animation-delay: 0.3s;">
@@ -503,7 +535,7 @@
         </section>
 
         <div id="subjectHeader" class="hidden mb-10 text-center relative transition-all duration-500">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/10 mb-4 border border-white/10"><i id="subjectIcon" class="fa-solid fa-heart-pulse text-2xl text-white"></i></div>
+            <div id="subjectIconContainer" class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/10 mb-4 border border-white/10 transition-all duration-500"><i id="subjectIcon" class="fa-solid fa-heart-pulse text-2xl text-white"></i></div>
             <h2 id="subjectTitle" class="text-3xl md:text-4xl font-display font-black text-white tracking-tight mb-2">Matière</h2><p class="text-gray-400 text-xs uppercase tracking-widest font-bold">Vue détaillée</p>
         </div>
 
@@ -758,7 +790,9 @@ const audioSystem = {
 	mastery: new Audio('https://assets.mixkit.co/active_storage/sfx/657/657-preview.mp3'),
 	whoosh: new Audio('https://assets.mixkit.co/active_storage/sfx/3124/3124-preview.mp3'),
         error: new Audio('https://assets.mixkit.co/active_storage/sfx/1110/1110-preview.mp3'),
-	refresh: new Audio('https://assets.mixkit.co/active_storage/sfx/2043/2043-preview.mp3')
+	refresh: new Audio('https://assets.mixkit.co/active_storage/sfx/2043/2043-preview.mp3'),
+	subjectClick: new Audio('https://assets.mixkit.co/active_storage/sfx/1120/1120-preview.mp3'),
+	creature: new Audio('https://assets.mixkit.co/active_storage/sfx/2350/2350-preview.mp3')
     }
 };
 
@@ -1702,6 +1736,8 @@ function triggerDinoJump() {
     const bubble = document.getElementById('dinoSpeechBubble');
     const bubbleText = document.getElementById('dinoSpeechText');
 
+playSound('creature');
+
     // 1. Si le chrono tourne déjà
     if (isTimerRunning) {
         dinoIcon.className = `fa-solid ${userAvatar} fa-beat text-6xl text-white transition-all duration-300`;
@@ -2050,21 +2086,58 @@ playSound('click');
             showToast('Nombre de lectures réinitialisé.', 'info');
         }
 
-        function updateStats() {
+function updateStats() {
             const total = rawItems.length;
             const totalLu = Object.values(userStatus).filter(s => s === 'lu' || s === 'maitrise').length;
             const totalMaitrise = Object.values(userStatus).filter(s => s === 'maitrise').length;
+            
+            // Mise à jour des cercles
             const pctLu = Math.round((totalLu / total) * 100);
             const pctMaitrise = Math.round((totalMaitrise / total) * 100);
-            document.getElementById('countLu').innerText = totalLu; document.getElementById('pctLu').innerText = pctLu + '%'; document.getElementById('ringLu').setAttribute('stroke-dasharray', `${pctLu}, 100`);
-            document.getElementById('countMaitrise').innerText = totalMaitrise; document.getElementById('pctMaitrise').innerText = pctMaitrise + '%'; document.getElementById('ringMaitrise').setAttribute('stroke-dasharray', `${pctMaitrise}, 100`);
             
+            document.getElementById('countLu').innerText = totalLu; 
+            document.getElementById('pctLu').innerText = pctLu + '%'; 
+            document.getElementById('ringLu').setAttribute('stroke-dasharray', `${pctLu}, 100`);
+            
+            document.getElementById('countMaitrise').innerText = totalMaitrise; 
+            document.getElementById('pctMaitrise').innerText = pctMaitrise + '%'; 
+            document.getElementById('ringMaitrise').setAttribute('stroke-dasharray', `${pctMaitrise}, 100`);
+            
+            // Calcul par matière
             const subjects = {};
-            rawItems.forEach(i => { if(!subjects[i.m]) subjects[i.m] = { total: 0, done: 0 }; subjects[i.m].total++; if(userStatus[i.id] === 'maitrise') subjects[i.m].done++; });
-            const sortedSubjects = Object.entries(subjects).map(([name, stats]) => { return { name, pct: Math.round((stats.done / stats.total) * 100), ...stats }; }).sort((a, b) => b.pct - a.pct);
+            rawItems.forEach(i => { 
+                if(!subjects[i.m]) subjects[i.m] = { total: 0, done: 0 }; 
+                subjects[i.m].total++; 
+                if(userStatus[i.id] === 'maitrise') subjects[i.m].done++; 
+            });
+            
+            const sortedSubjects = Object.entries(subjects)
+                .map(([name, stats]) => { return { name, pct: Math.round((stats.done / stats.total) * 100), ...stats }; })
+                .sort((a, b) => b.pct - a.pct);
+            
+            // --- GÉNÉRATION DES CARTES AVEC GLOW ---
             document.getElementById('subjectProgressContainer').innerHTML = sortedSubjects.map(s => {
                 const style = matiereConfig[s.name] || defaultConfig;
-                return `<div onclick="filterByMatiere('${s.name}')" class="min-w-[140px] bg-[#111] border border-white/5 rounded-xl p-3 cursor-pointer hover:bg-white/5 transition group"><div class="flex items-center justify-between mb-2"><i class="fa-solid ${style.icon} text-${style.color}-400"></i><span class="text-xs font-bold text-white">${s.pct}%</span></div><p class="text-[10px] font-bold uppercase text-gray-400 truncate mb-1 group-hover:text-white transition">${s.name}</p><div class="w-full h-1 bg-gray-800 rounded-full overflow-hidden"><div class="h-full bg-${style.color}-500" style="width: ${s.pct}%"></div></div></div>`;
+                
+                // 1. On récupère le code RGB de la matière (ex: "239, 68, 68" pour Rouge)
+                const rgb = getMatiereColorValue(style.color);
+                
+                // 2. On crée une ombre portée (glow) dynamique
+                // On retire les espaces dans le RGB pour que la classe Tailwind fonctionne bien
+                const glowClass = `hover:shadow-[0_0_20px_rgba(${rgb.replace(/ /g, '')},0.4)]`;
+                const borderClass = `hover:border-${style.color}-500/50`;
+
+                return `
+                <div onclick="playSound('subjectClick'); filterByMatiere('${s.name}')" class="min-w-[140px] bg-[#111] border border-white/5 rounded-xl p-3 cursor-pointer transition-all duration-300 group ${glowClass} ${borderClass} hover:-translate-y-1">
+                    <div class="flex items-center justify-between mb-2">
+                        <i class="fa-solid ${style.icon} text-${style.color}-400"></i>
+                        <span class="text-xs font-bold text-white">${s.pct}%</span>
+                    </div>
+                    <p class="text-[10px] font-bold uppercase text-gray-400 truncate mb-1 group-hover:text-white transition">${s.name}</p>
+                    <div class="w-full h-1 bg-gray-800 rounded-full overflow-hidden">
+                        <div class="h-full bg-${style.color}-500" style="width: ${s.pct}%"></div>
+                    </div>
+                </div>`;
             }).join('');
 
             renderSuggestions();
@@ -2430,18 +2503,50 @@ function showCelebrationSuggestions() {
                 </div>`;
         }
         
-        function render() {
+function render() {
             const search = document.getElementById('searchInput').value.toLowerCase();
             const matiere = document.getElementById('matiereFilter').value;
             const status = currentStatusFilter; 
             
             const header = document.getElementById('subjectHeader');
+            const container = document.getElementById('subjectIconContainer');
+            const icon = document.getElementById('subjectIcon');
+            const title = document.getElementById('subjectTitle');
+            
+            // Toujours afficher le header maintenant
+            header.classList.remove('hidden');
+
+            // --- GESTION DU HEADER ---
             if(matiere !== 'all') {
+                // CAS 1 : UNE MATIÈRE EST SÉLECTIONNÉE
                 const style = matiereConfig[matiere] || defaultConfig;
-                header.classList.remove('hidden');
-                document.getElementById('subjectTitle').innerText = matiere;
-                document.getElementById('subjectIcon').className = `fa-solid ${style.icon} text-3xl text-${style.color}-400`;
-            } else { header.classList.add('hidden'); }
+                
+                title.innerText = matiere;
+                
+                // Récupération couleur RGB
+                const rgb = getMatiereColorValue(style.color);
+                
+                // Lueur colorée intense
+                container.style.boxShadow = `0 0 40px -10px rgba(${rgb}, 0.5), inset 0 0 20px rgba(${rgb}, 0.2)`;
+                container.style.borderColor = `rgba(${rgb}, 0.5)`;
+                container.style.backgroundColor = `rgba(${rgb}, 0.1)`; 
+
+                // Icône colorée
+                icon.className = `fa-solid ${style.icon} text-3xl text-${style.color}-400 drop-shadow-[0_0_15px_rgba(${rgb},0.8)]`;
+
+            } else { 
+                // CAS 2 : VUE GÉNÉRALE (TOUS LES ITEMS)
+                title.innerText = "Programme R2C";
+                
+                // Lueur blanche/grise neutre et élégante
+                container.style.boxShadow = `0 0 40px -10px rgba(255, 255, 255, 0.1), inset 0 0 20px rgba(255, 255, 255, 0.05)`;
+                container.style.borderColor = `rgba(255, 255, 255, 0.1)`;
+                container.style.backgroundColor = `rgba(255, 255, 255, 0.02)`;
+
+                // Icône livre générique
+                icon.className = `fa-solid fa-book-medical text-3xl animate-spectral`;
+            }
+            // ------------------------------------------------
 
             const filtered = courses.filter(c => {
                 const matchS = c.title.toLowerCase().includes(search) || c.item.toString().includes(search);
