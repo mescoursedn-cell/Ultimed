@@ -137,6 +137,16 @@
         input, textarea { background: rgba(30,30,30,0.5); border-color: #333; color: white; }
         input:focus, select:focus, textarea:focus { border-color: white; outline: none; }
         
+/* Cache les flèches (spinners) des inputs numériques */
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield; /* Pour Firefox */
+        }
+
         .hide-scrollbar::-webkit-scrollbar { display: none; } .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .circular-chart { display: block; margin: 0 auto; max-width: 80%; max-height: 250px; overflow: visible; }
         .circle-bg { fill: none; stroke: #222; stroke-width: 2.5; }
@@ -299,6 +309,41 @@
         .driver-popover-arrow-side-right.driver-popover-arrow { border-right-color: rgba(15, 15, 15, 0.9) !important; }
         .driver-popover-arrow-side-top.driver-popover-arrow { border-top-color: rgba(15, 15, 15, 0.9) !important; }
         .driver-popover-arrow-side-bottom.driver-popover-arrow { border-bottom-color: rgba(15, 15, 15, 0.9) !important; }
+
+/* --- CSS GLASSMORPHISM & LUEUR INTERNE --- */
+@keyframes softGlassPulse {
+    0%, 100% { 
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), inset 0 0 0 rgba(255, 255, 255, 0); 
+        border-color: rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.03);
+    }
+    50% { 
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2), inset 0 0 15px rgba(100, 200, 255, 0.15); 
+        border-color: rgba(255, 255, 255, 0.25);
+        background: rgba(255, 255, 255, 0.06);
+    }
+}
+
+.glass-btn {
+    /* Base Glassmorphism */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px; /* Arrondi comme vos boutons actuels */
+    
+    /* Animation */
+    animation: softGlassPulse 4s infinite ease-in-out;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.glass-btn:hover {
+    /* Effet au survol (plus intense) */
+    transform: translateY(-3px) scale(1.05);
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.5) !important;
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.4), inset 0 0 20px rgba(255, 255, 255, 0.2) !important;
+    animation: none; /* On stoppe la pulsation au survol pour fixer l'état actif */
+}
 
 /* --- AJOUT : Animation Lueur Multicolore --- */
 /* --- Animation "Spectre Complet" (Toutes les matières) --- */
@@ -469,9 +514,9 @@
                     </div>
                 </div>
 
-                <div class="hidden md:flex items-center gap-3 bg-yellow-500/10 backdrop-blur-md px-4 py-2 rounded-xl border border-yellow-500/20 shadow-[0_0_15px_rgba(234,179,8,0.05)] hover:bg-yellow-500/20 transition-all cursor-default">
+                <div class="hidden md:flex items-center gap-3 bg-yellow-500/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/5 shadow-[0_0_15px_rgba(234,179,8,0.05)] hover:bg-yellow-500/20 transition-all cursor-default">
                     <div class="flex flex-col items-end leading-none">
-                        <span class="text-[8px] text-yellow-600/80 font-bold uppercase tracking-widest mb-0.5">Jours Restants</span>
+                        <span class="text-[10px] text-yellow-600/80 font-bold uppercase tracking-widest mb-0.3">Jours Restants</span>
                     </div>
                     <div class="h-6 w-px bg-yellow-500/20"></div>
                     <div class="flex items-center gap-2">
@@ -480,41 +525,40 @@
                     </div>
                 </div>
 
-                <button onclick="resetView()" class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-green-400 hover:bg-green-500/10 transition-all shadow-sm group" title="Accueil (Tableau de bord)">
-                    <i class="fa-solid fa-house text-sm group-hover:scale-110 transition-transform"></i>
-                </button>
+                <button onclick="resetView()" class="w-10 h-10 glass-btn flex items-center justify-center text-gray-400 hover:text-green-400 transition-all shadow-lg group relative overflow-hidden" title="Accueil (Tableau de bord)">
+        <i class="fa-solid fa-house text-sm group-hover:scale-110 transition-transform relative z-10"></i>
+    </button>
 
-                <button onclick="toggleCalendarView()" class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-blue-400 hover:bg-blue-500/10 transition-all shadow-sm group" title="Calendrier">
-                    <i class="fa-regular fa-calendar text-sm group-hover:scale-110 transition-transform"></i>
-                </button>
+    <button onclick="toggleCalendarView()" class="w-10 h-10 glass-btn flex items-center justify-center text-gray-400 hover:text-blue-400 transition-all shadow-lg group relative overflow-hidden" title="Calendrier">
+        <i class="fa-regular fa-calendar text-sm group-hover:scale-110 transition-transform relative z-10"></i>
+    </button>
 
-                <div class="relative" id="userMenuDropdown">
-                    <button onclick="toggleUserMenu()" class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all shadow-md group" title="Menu Utilisateur">
-                        <i class="fa-solid fa-bars text-lg group-hover:scale-110 transition-transform"></i>
-                    </button>
+    <div class="relative" id="userMenuDropdown">
+        <button onclick="toggleUserMenu()" class="w-10 h-10 glass-btn flex items-center justify-center text-gray-400 hover:text-white transition-all shadow-lg group relative overflow-hidden" title="Menu Utilisateur">
+            <i class="fa-solid fa-bars text-lg group-hover:scale-110 transition-transform relative z-10"></i>
+            <i id="headerUserIcon" class="hidden absolute top-1 right-1 text-[8px] text-blue-400"></i>
+        </button>
 
-                    <div id="dropdownMenuBody" class="absolute right-0 top-full mt-3 w-64 bg-[#111]/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl transform origin-top-right transition-all duration-200 scale-95 opacity-0 invisible z-[100]">
-                        <div class="p-4 border-b border-white/5">
-                            <p class="text-white font-bold text-sm truncate" id="menuUserName">Docteur</p>
-                            <p class="text-xs text-gray-500 uppercase tracking-wider">Étudiant</p>
-                        </div>
-                        <div class="p-2 space-y-1">
-                            <button onclick="toggleCalendarView(); toggleUserMenu()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-gray-300 hover:text-white transition text-left group">
-                                <div class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition"><i class="fa-regular fa-calendar"></i></div>
-                                <div><div class="text-sm font-bold">Calendrier</div><div class="text-[10px] text-gray-500 group-hover:text-gray-400">Planning & Streak</div></div>
-                            </button>
-                            <button onclick="openGlobalSettings(); toggleUserMenu()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-gray-300 hover:text-white transition text-left group">
-                                <div class="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:bg-purple-500 group-hover:text-white transition"><i class="fa-solid fa-sliders"></i></div>
-                                <div><div class="text-sm font-bold">Paramètres</div><div class="text-[10px] text-gray-500 group-hover:text-gray-400">Compte & Données</div></div>
-                            </button>
-                        </div>
-                        <div class="p-2 border-t border-white/5">
-                            <button onclick="startTutorial(); toggleUserMenu()" class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-bold text-gray-500 hover:text-white hover:bg-white/5 transition"><i class="fa-solid fa-circle-question"></i> Aide / Tutoriel</button>
-                        </div>
-                    </div>
-                </div>
-
+        <div id="dropdownMenuBody" class="absolute right-0 top-full mt-3 w-64 bg-[#111]/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl transform origin-top-right transition-all duration-200 scale-95 opacity-0 invisible z-[100]">
+            <div class="p-4 border-b border-white/5">
+                <p class="text-white font-bold text-sm truncate" id="menuUserName">Docteur</p>
+                <p class="text-xs text-gray-500 uppercase tracking-wider">Étudiant</p>
             </div>
+            <div class="p-2 space-y-1">
+                <button onclick="toggleCalendarView(); toggleUserMenu()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-gray-300 hover:text-white transition text-left group">
+                    <div class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition"><i class="fa-regular fa-calendar"></i></div>
+                    <div><div class="text-sm font-bold">Calendrier</div><div class="text-[10px] text-gray-500 group-hover:text-gray-400">Planning & Streak</div></div>
+                </button>
+                <button onclick="openGlobalSettings(); toggleUserMenu()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-gray-300 hover:text-white transition text-left group">
+                    <div class="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:bg-purple-500 group-hover:text-white transition"><i class="fa-solid fa-sliders"></i></div>
+                    <div><div class="text-sm font-bold">Paramètres</div><div class="text-[10px] text-gray-500 group-hover:text-gray-400">Compte & Données</div></div>
+                </button>
+            </div>
+            <div class="p-2 border-t border-white/5">
+                <button onclick="startTutorial(); toggleUserMenu()" class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-bold text-gray-500 hover:text-white hover:bg-white/5 transition"><i class="fa-solid fa-circle-question"></i> Aide / Tutoriel</button>
+            </div>
+        </div>
+    </div>
         </div>
     </header>
 
@@ -526,35 +570,66 @@
         <h2 class="text-gray-500 text-xs font-bold uppercase tracking-widest mb-4 pl-2">Tableau de bord</h2>
 
         <section class="mb-12 grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in-up" style="animation-delay: 0.1s;">
-            <div class="card-panel rounded-3xl p-6 flex flex-col items-center justify-center relative overflow-hidden shadow-2xl order-1 min-h-[400px]">
-                <div id="timerGlow" class="absolute w-40 h-40 bg-blue-600/10 rounded-full blur-[70px] transition-all duration-1000 opacity-0 scale-50 pointer-events-none"></div>
-                <div id="timerFlame" class="hidden absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-full bg-yellow-500/5 blur-xl z-0"></div>
-                <div class="flex-grow flex items-end justify-center pb-6 w-full">
-<div id="dinoWrapper" class="relative transition-transform duration-300 cursor-pointer group" onclick="triggerDinoJump()">
+
+            <div class="card-panel rounded-3xl p-6 flex flex-col items-center justify-center relative shadow-2xl order-1 min-h-[400px]">
+    <div class="absolute inset-0 overflow-hidden rounded-3xl pointer-events-none">
+         <div id="timerGlow" class="absolute w-40 h-40 bg-blue-600/10 rounded-full blur-[70px] transition-all duration-1000 opacity-0 scale-50"></div>
+         <div id="timerFlame" class="hidden absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-full bg-yellow-500/5 blur-xl z-0"></div>
+    </div>
     
-    <div id="dinoSpeechBubble" class="absolute bottom-full mb-7 left-1/2 -translate-x-1/2 w-64 p-4 rounded-2xl bg-slate-900/80 backdrop-blur-xl border border-cyan-500/30 shadow-[0_0_30px_-5px_rgba(6,182,212,0.2),inset_0_0_20px_rgba(6,182,212,0.05)] hidden opacity-0 transition-all duration-300 z-30">
-        
-        <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-slate-900/80 backdrop-blur-xl border-r border-b border-cyan-500/30 rotate-45"></div>
-        
-        <h4 class="text-cyan-400 font-display font-black text-xs uppercase tracking-widest mb-1 drop-shadow-md flex items-center gap-2">
-            <i class="fa-solid fa-star"></i> Magic Creature
-        </h4>
-        <p id="dinoSpeechText" class="text-cyan-50 text-sm font-medium leading-relaxed drop-shadow-sm">Prêt à majorer ?</p>
+    <div class="absolute top-4 right-4 z-30 flex flex-col items-end">
+        <label class="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-1">Objectif (H)</label>
+        <div class="flex items-center bg-black/40 border border-white/10 rounded-lg p-1 px-2 hover:border-blue-500/50 transition group-focus-within:border-blue-500 w-24">
+            <input type="text" id="timerGoalInput" placeholder="1.5 ou 1h30" onchange="parseSmartGoal(this.value)" class="w-full bg-transparent text-right text-sm font-bold text-white focus:outline-none placeholder-gray-600">
+        </div>
     </div>
 
-    <i class="fa-solid fa-dragon text-6xl text-gray-500 transition-colors duration-300" id="dinoIcon"></i>
-    <div id="dinoZzz" class="absolute -top-6 -right-6 text-lg font-bold text-gray-600 animate-pulse">Zzz</div>
-</div>
-                </div>
-                <div class="flex flex-col items-center z-10 mb-4">
-                    <div id="timerDisplay" class="text-6xl font-mono font-black text-white tracking-widest transition-all duration-500 tabular-nums drop-shadow-lg">00:00</div>
-                    <div id="timerMessage" class="h-5 mt-2 text-xs font-bold text-blue-400 opacity-0 transition-opacity uppercase tracking-wider"></div>
-                </div>
-                <div class="flex items-center gap-6 mt-auto">
-                    <button onclick="resetTimer()" class="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-gray-500 hover:text-white hover:bg-white/5 transition group"><i class="fa-solid fa-rotate-right text-xs group-hover:rotate-180 transition-transform duration-500"></i></button>
-                    <button onclick="toggleTimer()" id="timerBtn" class="w-14 h-14 rounded-full bg-white text-black flex items-center justify-center shadow-lg hover:scale-105 transition-all duration-300 group relative overflow-visible active:scale-95"><i class="fa-solid fa-play text-xl ml-0.5 group-hover:scale-110 transition" id="timerIcon"></i><div id="shockwaveContainer" class="absolute inset-0 pointer-events-none"></div></button>
-                </div>
+    <div class="flex-grow flex items-end justify-center pb-6 w-full relative z-20">
+        <div id="dinoWrapper" class="relative transition-transform duration-300 cursor-pointer group" onclick="triggerDinoJump()">
+            
+            <div id="dinoSpeechBubble" class="absolute bottom-full mb-7 left-1/2 -translate-x-1/2 w-64 p-4 rounded-2xl bg-slate-900/95 backdrop-blur-xl border border-cyan-500/30 shadow-[0_0_30px_-5px_rgba(6,182,212,0.4)] hidden opacity-0 transition-all duration-300 z-[9999]">
+                <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-slate-900/95 backdrop-blur-xl border-r border-b border-cyan-500/30 rotate-45"></div>
+                <h4 class="text-cyan-400 font-display font-black text-xs uppercase tracking-widest mb-1 drop-shadow-md flex items-center gap-2">
+                    <i class="fa-solid fa-star"></i> Magic Creature
+                </h4>
+                <p id="dinoSpeechText" class="text-cyan-50 text-sm font-medium leading-relaxed drop-shadow-sm">Prêt à majorer ?</p>
             </div>
+
+            <i class="fa-solid fa-dragon text-6xl text-gray-500 transition-colors duration-300 relative z-10" id="dinoIcon"></i>
+            <div id="dinoZzz" class="absolute -top-6 -right-6 text-lg font-bold text-gray-600 animate-pulse z-10">Zzz</div>
+        </div>
+    </div>
+
+    <div class="flex flex-col items-center z-10 mb-6">
+        <div id="timerDisplay" class="text-6xl font-mono font-black text-white tracking-widest transition-all duration-500 tabular-nums drop-shadow-lg">00:00</div>
+        
+        <div id="timerProgressBarContainer" class="w-32 h-1 bg-gray-800 rounded-full mt-4 overflow-hidden hidden transition-all">
+            <div id="timerProgressBar" class="h-full bg-blue-500 w-0 shadow-[0_0_10px_rgba(59,130,246,0.8)] transition-all duration-1000"></div>
+        </div>
+        <div id="timerMessage" class="h-5 mt-1 text-xs font-bold text-blue-400 opacity-0 transition-opacity uppercase tracking-wider"></div>
+    </div>
+
+    <div class="flex items-center gap-6 mt-auto relative z-20">
+        <button onclick="resetTimer()" class="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-gray-500 hover:text-white hover:bg-white/5 transition group" title="Réinitialiser">
+            <i class="fa-solid fa-rotate-right text-xs group-hover:rotate-180 transition-transform duration-500"></i>
+        </button>
+        
+        <div class="relative flex items-center justify-center">
+            <svg class="w-16 h-16 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-90 pointer-events-none">
+                <circle cx="32" cy="32" r="30" stroke="rgba(255,255,255,0.1)" stroke-width="2" fill="none" />
+                <circle id="playBtnProgress" cx="32" cy="32" r="30" stroke="#3b82f6" stroke-width="2" fill="none" stroke-dasharray="188" stroke-dashoffset="188" class="transition-all duration-1000" />
+            </svg>
+            <button onclick="toggleTimer()" id="timerBtn" class="w-14 h-14 rounded-full bg-white text-black flex items-center justify-center shadow-lg hover:scale-105 transition-all duration-300 group relative overflow-hidden active:scale-95 z-10">
+                <i class="fa-solid fa-play text-xl ml-0.5 group-hover:scale-110 transition" id="timerIcon"></i>
+                <div id="shockwaveContainer" class="absolute inset-0 pointer-events-none"></div>
+            </button>
+        </div>
+
+        <button onclick="finishSession()" id="finishBtn" class="w-10 h-10 rounded-full border border-green-500/30 text-green-500 hover:bg-green-500 hover:text-white flex items-center justify-center transition opacity-30 cursor-not-allowed transform scale-90" disabled title="Terminer la session">
+            <i class="fa-solid fa-flag-checkered text-xs"></i>
+        </button>
+    </div>
+</div>
 
             <div class="card-panel rounded-3xl p-6 flex flex-col shadow-2xl order-2 relative z-20 min-h-[400px]">
                 <div class="flex justify-between items-center mb-4 border-b border-white/5 pb-4">
@@ -1228,6 +1303,7 @@
         <i id="subjectBurstIcon" class="relative z-10 text-[50vmin] opacity-0 transform transition-all"></i>
 
     <script>
+
         /* ==========================================
             ultimed Ultimate Cockpit - Logic Script 
             ==========================================
@@ -1255,7 +1331,7 @@
 	var userItemErrors = {};
 	var userXPClaimed = {};
 
-	// --- CONFIGURATION DES RÉCOMPENSES (NIVEAUX) ---
+// --- CONFIGURATION DES RÉCOMPENSES (NIVEAUX) ---
 	const levelRewards = {
     2: 'fa-cat',      // Chat au niveau 2
     5: 'fa-dog',      // Chien au niveau 5
@@ -1268,7 +1344,7 @@
     50: 'fa-dove'     // Colombe au niveau 50 (Légendaire)
 };
 
-        // --- MOTIVATIONAL QUOTES (POUR LES MILESTONES DU TIMER) ---
+// --- MOTIVATIONAL QUOTES (POUR LES MILESTONES DU TIMER) ---
         const motivationalQuotes = [
             "La douleur est temporaire, la fierté est éternelle.",
             "Chaque minute compte.",
@@ -1286,9 +1362,9 @@
         ];
 
 // --- SYSTEME SONORE ---
-const audioSystem = {
-    enabled: true,
-    sounds: {
+	const audioSystem = {
+   	 enabled: true,
+   	 sounds: {
         success: new Audio('https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3'),
         click: new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3'),
         levelUp: new Audio('https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3'),
@@ -2315,7 +2391,67 @@ function updateCountdownDisplay(dateStr) {
         }
 
 // --- TIMER ANIMATION & LOGIQUE ---
+
+let timerTargetSeconds = 0;
+
+/* --- FONCTION : DÉFINIR L'OBJECTIF --- */
+function parseSmartGoal(value) {
+    let seconds = 0;
+    let text = value.toLowerCase().trim();
+
+    if (!text) {
+        timerTargetSeconds = 0;
+        updateTimerUI(0);
+        return;
+    }
+
+    // Cas 1 : Format "1h30" ou "1h"
+    if (text.includes('h')) {
+        const parts = text.split('h');
+        const h = parseFloat(parts[0]) || 0;
+        const m = parseFloat(parts[1]) || 0;
+        seconds = (h * 3600) + (m * 60);
+    } 
+    // Cas 2 : Format "90m" ou "90min"
+    else if (text.includes('m')) {
+        const m = parseFloat(text) || 0;
+        seconds = m * 60;
+    }
+    // Cas 3 : Nombre décimal simple (ex: "1.5" = 1h30)
+    else {
+        const h = parseFloat(text) || 0;
+        seconds = h * 3600;
+    }
+
+    timerTargetSeconds = seconds;
+    
+    // Mise à jour de l'interface (Barre + Texte)
+    updateTimerUI(timerTargetSeconds);
+}
+
+function updateTimerUI(targetSecs) {
+    const barContainer = document.getElementById('timerProgressBarContainer');
+    const msg = document.getElementById('timerMessage');
+
+    if (targetSecs > 0) {
+        barContainer.classList.remove('hidden');
+        // Conversion inverse pour affichage propre (ex: 1h 30min)
+        const h = Math.floor(targetSecs / 3600);
+        const m = Math.floor((targetSecs % 3600) / 60);
+        let label = "Objectif : ";
+        if (h > 0) label += `${h}h `;
+        if (m > 0) label += `${m}min`;
         
+        msg.innerText = label;
+        msg.style.opacity = '1';
+        if (!isTimerRunning) dinoSpeak(`Cible verrouillée : ${label}.`, 'info');
+    } else {
+        barContainer.classList.add('hidden');
+        msg.style.opacity = '0';
+    }
+    updateTimerDisplay();
+}
+
 function triggerChronoAnimation() {
             const overlay = document.getElementById('chronoStartOverlay');
             if(!overlay) return;
@@ -2468,37 +2604,150 @@ playSound('click');
         }
 
         function resetTimer() {
-playSound('click');
-             clearInterval(timerInterval); isTimerRunning = false; seconds = 0; updateTimerDisplay();
-             const btn = document.getElementById('timerBtn');
-             const icon = document.getElementById('timerIcon');
-             const glow = document.getElementById('timerGlow');
-             const dinoIcon = document.getElementById('dinoIcon');
-             const dinoZzz = document.getElementById('dinoZzz');
-             icon.classList.remove('fa-pause'); icon.classList.add('fa-play');
-             btn.classList.remove('animate-button-pulse');
-             glow.classList.remove('scale-100', 'opacity-100'); glow.classList.add('scale-50', 'opacity-0');
-             glow.style = ''; 
-             document.getElementById('timerDisplay').classList.remove('timer-active');
-             
-             dinoIcon.className = `fa-solid ${userAvatar} text-6xl text-gray-500 transition-colors duration-300`;
-             dinoZzz.classList.remove('hidden');
-        }
+     playSound('click');
+     clearInterval(timerInterval); 
+     isTimerRunning = false; 
+     seconds = 0; 
+
+     updateTimerDisplay(); 
+
+     const btn = document.getElementById('timerBtn');
+     const icon = document.getElementById('timerIcon');
+     const glow = document.getElementById('timerGlow');
+     const dinoIcon = document.getElementById('dinoIcon');
+     const dinoZzz = document.getElementById('dinoZzz');
+     const display = document.getElementById('timerDisplay');
+
+     icon.classList.remove('fa-pause'); icon.classList.add('fa-play');
+     btn.classList.remove('animate-button-pulse');
+     glow.classList.remove('scale-100', 'opacity-100'); glow.classList.add('scale-50', 'opacity-0');
+     glow.style = ''; 
+     display.classList.remove('timer-active', 'text-green-400');
+     
+     dinoIcon.className = `fa-solid ${userAvatar} text-6xl text-gray-500 transition-colors duration-300`;
+     dinoZzz.classList.remove('hidden');
+}
+
 
         function updateTimerDisplay() {
-            const hrs = Math.floor(seconds / 3600).toString().padStart(2, '0');
-            const mins = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
-            const secs = (seconds % 60).toString().padStart(2, '0');
-            
-            if (seconds >= 3600) {
-                document.getElementById('timerDisplay').innerText = `${hrs}:${mins}:${secs}`;
-                document.getElementById('timerDisplay').classList.replace('text-6xl', 'text-5xl');
-            } else {
-                document.getElementById('timerDisplay').innerText = `${mins}:${secs}`;
-                document.getElementById('timerDisplay').classList.replace('text-5xl', 'text-6xl');
-            }
+    const hrs = Math.floor(seconds / 3600).toString().padStart(2, '0');
+    const mins = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+    const secs = (seconds % 60).toString().padStart(2, '0');
+    
+    // Affichage Numérique
+    const display = document.getElementById('timerDisplay');
+    if (seconds >= 3600) {
+        display.innerText = `${hrs}:${mins}:${secs}`;
+        display.classList.replace('text-6xl', 'text-5xl');
+    } else {
+        display.innerText = `${mins}:${secs}`;
+        display.classList.replace('text-5xl', 'text-6xl');
+    }
+
+    // --- LOGIQUE BOUTON FINIR (CLIGNOTE APRÈS 1 MIN) ---
+    const finishBtn = document.getElementById('finishBtn');
+    
+    if (seconds >= 60) { // Seulement après 1 minute !
+        finishBtn.disabled = false;
+        finishBtn.classList.remove('opacity-30', 'cursor-not-allowed', 'scale-90');
+        // Ajout de l'animation de clignotement
+        finishBtn.classList.add('animate-pulse-glow'); 
+    } else {
+        finishBtn.disabled = true;
+        finishBtn.classList.add('opacity-30', 'cursor-not-allowed', 'scale-90');
+        // Retrait de l'animation
+        finishBtn.classList.remove('animate-pulse-glow');
+    }
+    // ----------------------------------------------------
+
+    // Barre de progression & Cercle
+    const progressBar = document.getElementById('timerProgressBar');
+    const playCircle = document.getElementById('playBtnProgress');
+    
+    if (timerTargetSeconds > 0) {
+        const pct = Math.min((seconds / timerTargetSeconds) * 100, 100);
+        progressBar.style.width = `${pct}%`;
+        const offset = 188 - (188 * pct) / 100;
+        playCircle.style.strokeDashoffset = offset;
+
+        if (pct >= 100) {
+            progressBar.classList.replace('bg-blue-500', 'bg-green-500');
+            progressBar.classList.add('shadow-[0_0_15px_rgba(34,197,94,0.8)]');
+            playCircle.style.stroke = '#22c55e';
+            display.classList.add('text-green-400', 'drop-shadow-[0_0_10px_rgba(34,197,94,0.8)]');
+        } else {
+             progressBar.classList.replace('bg-green-500', 'bg-blue-500');
+             progressBar.classList.remove('shadow-[0_0_15px_rgba(34,197,94,0.8)]');
+             playCircle.style.stroke = '#3b82f6';
+             display.classList.remove('text-green-400', 'drop-shadow-[0_0_10px_rgba(34,197,94,0.8)]');
         }
-        
+    } else {
+        playCircle.style.strokeDashoffset = 188;
+    }
+}
+
+function finishSession() {
+    if (seconds < 60) {
+        showToast("Session trop courte (< 1 min).", "info");
+        return;
+    }
+
+    if (isTimerRunning) toggleTimer(); 
+
+    const minutes = Math.floor(seconds / 60);
+    // XP basée sur le temps (5 XP / min)
+    let xpGain = minutes * 5; 
+    let bonusMsg = "";
+
+    // Bonus si l'objectif est atteint
+    if (timerTargetSeconds > 0 && seconds >= timerTargetSeconds) {
+        const bonus = 100; 
+        xpGain += bonus;
+        bonusMsg = "Objectif atteint (+100 XP)";
+        playSound('mastery');
+    } else {
+        playSound('success');
+    }
+
+    addXP(xpGain, `Session ${minutes} min`);
+    showSessionReport(minutes, xpGain, bonusMsg);
+    resetTimer();
+}
+
+function showSessionReport(minutes, xp, bonus) {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast border-l-4 border-blue-500 flex flex-col gap-1 items-start py-4`;
+    toast.style.background = "linear-gradient(135deg, rgba(15,23,42,0.95), rgba(30,58,138,0.9))";
+    
+    toast.innerHTML = `
+        <div class="flex items-center gap-3 w-full border-b border-white/10 pb-2 mb-1">
+            <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400">
+                <i class="fa-solid fa-stopwatch"></i>
+            </div>
+            <div>
+                <h4 class="text-white font-bold text-sm uppercase tracking-wide">Session Terminée</h4>
+                <span class="text-blue-300 text-xs font-mono">${new Date().toLocaleTimeString()}</span>
+            </div>
+        </div>
+        <div class="w-full space-y-1 pl-11">
+            <div class="flex justify-between text-gray-300 text-sm">
+                <span>Durée :</span> <span class="text-white font-bold">${minutes} min</span>
+            </div>
+            <div class="flex justify-between text-gray-300 text-sm">
+                <span>XP Gagnée :</span> <span class="text-yellow-400 font-bold">+${xp} XP</span>
+            </div>
+            ${bonus ? `<div class="text-xs text-green-400 font-bold mt-1"><i class="fa-solid fa-check"></i> ${bonus}</div>` : ''}
+        </div>
+    `;
+    
+    container.appendChild(toast);
+    setTimeout(() => {
+        toast.style.animation = 'toastSlide 0.3s ease-in reverse forwards';
+        setTimeout(() => toast.remove(), 300);
+    }, 6000); // Reste 6 secondes
+}
+
         function checkTimerMilestones() {
             const milestones = [3600, 7200, 14400, 21600];
 
