@@ -267,6 +267,7 @@
             color: #67e8f9; /* Cyan-300 */
             filter: drop-shadow(0 0 20px rgba(34, 211, 238, 0.6));
         }
+
 /* --- CUSTOM DRIVER.JS THEME (Glassmorphism) --- */
         
         /* La bulle principale */
@@ -332,6 +333,8 @@
         .driver-popover-arrow-side-top.driver-popover-arrow { border-top-color: rgba(15, 15, 15, 0.9) !important; }
         .driver-popover-arrow-side-bottom.driver-popover-arrow { border-bottom-color: rgba(15, 15, 15, 0.9) !important; }
 
+
+
 /* --- CSS GLASSMORPHISM & LUEUR INTERNE --- */
 @keyframes softGlassPulse {
     0%, 100% { 
@@ -365,6 +368,33 @@
     border-color: rgba(255, 255, 255, 0.5) !important;
     box-shadow: 0 0 20px rgba(59, 130, 246, 0.4), inset 0 0 20px rgba(255, 255, 255, 0.2) !important;
     animation: none; /* On stoppe la pulsation au survol pour fixer l'état actif */
+}
+
+/* Style personnalisé pour le Slider d'objectif */
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: #3b82f6; /* Bleu */
+    border: 2px solid #1e293b; /* Bordure sombre */
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+    margin-top: -6px; /* Centrer sur la barre */
+    transition: transform 0.1s;
+}
+
+input[type=range]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.8);
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 4px;
+    cursor: pointer;
+    background: #334155;
+    border-radius: 2px;
 }
 
 /* --- AJOUT : Animation Lueur Multicolore --- */
@@ -523,29 +553,45 @@
 
             <div class="flex items-center gap-4 lg:gap-6">
                 
-                <div class="hidden xl:flex flex-col justify-center w-56 group cursor-help" title="Progression">
-                    <div class="flex justify-between w-full text-[9px] font-bold uppercase mb-1.5 px-1">
-                        <span class="text-blue-400 drop-shadow-[0_0_5px_rgba(59,130,246,0.8)]">Niv. <span id="lvlDisplay">0</span></span>
-                        <span class="text-gray-400"><span id="xpDisplay">0</span> XP</span>
-                    </div>
-                    <div class="w-full h-2 bg-gray-900/50 rounded-full overflow-hidden border border-white/10 shadow-inner relative backdrop-blur-sm">
-                        <div class="absolute inset-0 bg-blue-500/10 animate-pulse"></div>
-                        <div id="xpBar" class="h-full bg-gradient-to-r from-blue-600 via-cyan-400 to-white shadow-[0_0_15px_rgba(34,211,238,0.8)] relative" style="width: 0%">
-                            <div class="absolute right-0 top-0 h-full w-1 bg-white blur-[1px]"></div>
-                        </div>
-                    </div>
-                </div>
+   <div class="flex items-center gap-3">
+    
+    <div class="hidden xl:flex items-center gap-2.5 bg-blue-900/20 backdrop-blur-md px-3 py-1.5 rounded-lg border border-blue-500/10 shadow-lg hover:border-blue-500/30 transition-all cursor-help group h-10">
+        
+        <div class="flex flex-col items-end justify-center leading-none">
+            <span class="text-[8px] text-blue-300/60 font-bold uppercase tracking-wider">Niv.</span>
+            <span id="lvlDisplay" class="text-blue-100 font-display font-black text-lg leading-none group-hover:text-white transition">0</span>
+        </div>
 
-                <div class="hidden md:flex items-center gap-3 bg-yellow-500/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/5 shadow-[0_0_15px_rgba(234,179,8,0.05)] hover:bg-yellow-500/20 transition-all cursor-default">
-                    <div class="flex flex-col items-end leading-none">
-                        <span class="text-[10px] text-yellow-600/80 font-bold uppercase tracking-widest mb-0.3">Jours Restants</span>
-                    </div>
-                    <div class="h-6 w-px bg-yellow-500/20"></div>
-                    <div class="flex items-center gap-2">
-                        <i class="fa-solid fa-hourglass-half text-yellow-400 text-sm animate-pulse"></i>
-                        <span id="countdownDisplay" class="text-yellow-200 font-mono font-bold text-lg leading-none tracking-wider drop-shadow-sm">---</span>
-                    </div>
-                </div>
+        <div class="h-5 w-px bg-blue-500/20 mx-1"></div>
+
+        <div class="flex flex-col justify-center w-24">
+            <div class="flex justify-between items-center mb-1">
+                <i class="fa-solid fa-bolt text-[8px] text-blue-500 group-hover:text-blue-400 transition"></i>
+                <span class="text-[8px] font-mono font-bold text-blue-300"><span id="xpDisplay">0</span> XP</span>
+            </div>
+            
+            <div class="w-full h-1 bg-blue-900/50 rounded-full overflow-hidden border border-white/5">
+                <div id="xpBar" class="h-full bg-gradient-to-r from-blue-400 to-indigo-400 shadow-[0_0_5px_rgba(96,165,250,0.8)] relative transition-all duration-500" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="hidden md:flex items-center gap-2.5 bg-yellow-900/10 backdrop-blur-md px-3 py-1.5 rounded-lg border border-yellow-500/10 shadow-lg hover:border-yellow-500/30 transition-all cursor-default group h-10">
+        
+        <div class="flex flex-col items-end justify-center leading-none">
+            <span class="text-[8px] text-yellow-500/60 font-bold uppercase tracking-wider mb-0.5">Jours</span>
+            <span class="text-[8px] text-gray-500 font-bold uppercase tracking-wider">Restants</span>
+        </div>
+        
+        <div class="h-5 w-px bg-yellow-500/20 mx-1"></div>
+
+        <div class="flex items-center gap-2">
+            <span id="countdownDisplay" class="text-yellow-100 font-display font-black text-lg leading-none tracking-wide group-hover:text-white transition">---</span>
+            <i class="fa-solid fa-hourglass-half text-yellow-500/80 text-xs group-hover:animate-spin-slow"></i>
+        </div>
+    </div>
+
+</div>
 
                 <button onclick="resetView()" class="w-10 h-10 glass-btn flex items-center justify-center text-gray-400 hover:text-green-400 transition-all shadow-lg group relative overflow-hidden" title="Accueil (Tableau de bord)">
         <i class="fa-solid fa-house text-sm group-hover:scale-110 transition-transform relative z-10"></i>
@@ -556,36 +602,32 @@
     </button>
 
     <div class="relative" id="userMenuDropdown">
-        <button onclick="toggleUserMenu()" class="w-10 h-10 glass-btn flex items-center justify-center text-gray-400 hover:text-white transition-all shadow-lg group relative overflow-hidden" title="Menu Utilisateur">
-            <i class="fa-solid fa-bars text-lg group-hover:scale-110 transition-transform relative z-10"></i>
-            <i id="headerUserIcon" class="hidden absolute top-1 right-1 text-[8px] text-blue-400"></i>
-        </button>
+    <button onclick="toggleUserMenu()" class="w-10 h-10 glass-btn flex items-center justify-center text-gray-400 hover:text-white transition-all shadow-lg group relative overflow-hidden" title="Menu Utilisateur">
+        <i class="fa-solid fa-bars text-lg group-hover:scale-110 transition-transform"></i>
+    </button>
 
-        <div id="dropdownMenuBody" class="absolute right-0 top-full mt-3 w-64 bg-[#111]/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl transform origin-top-right transition-all duration-200 scale-95 opacity-0 invisible z-[100]">
-    <div class="p-4 border-b border-white/5">
-        <p class="text-white font-bold text-sm truncate" id="menuUserName">Docteur</p>
-        <p class="text-xs text-gray-500 uppercase tracking-wider">Étudiant</p>
-    </div>
-
-    <div class="p-2 space-y-1">
-        <button onclick="toggleCalendarView(); toggleUserMenu()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-gray-300 hover:text-white transition text-left group">
-            <div class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition"><i class="fa-regular fa-calendar"></i></div>
-            <div><div class="text-sm font-bold">Calendrier</div><div class="text-[10px] text-gray-500 group-hover:text-gray-400">Planning & Streak</div></div>
-        </button>
+    <div id="dropdownMenuBody" class="absolute right-0 top-full mt-3 w-64 bg-[#111]/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl transform origin-top-right transition-all duration-200 scale-95 opacity-0 invisible z-[100]">
         
-        <button onclick="openGlobalSettings(); toggleUserMenu()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-gray-300 hover:text-white transition text-left group">
-            <div class="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:bg-purple-500 group-hover:text-white transition"><i class="fa-solid fa-sliders"></i></div>
-            <div><div class="text-sm font-bold">Paramètres</div><div class="text-[10px] text-gray-500 group-hover:text-gray-400">Compte & Données</div></div>
-        </button>
-        
-        <button onclick="handleLogout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-500/10 text-gray-300 hover:text-red-400 transition text-left group">
-            <div class="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center text-red-500 group-hover:bg-red-500 group-hover:text-white transition"><i class="fa-solid fa-power-off"></i></div>
-            <div><div class="text-sm font-bold">Déconnexion</div><div class="text-[10px] text-gray-500 group-hover:text-red-400/70">Fermer la session</div></div>
-        </button>
-    </div>
+        <div class="p-4 border-b border-white/5">
+            <p class="text-white font-bold text-sm truncate" id="menuUserName">Docteur</p>
+            <p class="text-xs text-gray-500 uppercase tracking-wider">Étudiant</p>
+        </div>
 
-    <div class="p-2 border-t border-white/5">
-        <button onclick="startTutorial(); toggleUserMenu()" class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-bold text-gray-500 hover:text-white hover:bg-white/5 transition"><i class="fa-solid fa-circle-question"></i> Aide / Tutoriel</button>
+        <div class="p-2 space-y-1">
+            <button onclick="openGlobalSettings(); toggleUserMenu()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-gray-300 hover:text-white transition text-left group">
+                <div class="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:bg-purple-500 group-hover:text-white transition"><i class="fa-solid fa-sliders"></i></div>
+                <div><div class="text-sm font-bold">Paramètres</div><div class="text-[10px] text-gray-500 group-hover:text-gray-400">Compte & Données</div></div>
+            </button>
+            
+            <button onclick="handleLogout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-500/10 text-gray-300 hover:text-red-400 transition text-left group">
+                <div class="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center text-red-500 group-hover:bg-red-500 group-hover:text-white transition"><i class="fa-solid fa-power-off"></i></div>
+                <div><div class="text-sm font-bold">Déconnexion</div><div class="text-[10px] text-gray-500 group-hover:text-red-400/70">Fermer la session</div></div>
+            </button>
+        </div>
+
+        <div class="p-2 border-t border-white/5">
+            <button onclick="startTutorial(); toggleUserMenu()" class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-bold text-gray-500 hover:text-white hover:bg-white/5 transition"><i class="fa-solid fa-circle-question"></i> Aide / Tutoriel</button>
+        </div>
     </div>
 </div>
 
@@ -607,11 +649,58 @@
     </div>
     
     <div class="absolute top-4 right-4 z-30 flex flex-col items-end">
-        <label class="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-1">Objectif (H)</label>
-        <div class="flex items-center bg-black/40 border border-white/10 rounded-lg p-1 px-2 hover:border-blue-500/50 transition group-focus-within:border-blue-500 w-24">
-            <input type="text" id="timerGoalInput" placeholder="1.5 ou 1h30" onchange="parseSmartGoal(this.value)" class="w-full bg-transparent text-right text-sm font-bold text-white focus:outline-none placeholder-gray-600">
+    <button onclick="toggleGoalPanel()" id="goalDisplayBtn" class="group relative flex items-center gap-2 bg-black/40 border border-white/10 rounded-xl px-3 py-1.5 hover:border-blue-500/50 hover:bg-blue-500/10 transition-all duration-300">
+        <div class="flex flex-col items-end">
+            <span class="text-[9px] font-bold text-gray-500 uppercase tracking-widest group-hover:text-blue-400 transition">Cible</span>
+            <span id="goalValueDisplay" class="text-sm font-mono font-bold text-white">Libre</span>
         </div>
+        <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-gray-400 group-hover:text-blue-400 group-hover:scale-110 transition">
+            <i class="fa-solid fa-crosshairs"></i>
+        </div>
+    </button>
+
+    <div id="goalControlPanel" class="absolute top-full right-0 mt-2 w-72 bg-[#151515] border border-white/10 rounded-2xl p-4 shadow-2xl backdrop-blur-xl opacity-0 invisible transform -translate-y-2 transition-all duration-300 origin-top-right z-50">
+        
+        <div class="flex justify-between items-center mb-4">
+            <h4 class="text-xs font-bold text-white uppercase tracking-wider">Définir Durée (Minutes)</h4>
+            <button onclick="toggleGoalPanel()" class="text-gray-500 hover:text-white"><i class="fa-solid fa-times"></i></button>
+        </div>
+
+        <div class="mb-5 px-1">
+            <div class="flex items-center gap-3 mb-2">
+                <input type="range" id="goalSlider" min="0" max="720" step="15" value="0" 
+                       oninput="updateGoalFromInput(this.value)" 
+                       class="flex-grow h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500 hover:accent-blue-400 transition-all">
+                
+                <input type="number" id="goalInputManual" placeholder="Min" 
+                       oninput="updateGoalFromInput(this.value)"
+                       class="w-16 bg-[#222] border border-white/10 rounded-lg py-1 px-2 text-right text-white text-xs font-mono font-bold focus:border-blue-500 focus:outline-none">
+            </div>
+
+            <div class="flex justify-between text-[9px] text-gray-500 font-mono">
+                <span>0</span>
+                <span>6h</span>
+                <span>12h+</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2">
+            <button onclick="setPresetGoal(25)" class="py-2 rounded-lg border border-white/5 bg-white/5 hover:bg-blue-500/20 hover:border-blue-500/30 text-xs font-bold text-gray-300 hover:text-white transition">
+                25m <span class="block text-[8px] opacity-50 font-normal">Pomodoro</span>
+            </button>
+            <button onclick="setPresetGoal(60)" class="py-2 rounded-lg border border-white/5 bg-white/5 hover:bg-blue-500/20 hover:border-blue-500/30 text-xs font-bold text-gray-300 hover:text-white transition">
+                1h <span class="block text-[8px] opacity-50 font-normal">Session</span>
+            </button>
+            <button onclick="setPresetGoal(120)" class="py-2 rounded-lg border border-white/5 bg-white/5 hover:bg-purple-500/20 hover:border-purple-500/30 text-xs font-bold text-gray-300 hover:text-white transition">
+                2h <span class="block text-[8px] opacity-50 font-normal">Focus</span>
+            </button>
+        </div>
+        
+        <button onclick="setPresetGoal(0)" class="w-full mt-3 py-1.5 text-[10px] text-gray-500 hover:text-red-400 transition border-t border-white/5">
+            Désactiver l'objectif
+        </button>
     </div>
+</div>
 
     <div class="flex-grow flex items-end justify-center pb-6 w-full relative z-20">
         <div id="dinoWrapper" class="relative transition-transform duration-300 cursor-pointer group" onclick="triggerDinoJump()">
@@ -768,18 +857,18 @@
         </div>
 
         <div class="sticky top-24 z-40 mb-8" id="filterBar">
-            <div class="bg-[#151515]/90 backdrop-blur-md p-1.5 rounded-full border border-white/10 shadow-xl flex items-center max-w-3xl mx-auto">
-                <div class="pl-4 text-gray-500"><i class="fa-solid fa-search"></i></div>
-                <input type="text" id="searchInput" placeholder="Rechercher un cours..." class="bg-transparent border-none w-full text-sm px-3 py-2 focus:ring-0 text-white placeholder-gray-600">
-                <div class="h-6 w-px bg-white/10 mx-2"></div>
-                <div class="relative w-8 h-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition cursor-pointer mr-1 group">
-                    <i id="filterIcon" class="fa-solid fa-filter text-gray-400 text-xs group-hover:text-white transition-colors"></i>
-                    <select id="matiereFilter" onchange="handleFilterChange(this)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" title="Filtrer par matière">
-                        <option value="all">Toutes</option>
-                    </select>
-                </div>
-            </div>
+    <div class="bg-[#151515]/60 backdrop-blur-xl p-1.5 rounded-full border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex items-center max-w-3xl mx-auto transition-all hover:border-white/20 hover:bg-[#151515]/80">
+        <div class="pl-4 text-gray-500"><i class="fa-solid fa-search"></i></div>
+        <input type="text" id="searchInput" placeholder="Rechercher un cours..." class="bg-transparent border-none w-full text-sm px-3 py-2 focus:ring-0 text-white placeholder-gray-600 font-medium">
+        <div class="h-6 w-px bg-white/10 mx-2"></div>
+        <div class="relative w-8 h-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition cursor-pointer mr-1 group">
+            <i id="filterIcon" class="fa-solid fa-filter text-gray-400 text-xs group-hover:text-white transition-colors"></i>
+            <select id="matiereFilter" onchange="handleFilterChange(this)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" title="Filtrer par matière">
+                <option value="all">Toutes</option>
+            </select>
         </div>
+    </div>
+</div>
 
         <div id="coursesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6"></div>
         <div id="emptyState" class="hidden text-center py-20 text-gray-500">Aucun résultat</div>
@@ -1026,7 +1115,7 @@
                         <i class="fa-solid fa-sliders text-white text-sm"></i>
                     </div>
                     <div>
-                        <h2 class="text-xl font-display font-bold text-white">Configuration</h2>
+                        <h2 class="text-xl font-display font-bold text-white">Paramètres</h2>
                         <p class="text-xs text-gray-400">Gérez votre profil et vos outils</p>
                     </div>
                 </div>
@@ -2598,35 +2687,39 @@ async function saveData() {
 }
 
 function updateCountdownDisplay(dateStr) {
-            if(!dateStr) return;
-            const examDate = new Date(dateStr);
-            const today = new Date();
-            const diffTime = examDate - today;
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            
-            const displayEl = document.getElementById('countdownDisplay');
-            const miniDateEl = document.getElementById('targetDateMini');
+    if(!dateStr) return;
+    const examDate = new Date(dateStr);
+    const today = new Date();
+    const diffTime = examDate - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    const displayEl = document.getElementById('countdownDisplay');
+    const miniDateEl = document.getElementById('targetDateMini');
 
-            const options = { day: 'numeric', month: 'short', year: 'numeric' };
-            if(miniDateEl) miniDateEl.innerText = examDate.toLocaleDateString('fr-FR', options);
-            
-            if (diffDays < 0) {
-                displayEl.innerText = "Terminé";
-                displayEl.className = "text-white font-mono font-bold text-xl tracking-wider digit-scroll";
-            } else if (diffDays === 0) {
-                 displayEl.innerText = "JOUR J";
-                 displayEl.className = "text-green-400 font-mono font-bold text-xl tracking-wider digit-scroll animate-pulse";
-            } else {
-                displayEl.innerText = diffDays;
-                if (diffDays > 100) { 
-                      displayEl.className = "text-white font-mono font-bold text-xl tracking-wider digit-scroll";
-                } else if (diffDays > 30) { 
-                      displayEl.className = "text-white font-mono font-bold text-xl tracking-wider digit-scroll";
-                } else { 
-                      displayEl.className = "text-red-500 font-mono font-bold text-xl tracking-wider digit-scroll animate-pulse";
-                }
-            }
-        } // <--- CETTE ACCOLADE FERMANTE MANQUAIT ICI POUR FERMER LA FONCTION PRECEDENTE
+    const options = { day: 'numeric', month: 'short', year: 'numeric' };
+    if(miniDateEl) miniDateEl.innerText = examDate.toLocaleDateString('fr-FR', options);
+    
+    // Base de style "Propre et Jaune"
+    const baseStyle = "font-display font-black text-xl tracking-wide digit-scroll drop-shadow-md transition-colors duration-300";
+
+    if (diffDays < 0) {
+        displayEl.innerText = "Terminé";
+        displayEl.className = `text-gray-400 ${baseStyle}`;
+    } else if (diffDays === 0) {
+         displayEl.innerText = "JOUR J";
+         displayEl.className = `text-red-500 animate-pulse ${baseStyle}`;
+    } else {
+        displayEl.innerText = diffDays;
+        
+        if (diffDays <= 30) { 
+            // Urgence (Moins de 30 jours) -> Rouge/Orange
+            displayEl.className = `text-orange-500 ${baseStyle}`;
+        } else { 
+            // Normal -> Jaune Vif (Au lieu de blanc)
+            displayEl.className = `text-yellow-400 ${baseStyle}`;
+        }
+    }
+}
 
         // Cette fonction doit être EN DEHORS de updateCountdownDisplay
         function trackResourceView(itemId, type) {
@@ -2642,39 +2735,106 @@ function updateCountdownDisplay(dateStr) {
 
 let timerTargetSeconds = 0;
 
-/* --- FONCTION : DÉFINIR L'OBJECTIF --- */
-function parseSmartGoal(value) {
-    let seconds = 0;
-    let text = value.toLowerCase().trim();
+// --- NOUVELLE LOGIQUE OBJECTIF (INTERACTIVE) ---
 
-    if (!text) {
-        timerTargetSeconds = 0;
-        updateTimerUI(0);
-        return;
-    }
-
-    // Cas 1 : Format "1h30" ou "1h"
-    if (text.includes('h')) {
-        const parts = text.split('h');
-        const h = parseFloat(parts[0]) || 0;
-        const m = parseFloat(parts[1]) || 0;
-        seconds = (h * 3600) + (m * 60);
-    } 
-    // Cas 2 : Format "90m" ou "90min"
-    else if (text.includes('m')) {
-        const m = parseFloat(text) || 0;
-        seconds = m * 60;
-    }
-    // Cas 3 : Nombre décimal simple (ex: "1.5" = 1h30)
-    else {
-        const h = parseFloat(text) || 0;
-        seconds = h * 3600;
-    }
-
-    timerTargetSeconds = seconds;
+// 1. Ouvrir / Fermer le panneau
+function toggleGoalPanel() {
+    const panel = document.getElementById('goalControlPanel');
+    const btn = document.getElementById('goalDisplayBtn');
     
-    // Mise à jour de l'interface (Barre + Texte)
-    updateTimerUI(timerTargetSeconds);
+    if (panel.classList.contains('invisible')) {
+        // Ouvrir
+        panel.classList.remove('invisible', 'opacity-0', '-translate-y-2');
+        btn.classList.add('border-blue-500'); // Active state
+    } else {
+        // Fermer
+        panel.classList.add('invisible', 'opacity-0', '-translate-y-2');
+        btn.classList.remove('border-blue-500');
+    }
+}
+
+// Fermer le panneau si on clique ailleurs
+document.addEventListener('click', (e) => {
+    const panel = document.getElementById('goalControlPanel');
+    const btn = document.getElementById('goalDisplayBtn');
+    // On vérifie que les éléments existent pour éviter les erreurs si on est sur une autre vue
+    if (panel && btn && !panel.contains(e.target) && !btn.contains(e.target)) {
+        panel.classList.add('invisible', 'opacity-0', '-translate-y-2');
+        btn.classList.remove('border-blue-500');
+    }
+});
+
+// 2. Mise à jour via le Slider
+function updateGoalFromInput(minutes) {
+    const mins = parseInt(minutes) || 0; // Si vide, 0
+    
+    // On synchronise les deux affichages
+    const slider = document.getElementById('goalSlider');
+    const manual = document.getElementById('goalInputManual');
+    
+    // Si on change l'un, l'autre suit (si dans la plage du slider)
+    if (slider && parseInt(slider.value) !== mins && mins <= 720) slider.value = mins;
+    if (manual && manual.value != mins) manual.value = mins;
+
+    applyGoal(mins);
+}
+
+// 3. Mise à jour via les Presets
+function setPresetGoal(minutes) {
+    // Mettre à jour le slider et l'input manuel
+    const slider = document.getElementById('goalSlider');
+    const manual = document.getElementById('goalInputManual');
+    
+    if(slider) slider.value = minutes;
+    if(manual) manual.value = minutes;
+    
+    applyGoal(minutes);
+    
+    // Fermer le panneau après un clic sur un preset
+    if (minutes > 0) setTimeout(toggleGoalPanel, 300);
+}
+
+// 4. Fonction centrale d'application
+function applyGoal(minutes) {
+    const displayEl = document.getElementById('goalValueDisplay');
+    const msg = document.getElementById('timerMessage');
+    const barContainer = document.getElementById('timerProgressBarContainer');
+
+    if (minutes <= 0) {
+        // Désactivation
+        timerTargetSeconds = 0;
+        if(displayEl) {
+            displayEl.innerText = "Libre";
+            displayEl.className = "text-sm font-mono font-bold text-gray-400";
+        }
+        
+        if(barContainer) barContainer.classList.add('hidden');
+        if(msg) msg.style.opacity = '0';
+        
+    } else {
+        // Activation
+        timerTargetSeconds = minutes * 60;
+        
+        // Formatage joli (ex: 1h 30m)
+        let label = "";
+        const h = Math.floor(minutes / 60);
+        const m = minutes % 60;
+        
+        if (h > 0) label += `${h}h`;
+        if (m > 0 || h === 0) label += `${m > 0 ? (h > 0 ? ' ' : '') + m + 'm' : ''}`;
+        
+        if(displayEl) {
+            displayEl.innerText = label;
+            
+            // Couleur dynamique selon l'intensité
+            if (minutes >= 120) displayEl.className = "text-sm font-mono font-bold text-purple-400 drop-shadow-[0_0_5px_rgba(192,38,211,0.5)]";
+            else if (minutes >= 60) displayEl.className = "text-sm font-mono font-bold text-blue-400";
+            else displayEl.className = "text-sm font-mono font-bold text-white";
+        }
+
+        // Mise à jour UI Timer existante
+        updateTimerUI(timerTargetSeconds);
+    }
 }
 
 function updateTimerUI(targetSecs) {
