@@ -88,7 +88,7 @@
             }
         }
     </script>
-    <!-- FontAwesome --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- FontAwesome --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <!-- Google Fonts --><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@400;600;900&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
     <!-- Markdown --><script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
@@ -104,7 +104,7 @@
             projectId: "ultimed-2d332",
             storageBucket: "ultimed-2d332.firebasestorage.app",
             messagingSenderId: "944246190546",
-            appId: "1:944246190546:web:210e73fd118a955dbe580b"
+            appId: "1:944246190546:web:210e73fd118a955dbe580b",
             measurementId: "G-QS93Y4XXP6"
         };
         
@@ -1983,7 +1983,8 @@ async function completeInitialization(userId) {
     }
     
     // 5. Initialiser la Clé API (Reste en localStorage ou dans un champ de loadedData)
-    // NOTE: L'API Key est mieux conservée en local. On ne la synchronise pas.
+    // NOTE: L'API Key est mieux conservée en local.
+
     const savedKey = localStorage.getItem('ultimed_apiKey');
     if(savedKey) {
         userApiKey = savedKey;
