@@ -868,24 +868,26 @@ input[type=range]::-webkit-slider-runnable-track {
 
         <div id="subjectHeader" class="relative h-56 w-full max-w-6xl mx-auto z-30 mb-4 flex items-center justify-center">
     
-    <div id="staticHeaderContent" onclick="toggleSubjectCarousel()" class="cursor-pointer group transition-all duration-300 z-20 hover:scale-105 flex items-center justify-center absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 gap-4">
+    <div id="staticHeaderContent" onclick="toggleSubjectCarousel()" class="cursor-pointer group transition-all duration-300 z-20 hover:scale-105 flex flex-col items-center justify-center absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
         
-        <i class="fa-solid fa-chevron-left text-xl text-white/10 transition-all duration-300 group-hover:text-white/40 group-hover:-translate-x-2"></i>
+        <div class="flex items-center gap-6 mb-4">
+            
+            <i class="fa-solid fa-chevron-left text-xl text-white/10 transition-all duration-300 group-hover:text-white/40 group-hover:-translate-x-2"></i>
 
-        <div class="flex flex-col items-center justify-center w-48">
-            <div id="subjectIconContainer" class="w-20 h-20 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center shadow-2xl backdrop-blur-xl transition-all duration-500 group-hover:border-white/30 group-hover:bg-white/10 mb-4">
+            <div id="subjectIconContainer" class="w-20 h-20 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center shadow-2xl backdrop-blur-xl transition-all duration-500 group-hover:border-white/30 group-hover:bg-white/10">
                 <i id="subjectIcon" class="fa-solid fa-book-medical text-3xl text-gray-400 transition-all duration-500 group-hover:text-white group-hover:rotate-12"></i>
             </div>
+
+            <i class="fa-solid fa-chevron-right text-xl text-white/10 transition-all duration-300 group-hover:text-white/40 group-hover:translate-x-2"></i>
             
-            <div class="text-center w-max">
-                <h2 id="subjectTitle" class="text-3xl font-display font-black text-white uppercase tracking-tight drop-shadow-2xl leading-none mb-2 transition-all">Programme R2C</h2>
-                <div class="text-[10px] text-gray-600 font-bold uppercase tracking-[0.3em] group-hover:text-blue-400 transition-colors bg-black/30 px-3 py-1 rounded-full border border-white/5 inline-block">
-                    Ouvrir le menu
-                </div>
+        </div>
+        
+        <div class="text-center w-max">
+            <h2 id="subjectTitle" class="text-3xl font-display font-black text-white uppercase tracking-tight drop-shadow-2xl leading-none mb-2 transition-all">Programme R2C</h2>
+            <div class="text-[10px] text-gray-600 font-bold uppercase tracking-[0.3em] group-hover:text-blue-400 transition-colors bg-black/30 px-3 py-1 rounded-full border border-white/5 inline-block">
+                Ouvrir le menu
             </div>
         </div>
-
-        <i class="fa-solid fa-chevron-right text-xl text-white/10 transition-all duration-300 group-hover:text-white/40 group-hover:translate-x-2"></i>
 
     </div>
 
@@ -2787,6 +2789,8 @@ async function saveData() {
             const dinoIcon = document.getElementById('dinoIcon');
             dinoIcon.className = `fa-solid ${userAvatar} text-6xl text-gray-500 transition-colors duration-300`;
 
+	saveData();
+
             showToast("Configuration enregistrée !", "success");
             closeGlobalSettings();
         }
@@ -4447,7 +4451,9 @@ function saveCustomLink() {
         if (!url.startsWith('http')) url = 'https://' + url;
         
         userLinks.push({ name, url });
-        localStorage.setItem('ultimed_custom_links', JSON.stringify(userLinks));
+        // localStorage.setItem... <-- Plus besoin de ça si on sauvegarde dans le cloud
+        
+        saveData(); // <--- AJOUT ESSENTIEL
         
         renderHeaderLinks();
         closeLinkModal();
@@ -4462,7 +4468,9 @@ function saveCustomLink() {
 function deleteLink(index) {
     if(confirm('Supprimer ce raccourci ?')) {
         userLinks.splice(index, 1);
-        localStorage.setItem('ultimed_custom_links', JSON.stringify(userLinks));
+        
+        saveData(); // <--- AJOUT ESSENTIEL
+        
         renderHeaderLinks();
         playSound('click');
     }
@@ -5762,17 +5770,18 @@ function renderCalendar() {
         }
 
         function removePlanningItem(dateKey, index) {
-            if (userPlanning[dateKey]) {
-                userPlanning[dateKey].splice(index, 1);
-                // Nettoyage si vide
-                if (userPlanning[dateKey].length === 0) delete userPlanning[dateKey];
-                
-                localStorage.setItem('ultimed_planning', JSON.stringify(userPlanning));
-                renderDayDetails(dateKey);
-                renderCalendar();
-                playSound('click');
-            }
-        }
+    if (userPlanning[dateKey]) {
+        userPlanning[dateKey].splice(index, 1);
+        // Nettoyage si vide
+        if (userPlanning[dateKey].length === 0) delete userPlanning[dateKey];
+        
+        saveData(); // <--- AJOUT ESSENTIEL (Remplace le localStorage)
+        
+        renderDayDetails(dateKey);
+        renderCalendar();
+        playSound('click');
+    }
+}
 
 // --- LOGIQUE VUE DÉTAILLÉE ---
 var currentItemId = null;
