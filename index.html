@@ -562,26 +562,33 @@
         </button>
 
         <div id="dropdownMenuBody" class="absolute right-0 top-full mt-3 w-64 bg-[#111]/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl transform origin-top-right transition-all duration-200 scale-95 opacity-0 invisible z-[100]">
-            <div class="p-4 border-b border-white/5">
-                <p class="text-white font-bold text-sm truncate" id="menuUserName">Docteur</p>
-                <p class="text-xs text-gray-500 uppercase tracking-wider">Étudiant</p>
-            </div>
-            <div class="p-2 space-y-1">
-                <button onclick="toggleCalendarView(); toggleUserMenu()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-gray-300 hover:text-white transition text-left group">
-                    <div class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition"><i class="fa-regular fa-calendar"></i></div>
-                    <div><div class="text-sm font-bold">Calendrier</div><div class="text-[10px] text-gray-500 group-hover:text-gray-400">Planning & Streak</div></div>
-                </button>
-                <button onclick="openGlobalSettings(); toggleUserMenu()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-gray-300 hover:text-white transition text-left group">
-                    <div class="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:bg-purple-500 group-hover:text-white transition"><i class="fa-solid fa-sliders"></i></div>
-                    <div><div class="text-sm font-bold">Paramètres</div><div class="text-[10px] text-gray-500 group-hover:text-gray-400">Compte & Données</div></div>
-                </button>
-            </div>
-            <div class="p-2 border-t border-white/5">
-                <button onclick="startTutorial(); toggleUserMenu()" class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-bold text-gray-500 hover:text-white hover:bg-white/5 transition"><i class="fa-solid fa-circle-question"></i> Aide / Tutoriel</button>
-            </div>
-        </div>
+    <div class="p-4 border-b border-white/5">
+        <p class="text-white font-bold text-sm truncate" id="menuUserName">Docteur</p>
+        <p class="text-xs text-gray-500 uppercase tracking-wider">Étudiant</p>
     </div>
-        </div>
+
+    <div class="p-2 space-y-1">
+        <button onclick="toggleCalendarView(); toggleUserMenu()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-gray-300 hover:text-white transition text-left group">
+            <div class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition"><i class="fa-regular fa-calendar"></i></div>
+            <div><div class="text-sm font-bold">Calendrier</div><div class="text-[10px] text-gray-500 group-hover:text-gray-400">Planning & Streak</div></div>
+        </button>
+        
+        <button onclick="openGlobalSettings(); toggleUserMenu()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-gray-300 hover:text-white transition text-left group">
+            <div class="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:bg-purple-500 group-hover:text-white transition"><i class="fa-solid fa-sliders"></i></div>
+            <div><div class="text-sm font-bold">Paramètres</div><div class="text-[10px] text-gray-500 group-hover:text-gray-400">Compte & Données</div></div>
+        </button>
+        
+        <button onclick="handleLogout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-500/10 text-gray-300 hover:text-red-400 transition text-left group">
+            <div class="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center text-red-500 group-hover:bg-red-500 group-hover:text-white transition"><i class="fa-solid fa-power-off"></i></div>
+            <div><div class="text-sm font-bold">Déconnexion</div><div class="text-[10px] text-gray-500 group-hover:text-red-400/70">Fermer la session</div></div>
+        </button>
+    </div>
+
+    <div class="p-2 border-t border-white/5">
+        <button onclick="startTutorial(); toggleUserMenu()" class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-bold text-gray-500 hover:text-white hover:bg-white/5 transition"><i class="fa-solid fa-circle-question"></i> Aide / Tutoriel</button>
+    </div>
+</div>
+
     </header>
 
     <div class="h-24"></div>
@@ -1921,6 +1928,26 @@ function handleAuthAction() {
     }
 }
 
+// --- Fonction de Déconnexion ---
+function handleLogout() {
+    // 1. Fermer le menu visuellement
+    toggleUserMenu();
+
+    // 2. Déconnecter de Firebase
+    if (typeof auth !== 'undefined') {
+        auth.signOut().then(() => {
+            console.log("Déconnexion réussie.");
+            // 3. Recharger la page pour réinitialiser l'interface (retour au Login)
+            location.reload();
+        }).catch((error) => {
+            console.error("Erreur déconnexion:", error);
+        });
+    } else {
+        // Cas hors ligne / mode démo
+        location.reload();
+    }
+}
+
 function showAuthError(msg) {
     const box = document.getElementById('authError');
     box.innerText = msg;
@@ -1998,159 +2025,180 @@ function closeConfirmModal() {
 // --- REMPLACEZ TOUTE LA FONCTION initApp PAR CECI ---
 function initApp() {
     const overlay = document.getElementById('loginOverlay');
-    
-    // Vérifie si Firebase est bien chargé avant de lancer
+    const dashboard = document.getElementById('dashboardView'); // On cible le dashboard
+
+    // Vérifie si Firebase est bien chargé
     if (typeof auth === 'undefined') {
-        console.error("Erreur: Firebase n'est pas chargé. Vérifiez votre connexion internet.");
+        console.error("Erreur: Firebase n'est pas chargé.");
         return;
     }
 
-    // Écouteur : Se déclenche au chargement de la page
+    // Écouteur : Se déclenche au chargement de la page ET à la connexion/déconnexion
     auth.onAuthStateChanged((user) => {
         if (user) {
-            // --- SI DÉJÀ CONNECTÉ ---
+            // --- CAS 1 : UTILISATEUR CONNECTÉ ---
             console.log("Utilisateur reconnu :", user.email);
             
-            // On cache le login
+            // 1. On cache l'écran de login
             overlay.classList.add('opacity-0');
             setTimeout(() => {
                 overlay.classList.add('hidden');
             }, 500);
 
-            // On lance l'app
+            // 2. IMPORTANT : On affiche le site (c'était ce qui manquait)
+            if(dashboard) dashboard.classList.remove('hidden');
+
+            // 3. On lance le chargement des données
             completeInitialization(user.uid);
 
         } else {
-            // --- SI PAS CONNECTÉ ---
+            // --- CAS 2 : NON CONNECTÉ ---
             console.log("Non connecté. Affichage du Login.");
             
-            // On s'assure que le login est visible
+            // 1. On affiche l'écran de login
             overlay.classList.remove('hidden');
             overlay.classList.remove('opacity-0');
             
-            // On cache le reste du site pour éviter les fuites visuelles
-            document.getElementById('dashboardView').classList.add('hidden');
+            // 2. On cache le site pour qu'on ne puisse rien voir derrière
+            if(dashboard) dashboard.classList.add('hidden');
         }
     });
 }
 
-// --- REMPLACEZ TOUTE LA FONCTION completeInitialization PAR CECI ---
+// --- FONCTION DE CHARGEMENT MISE À JOUR ---
 async function completeInitialization(userId) {
-    console.log("Initialisation en cours...");
+    console.log("Connexion réussie. ID:", userId);
 
-    // 1. On ignore Firebase et on charge les données vides ou locales
-    let loadedData = {}; 
-    
-    // 2. Afficher la date (Code existant)
+    // 1. Récupération des données Cloud
+    const userDocRef = db.collection('users').doc(userId);
+    let loadedData = {};
+
+    try {
+        const doc = await userDocRef.get();
+        if (doc.exists) {
+            console.log("Données trouvées !");
+            loadedData = doc.data().userData || {};
+        } else {
+            console.log("Profil vierge (Nouvel utilisateur).");
+            // On force une première sauvegarde pour créer le dossier
+            setTimeout(saveData, 2000); 
+        }
+    } catch (error) {
+        console.warn("Mode Hors Ligne ou Erreur:", error);
+    }
+
+    // 2. Afficher la date
     const options = { weekday: 'long', day: 'numeric', month: 'long' };
     const dateElement = document.getElementById('dateToday');
     if(dateElement) dateElement.innerText = new Date().toLocaleDateString('fr-FR', options);
-    
-    // 3. Charger le profil local
-    loadProfile();
-    updateGreetingDisplay();
 
-    // 4. Initialiser les variables avec des valeurs par défaut (très important pour éviter les bugs)
-    userHistory = loadedData.history || {};
-    userPlanning = loadedData.planning || {};
+    // 3. APPLICATION DES DONNÉES (C'est ici que la magie opère)
+    
+    // -- Progression --
     userXP = loadedData.xp || 0;
     userLevel = Math.floor(userXP / 1000); 
-    if(typeof updateXPDisplay === 'function') updateXPDisplay();
-    
-    userLinks = loadedData.custom_links || [];
-    if(typeof renderHeaderLinks === 'function') renderHeaderLinks();
-
-    userResources = loadedData.resources || [];
     userStatus = loadedData.status || {};
-    userTodos = loadedData.todos || [];
     userVues = loadedData.vues || {};
-
+    userHistory = loadedData.history || {};
+    userPlanning = loadedData.planning || {};
+    userTodos = loadedData.todos || [];
+    userResources = loadedData.resources || [];
+    
+    // -- Détails --
     userItemNotes = loadedData.item_notes || {};
     userItemDifficulty = loadedData.item_difficulty || {};
     userItemErrors = loadedData.item_errors || {};
     userXPClaimed = loadedData.xp_claimed || {};
 
+    // -- Profil --
+    if (loadedData.user_name) userName = loadedData.user_name;
+    if (loadedData.user_alias) userAlias = loadedData.user_alias;
+    if (loadedData.current_avatar) userAvatar = loadedData.current_avatar;
+    if (loadedData.unlocked_avatars) userUnlockedAvatars = loadedData.unlocked_avatars;
+    if (loadedData.custom_links) userLinks = loadedData.custom_links;
+
+    // -- Mise à jour de l'interface --
+    updateGreetingDisplay(); // Met à jour le nom et l'avatar
+    if(typeof updateXPDisplay === 'function') updateXPDisplay();
+    if(typeof renderHeaderLinks === 'function') renderHeaderLinks();
+    
+    loadProfile(); // Charge les réglages locaux (Son, Clé API)
     loadDailySuggestionState();
     initNotes(); 
-    
-    // 5. Initialiser le Compte à Rebours (Local Storage)
+
+    // Date examen
     const savedDate = localStorage.getItem('ultimed_examDate');
     if(savedDate) {
         updateCountdownDisplay(savedDate);
         const settingDateInput = document.getElementById('settingDate');
         if(settingDateInput) settingDateInput.value = savedDate;
     }
-    
-    // 6. Events Recherche & Notes
+
+    // Listeners Recherche
     const searchInput = document.getElementById('searchInput');
-    if(searchInput) searchInput.addEventListener('input', render);
-
+    if(searchInput) {
+        const newSearch = searchInput.cloneNode(true);
+        searchInput.parentNode.replaceChild(newSearch, searchInput);
+        newSearch.addEventListener('input', render);
+    }
     const quickNotes = document.getElementById('quickNotes');
-    if(quickNotes) {
-        quickNotes.addEventListener('input', (e) => {
-            saveNotes(e.target.value);
-        });
-    }
+    if(quickNotes) quickNotes.addEventListener('input', (e) => saveNotes(e.target.value));
 
-    // 7. Barre de recherche ToDo
-    const todoInput = document.getElementById('todoInput');
-    const autoList = document.getElementById('autocompleteList');
-    
-    if (todoInput && autoList) {
-        todoInput.addEventListener('input', (e) => {
-            const val = e.target.value.toLowerCase();
-            if(!val) { autoList.classList.add('hidden'); return; }
-            const matches = rawItems.filter(i => 
-                i.id.includes(val) || i.t.toLowerCase().includes(val) || i.m.toLowerCase().includes(val)
-            ).slice(0, 5);
-            if(matches.length === 0) { autoList.classList.add('hidden'); return; }
-            autoList.innerHTML = matches.map(m => `
-                <div class="autocomplete-item" onclick="addSpecificTodo('${m.id}', '${m.t.replace(/'/g, "&apos;")}')">
-                    <span class="font-bold text-blue-400">#${m.id}</span> ${m.t}
-                </div>
-            `).join('');
-            autoList.classList.remove('hidden');
-        });
-        document.addEventListener('click', (e) => {
-            if (!todoInput.contains(e.target) && !autoList.contains(e.target)) {
-                autoList.classList.add('hidden');
-            }
-        });
-    }
-    
-    // 8. Lancer l'affichage principal
-    // C'EST ICI QUE LES COURS SONT CRÉÉS
-    console.log("Génération des cours...");
-    buildCourses();
+    // Setup Autocomplete
+    setupAutocompleteSystems();
+
+    // 4. LANCEMENT FINAL
+    console.log("Génération de l'interface...");
+    buildCourses(); // Construit la grille avec les statuts "Lu" / "Maîtrisé"
     populateFilters();
     updateStats();
-    render(); // Affiche la grille
+    render(); 
     renderTodos();
 
-    // 9. Gestion Calendrier
+    // On cache le chargement
+    const overlay = document.getElementById('loginOverlay');
+    if(overlay) overlay.classList.add('hidden');
+}
+
+// Petite fonction utilitaire requise
+function setupAutocompleteSystems() {
+    const todoInput = document.getElementById('todoInput');
+    const autoList = document.getElementById('autocompleteList');
     const calInput = document.getElementById('calendarSearchInput');
     const calList = document.getElementById('calendarAutocompleteList');
-    if (calInput && calList) {
-        calInput.addEventListener('input', (e) => {
-            const val = e.target.value.toLowerCase();
-            if(!val) { calList.classList.add('hidden'); return; }
-            const matches = rawItems.filter(i => 
-                i.id.includes(val) || i.t.toLowerCase().includes(val) || i.m.toLowerCase().includes(val)
-            ).slice(0, 5);
-            if(matches.length === 0) { calList.classList.add('hidden'); return; }
-            calList.innerHTML = matches.map(m => `
-                <div class="autocomplete-item" onclick="addPlanningItem('${m.id}')">
-                    <span class="font-bold text-blue-400">#${m.id}</span> ${m.t}
-                </div>
-            `).join('');
-            calList.classList.remove('hidden');
-        });
+
+    if (todoInput && autoList) {
+        todoInput.addEventListener('input', (e) => handleAutoSearch(e, autoList, 'todo'));
         document.addEventListener('click', (e) => {
-            if (!calInput.contains(e.target) && !calList.contains(e.target)) {
-                calList.classList.add('hidden');
-            }
+            if (!todoInput.contains(e.target) && !autoList.contains(e.target)) autoList.classList.add('hidden');
         });
     }
+    if (calInput && calList) {
+        calInput.addEventListener('input', (e) => handleAutoSearch(e, calList, 'planning'));
+        document.addEventListener('click', (e) => {
+            if (!calInput.contains(e.target) && !calList.contains(e.target)) calList.classList.add('hidden');
+        });
+    }
+}
+
+function handleAutoSearch(e, listElement, type) {
+    const val = e.target.value.toLowerCase();
+    if(!val) { listElement.classList.add('hidden'); return; }
+    
+    const matches = rawItems.filter(i => 
+        i.id.includes(val) || i.t.toLowerCase().includes(val) || i.m.toLowerCase().includes(val)
+    ).slice(0, 5);
+    
+    if(matches.length === 0) { listElement.classList.add('hidden'); return; }
+    
+    const action = type === 'todo' ? 'addSpecificTodo' : 'addPlanningItem';
+    
+    listElement.innerHTML = matches.map(m => `
+        <div class="autocomplete-item" onclick="${action}('${m.id}', '${m.t.replace(/'/g, "&apos;")}')">
+            <span class="font-bold text-blue-400">#${m.id}</span> ${m.t}
+        </div>
+    `).join('');
+    listElement.classList.remove('hidden');
 }
 
         function handleFilterChange(selectElement) {
@@ -2260,31 +2308,46 @@ function loadProfile() {
         }
 
         // La fonction de sauvegarde est modifiée pour utiliser Firestore
+// --- FONCTION DE SAUVEGARDE ROBUSTE (CORRIGÉE) ---
+// --- FONCTION DE SAUVEGARDE CORRIGÉE (COMPLETE) ---
 async function saveData() {
     const user = auth.currentUser;
-    if (!user) return; // Sécurité
+    if (!user) return; // On ne sauvegarde pas si pas connecté
 
-    // 1. Consolidation de TOUTES les données globales
+    // 1. On rassemble TOUT ce qui doit être gardé
     const dataToSave = {
-        resources: userResources,
-        status: userStatus,
-        todos: userTodos,
-        vues: userVues,
+        // Progression principale
         xp: userXP,
+        status: userStatus, // C'est ici que "Lu" et "Maîtrisé" sont stockés
+        vues: userVues,
+        todos: userTodos,
         history: userHistory,
         planning: userPlanning,
-        // ... (Ajoutez toutes vos autres variables persistantes ici, ex: userItemNotes, userItemDifficulty)
+        resources: userResources,
+
+        // Données détaillées (Notes, Erreurs, Difficultés)
+        item_notes: userItemNotes || {},
+        item_difficulty: userItemDifficulty || {},
+        item_errors: userItemErrors || {},
+        xp_claimed: userXPClaimed || {}, // Pour éviter de gagner l'XP en boucle
+
+        // Profil & Personnalisation
+        custom_links: userLinks || [],
+        unlocked_avatars: userUnlockedAvatars || ['fa-dragon'],
+        current_avatar: userAvatar || 'fa-dragon',
+        user_name: userName || "",
+        user_alias: userAlias || "Docteur",
+        
+        last_update: new Date().toISOString()
     };
 
-    // 2. Écriture dans Firestore
+    // 2. Écriture dans Firestore (Création ou Mise à jour)
     try {
-        await db.collection('users').doc(user.uid).update({ userData: dataToSave });
-        updateStats(); // Mise à jour des stats locales
-        //showToast("Synchronisation Cloud OK.", 'info');
+        // .set avec merge:true est la méthode la plus sûre
+        await db.collection('users').doc(user.uid).set({ userData: dataToSave }, { merge: true });
+        console.log("Sauvegarde Cloud réussie.");
     } catch (error) {
-        // En cas d'échec (ex: problème réseau), on avertit l'utilisateur
-        console.error("Échec de la synchronisation Cloud:", error);
-        // showToast("Échec de la synchronisation Cloud.", 'error');
+        console.error("Erreur de sauvegarde :", error);
     }
 }
 
