@@ -4480,21 +4480,31 @@ function renderHeaderLinks() {
     const container = document.getElementById('customLinksContainer');
     if (!container) return;
     
-    // Palette de couleurs qui va tourner
+    // Palette de couleurs (Cycle)
     const colors = ['blue', 'emerald', 'purple', 'amber', 'pink', 'cyan', 'rose', 'indigo'];
 
     container.innerHTML = userLinks.map((link, index) => {
-        // On choisit la couleur en fonction de l'index (modulo pour boucler)
+        // 1. Couleur cyclique
         const c = colors[index % colors.length];
+        
+        // 2. Première lettre en majuscule
+        const letter = link.name ? link.name.charAt(0).toUpperCase() : "?";
 
         return `
         <div class="relative group">
             <a href="${link.url}" target="_blank" onclick="playSound('click')" 
                class="flex items-center gap-2 bg-${c}-900/20 px-3 py-1.5 rounded-lg border border-${c}-500/20 hover:bg-${c}-900/40 hover:border-${c}-500/40 transition" 
                title="${link.name}">
-                <i class="fa-solid fa-globe text-${c}-400 group-hover:text-${c}-300 text-xs"></i>
-                <span class="text-xs font-bold text-${c}-100/80 group-hover:text-white uppercase max-w-[100px] truncate">${link.name}</span>
+                
+                <span class="font-display font-black text-xs text-${c}-400 group-hover:text-${c}-300">
+                    ${letter}
+                </span>
+
+                <span class="text-xs font-bold text-${c}-100/80 group-hover:text-white uppercase max-w-[100px] truncate">
+                    ${link.name}
+                </span>
             </a>
+            
             <button onclick="deleteLink(${index})" class="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 text-white rounded-full text-[8px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition shadow-md hover:scale-110">
                 <i class="fa-solid fa-times"></i>
             </button>
