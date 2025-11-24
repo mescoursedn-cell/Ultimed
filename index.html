@@ -1318,33 +1318,53 @@
         </div>
     </div>
 
-	<div id="subjectBurstOverlay" class="fixed inset-0 z-[200] flex items-center justify-center pointer-events-none hidden overflow-hidden">
-        <div id="subjectBurstCircle" class="rounded-full absolute"></div>
-        
-        <i id="subjectBurstIcon" class="relative z-10 text-[50vmin] opacity-0 transform transition-all"></i>
+	<<div id="subjectBurstOverlay" class="fixed inset-0 z-[200] flex items-center justify-center pointer-events-none hidden overflow-hidden">
+    <div id="subjectBurstCircle" class="rounded-full absolute"></div>
+    <i id="subjectBurstIcon" class="relative z-10 text-[50vmin] opacity-0 transform transition-all"></i>
+</div> <div id="loginOverlay" class="fixed inset-0 z-[9999] bg-[#050505] flex items-center justify-center transition-opacity duration-500 opacity-100">
 
-    <div id="loginOverlay" class="fixed inset-0 z-[300] bg-dark-950 flex items-center justify-center transition-opacity duration-500 opacity-100">
-        <div class="w-full max-w-md p-8 card-panel rounded-3xl text-center">
-            <h3 class="text-3xl font-display font-black text-blue-500 mb-6 drop-shadow-lg">Ultimed Login</h3>
-            
-            <p class="text-gray-400 text-sm mb-6">Connectez-vous pour accéder à votre cockpit.</p>
-            
-            <div class="space-y-4">
-                <input type="email" id="loginEmail" placeholder="Identifiant (Email)" 
-                       class="w-full bg-[#151515] border border-white/10 rounded-xl px-4 py-3 text-white text-lg focus:border-blue-500 transition"
-                       onkeypress="if(event.key === 'Enter') document.getElementById('loginPassword').focus()">
-                       
-                <input type="password" id="loginPassword" placeholder="Mot de passe" 
-                       class="w-full bg-[#151515] border border-white/10 rounded-xl px-4 py-3 text-white text-lg focus:border-blue-500 transition"
-                       onkeypress="if(event.key === 'Enter') attemptLogin()">
+    <div class="relative w-full max-w-md p-1">
+        <div class="absolute inset-0 bg-blue-600/20 blur-[60px] rounded-full pointer-events-none"></div>
+        
+        <div class="relative card-panel rounded-3xl p-8 text-center border border-white/10 shadow-2xl bg-black/80 backdrop-blur-xl">
+            <div class="mb-8">
+                <i class="fa-solid fa-dragon text-5xl text-blue-500 mb-4 drop-shadow-[0_0_15px_rgba(59,130,246,0.6)] animate-pulse"></i>
+                <h3 class="text-3xl font-display font-black text-white tracking-widest uppercase">Ultimed</h3>
+                <p class="text-blue-400 text-xs font-bold uppercase tracking-[0.3em]">Cockpit R2C</p>
             </div>
             
-            <button onclick="attemptLogin()" class="w-full mt-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold transition shadow-lg shadow-blue-900/40">
-                Connexion
+            <div id="authError" class="hidden mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold"></div>
+
+            <div class="space-y-4">
+                <div class="group relative">
+                    <i class="fa-solid fa-envelope absolute left-4 top-4 text-gray-500 group-focus-within:text-blue-400 transition-colors"></i>
+                    <input type="email" id="loginEmail" placeholder="Email" 
+                           class="w-full bg-[#151515] border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition outline-none"
+                           onkeypress="if(event.key === 'Enter') document.getElementById('loginPassword').focus()">
+                </div>
+                       
+                <div class="group relative">
+                    <i class="fa-solid fa-lock absolute left-4 top-4 text-gray-500 group-focus-within:text-blue-400 transition-colors"></i>
+                    <input type="password" id="loginPassword" placeholder="Mot de passe" 
+                           class="w-full bg-[#151515] border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition outline-none"
+                           onkeypress="if(event.key === 'Enter') handleAuthAction()">
+                </div>
+            </div>
+            
+            <button id="authBtn" onclick="handleAuthAction()" class="w-full mt-8 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl font-bold transition shadow-lg shadow-blue-900/30 flex items-center justify-center gap-2 group">
+                <span id="authBtnText">Connexion</span>
+                <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
             </button>
-            <p id="loginError" class="text-red-500 text-xs mt-3 invisible">Identifiant ou mot de passe incorrect.</p>
+            
+            <div class="mt-6 pt-6 border-t border-white/10">
+                <p class="text-gray-500 text-xs mb-2" id="toggleText">Pas encore de compte ?</p>
+                <button onclick="toggleAuthMode()" class="text-white text-sm font-bold hover:text-blue-400 transition uppercase tracking-wide">
+                    <span id="toggleLink">Créer un compte</span>
+                </button>
+            </div>
         </div>
     </div>
+</div>
 
     <script>
 
@@ -1374,6 +1394,7 @@
 	var userItemDifficulty = {}; // Stocke la difficulté { "154": 3 } (1 à 5)
 	var userItemErrors = {};
 	var userXPClaimed = {};
+	var isRegistering = false;
 
 // --- CONFIGURATION DES RÉCOMPENSES (NIVEAUX) ---
 	const levelRewards = {
@@ -1834,34 +1855,118 @@ const defaultConfig = { color: 'gray', icon: 'fa-book-medical', gradient: 'from-
         const availableAvatars = ['fa-dragon', 'fa-cat', 'fa-dog', 'fa-crow', 'fa-otter', 'fa-fish', 'fa-spider', 'fa-horse', 'fa-frog', 'fa-dove'];
         
          // --- Login Functions --
-function attemptLogin() {
+// --- 1. Bascule entre Connexion et Inscription ---
+function toggleAuthMode() {
+    isRegistering = !isRegistering;
+    const btnText = document.getElementById('authBtnText');
+    const toggleText = document.getElementById('toggleText');
+    const toggleLink = document.getElementById('toggleLink');
+    const errorBox = document.getElementById('authError');
+
+    // Reset erreur
+    errorBox.classList.add('hidden');
+
+    if (isRegistering) {
+        btnText.innerText = "S'inscrire";
+        toggleText.innerText = "Déjà un compte ?";
+        toggleLink.innerText = "Se connecter";
+    } else {
+        btnText.innerText = "Connexion";
+        toggleText.innerText = "Pas encore de compte ?";
+        toggleLink.innerText = "Créer un compte";
+    }
+}
+
+// --- 2. Action principale (Click bouton) ---
+function handleAuthAction() {
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
-    const errorEl = document.getElementById('loginError');
-
-    errorEl.classList.add('invisible');
+    const errorBox = document.getElementById('authError');
 
     if (!email || !password) {
-        errorEl.innerText = "Veuillez entrer l'identifiant et le mot de passe.";
-        errorEl.classList.remove('invisible');
+        showAuthError("Veuillez remplir tous les champs.");
         return;
     }
 
-    // Utilisation de Firebase pour la connexion
-    auth.signInWithEmailAndPassword(email, password)
-        .then((userCredential) => {
-            // Connexion réussie, onAuthStateChanged va lancer completeInitialization
-        })
-        .catch((error) => {
-            // Échec de la connexion
-            errorEl.innerText = "Connexion échouée. Identifiant ou mot de passe incorrect.";
-            errorEl.classList.remove('invisible');
-            console.error("Firebase Login Error:", error);
-        });
+    // Effet de chargement sur le bouton
+    const btn = document.getElementById('authBtn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>';
+    btn.disabled = true;
+
+    if (isRegistering) {
+        // --- CRÉATION DE COMPTE ---
+        auth.createUserWithEmailAndPassword(email, password)
+            .then((userCredential) => {
+                // Succès : initApp gérera la suite via le listener
+                console.log("Compte créé :", userCredential.user.uid);
+            })
+            .catch((error) => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                showAuthError(getFirebaseErrorMessage(error.code));
+            });
+    } else {
+        // --- CONNEXION ---
+        auth.signInWithEmailAndPassword(email, password)
+            .then((userCredential) => {
+                // Succès
+                console.log("Connecté :", userCredential.user.uid);
+            })
+            .catch((error) => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                showAuthError("Email ou mot de passe incorrect.");
+            });
+    }
+}
+
+function showAuthError(msg) {
+    const box = document.getElementById('authError');
+    box.innerText = msg;
+    box.classList.remove('hidden');
+    // Animation de secousse
+    const panel = document.querySelector('#loginOverlay .card-panel');
+    panel.classList.add('animate-shake');
+    setTimeout(() => panel.classList.remove('animate-shake'), 500);
+}
+
+function getFirebaseErrorMessage(code) {
+    switch (code) {
+        case 'auth/email-already-in-use': return "Cet email est déjà utilisé.";
+        case 'auth/invalid-email': return "Format d'email invalide.";
+        case 'auth/weak-password': return "Le mot de passe doit faire 6 caractères min.";
+        default: return "Erreur d'authentification.";
+    }
+}
+
+// --- Fonction pour forcer le démarrage sans Firebase ---
+function startDemoMode() {
+    // 1. Cacher l'écran de login
+    const overlay = document.getElementById('loginOverlay');
+    overlay.classList.add('opacity-0');
+    setTimeout(() => {
+        overlay.classList.add('hidden');
+    }, 500);
+
+    // 2. Initialiser l'application avec un utilisateur fictif
+    console.log("Démarrage en mode Visiteur...");
+    
+    // On appelle la fonction principale qui charge les items
+    // On passe un ID fictif 'local-user' pour que le script fonctionne
+    completeInitialization('local-user');
+    
+    // Petit message de succès
+    setTimeout(() => {
+        // Si la fonction showToast existe, on l'utilise, sinon alert
+        if(typeof showToast === 'function') {
+            showToast("Mode Visiteur Activé", "success");
+        }
+    }, 1000);
 }
 
         // --- TOAST SYSTEM (DÉSACTIVÉ) ---
-        function showToast(message, type = 'info') {
+function showToast(message, type = 'info') {
             // J'ai supprimé le code ici pour qu'aucun message ne s'affiche
             return;
         }
@@ -1869,13 +1974,13 @@ function attemptLogin() {
         // --- CONFIRM MODAL SYSTEM ---
         var pendingConfirmAction = null;
         
-        function openConfirmModal(action) {
+function openConfirmModal(action) {
             pendingConfirmAction = action;
             document.getElementById('confirmModal').classList.remove('hidden');
             document.getElementById('confirmModal').classList.add('flex');
         }
 
-        function closeConfirmModal() {
+function closeConfirmModal() {
             document.getElementById('confirmModal').classList.add('hidden');
             document.getElementById('confirmModal').classList.remove('flex');
             pendingConfirmAction = null;
@@ -1890,109 +1995,93 @@ function attemptLogin() {
 
         // --- INIT & PERSISTENCE ---
 
-// DANS initApp()
+// --- REMPLACEZ TOUTE LA FONCTION initApp PAR CECI ---
 function initApp() {
-    // 0. CHECK AUTHENTIFICATION FIREBASE
-    // Le script s'arrête ici si l'utilisateur n'est pas authentifié
-    auth.onAuthStateChanged(user => {
+    const overlay = document.getElementById('loginOverlay');
+    
+    // Vérifie si Firebase est bien chargé avant de lancer
+    if (typeof auth === 'undefined') {
+        console.error("Erreur: Firebase n'est pas chargé. Vérifiez votre connexion internet.");
+        return;
+    }
+
+    // Écouteur : Se déclenche au chargement de la page
+    auth.onAuthStateChanged((user) => {
         if (user) {
-            // L'utilisateur est connecté, on retire l'overlay
-            document.getElementById('loginOverlay').classList.add('hidden');
+            // --- SI DÉJÀ CONNECTÉ ---
+            console.log("Utilisateur reconnu :", user.email);
             
-            // Lancement du corps principal
-            completeInitialization(user.uid); 
-            
+            // On cache le login
+            overlay.classList.add('opacity-0');
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+            }, 500);
+
+            // On lance l'app
+            completeInitialization(user.uid);
+
         } else {
-            // L'utilisateur n'est PAS connecté, on montre l'écran de login
-            document.getElementById('loginOverlay').classList.remove('hidden');
-            document.getElementById('loginOverlay').classList.add('opacity-100');
-            document.getElementById('loginEmail').focus();
+            // --- SI PAS CONNECTÉ ---
+            console.log("Non connecté. Affichage du Login.");
+            
+            // On s'assure que le login est visible
+            overlay.classList.remove('hidden');
+            overlay.classList.remove('opacity-0');
+            
+            // On cache le reste du site pour éviter les fuites visuelles
+            document.getElementById('dashboardView').classList.add('hidden');
         }
     });
 }
 
-// NOUVELLE FONCTION : Contient le corps de l'ancienne initApp, adapté au Cloud
+// --- REMPLACEZ TOUTE LA FONCTION completeInitialization PAR CECI ---
 async function completeInitialization(userId) {
+    console.log("Initialisation en cours...");
+
+    // 1. On ignore Firebase et on charge les données vides ou locales
+    let loadedData = {}; 
     
-    // --- 1. CHARGEMENT DES DONNÉES DEPUIS FIRESTORE ---
-    const userDocRef = db.collection('users').doc(userId);
-    let loadedData = {};
-
-    try {
-        const doc = await userDocRef.get();
-        if (doc.exists) {
-            loadedData = doc.data().userData || {};
-        } else {
-            // Première connexion : on crée un document vide
-            await userDocRef.set({ userData: { profileCreated: true } });
-        }
-    } catch (error) {
-        console.error("Erreur de chargement des données Cloud:", error);
-    }
-
-    // --- 2. MISE À JOUR DES VARIABLES GLOBALES (ADAPTÉES AU CLOUD) ---
-    // Les anciennes lignes de sauvegarde seront maintenant chargées depuis loadedData
-
-    // 1. Afficher la date du jour (Reste local)
+    // 2. Afficher la date (Code existant)
     const options = { weekday: 'long', day: 'numeric', month: 'long' };
     const dateElement = document.getElementById('dateToday');
     if(dateElement) dateElement.innerText = new Date().toLocaleDateString('fr-FR', options);
     
-    // 2. Charger le profil (Doit être adapté pour lire du Cloud ou de la mémoire)
-    // NOTE : Le chargement du profil (userName, Avatar, etc.) doit être adapté pour lire depuis loadedData.
-    // Cependant, pour l'instant, nous allons conserver loadProfile() et updateGreetingDisplay()
-    // et nous chargerons les données spécifiques ici.
-
+    // 3. Charger le profil local
     loadProfile();
     updateGreetingDisplay();
 
-    // Historique Calendrier
+    // 4. Initialiser les variables avec des valeurs par défaut (très important pour éviter les bugs)
     userHistory = loadedData.history || {};
     userPlanning = loadedData.planning || {};
-
-    // XP & Niveau
     userXP = loadedData.xp || 0;
     userLevel = Math.floor(userXP / 1000); 
     if(typeof updateXPDisplay === 'function') updateXPDisplay();
     
-    // Liens Perso
     userLinks = loadedData.custom_links || [];
     if(typeof renderHeaderLinks === 'function') renderHeaderLinks();
 
-    // 3. Charger les Données Principales (Statuts, Vues, Todos)
     userResources = loadedData.resources || [];
     userStatus = loadedData.status || {};
     userTodos = loadedData.todos || [];
     userVues = loadedData.vues || {};
 
-    // Notes, Difficultés, Erreurs
     userItemNotes = loadedData.item_notes || {};
     userItemDifficulty = loadedData.item_difficulty || {};
     userItemErrors = loadedData.item_errors || {};
     userXPClaimed = loadedData.xp_claimed || {};
 
     loadDailySuggestionState();
-    initNotes(); // Notes globales (Tableau de bord)
+    initNotes(); 
     
-    // 4. Initialiser le Compte à Rebours
-    const savedDate = loadedData.examDate;
+    // 5. Initialiser le Compte à Rebours (Local Storage)
+    const savedDate = localStorage.getItem('ultimed_examDate');
     if(savedDate) {
         updateCountdownDisplay(savedDate);
         const settingDateInput = document.getElementById('settingDate');
         if(settingDateInput) settingDateInput.value = savedDate;
     }
     
-    // 5. Initialiser la Clé API (Reste en localStorage ou dans un champ de loadedData)
-    // NOTE: L'API Key est mieux conservée en local.
-
-    const savedKey = localStorage.getItem('ultimed_apiKey');
-    if(savedKey) {
-        userApiKey = savedKey;
-        const settingKeyInput = document.getElementById('settingKey');
-        if(settingKeyInput) settingKeyInput.value = savedKey;
-    }
-    
-    // 6. Events Recherche & Notes Globales (PAS DE CHANGEMENT)
+    // 6. Events Recherche & Notes
     const searchInput = document.getElementById('searchInput');
     if(searchInput) searchInput.addEventListener('input', render);
 
@@ -2003,7 +2092,7 @@ async function completeInitialization(userId) {
         });
     }
 
-    // 7. Gestion de la barre de recherche ToDo (PAS DE CHANGEMENT)
+    // 7. Barre de recherche ToDo
     const todoInput = document.getElementById('todoInput');
     const autoList = document.getElementById('autocompleteList');
     
@@ -2011,13 +2100,10 @@ async function completeInitialization(userId) {
         todoInput.addEventListener('input', (e) => {
             const val = e.target.value.toLowerCase();
             if(!val) { autoList.classList.add('hidden'); return; }
-            
             const matches = rawItems.filter(i => 
                 i.id.includes(val) || i.t.toLowerCase().includes(val) || i.m.toLowerCase().includes(val)
             ).slice(0, 5);
-            
             if(matches.length === 0) { autoList.classList.add('hidden'); return; }
-            
             autoList.innerHTML = matches.map(m => `
                 <div class="autocomplete-item" onclick="addSpecificTodo('${m.id}', '${m.t.replace(/'/g, "&apos;")}')">
                     <span class="font-bold text-blue-400">#${m.id}</span> ${m.t}
@@ -2025,7 +2111,6 @@ async function completeInitialization(userId) {
             `).join('');
             autoList.classList.remove('hidden');
         });
-        
         document.addEventListener('click', (e) => {
             if (!todoInput.contains(e.target) && !autoList.contains(e.target)) {
                 autoList.classList.add('hidden');
@@ -2033,28 +2118,26 @@ async function completeInitialization(userId) {
         });
     }
     
-    // 8. Lancer l'affichage principal (C'est ça qui affiche les cours !)
+    // 8. Lancer l'affichage principal
+    // C'EST ICI QUE LES COURS SONT CRÉÉS
+    console.log("Génération des cours...");
     buildCourses();
     populateFilters();
     updateStats();
-    render();
+    render(); // Affiche la grille
     renderTodos();
 
-    // 8b. Gestion de la recherche Calendrier (PAS DE CHANGEMENT)
+    // 9. Gestion Calendrier
     const calInput = document.getElementById('calendarSearchInput');
     const calList = document.getElementById('calendarAutocompleteList');
-    
     if (calInput && calList) {
         calInput.addEventListener('input', (e) => {
             const val = e.target.value.toLowerCase();
             if(!val) { calList.classList.add('hidden'); return; }
-            
             const matches = rawItems.filter(i => 
                 i.id.includes(val) || i.t.toLowerCase().includes(val) || i.m.toLowerCase().includes(val)
             ).slice(0, 5);
-            
             if(matches.length === 0) { calList.classList.add('hidden'); return; }
-            
             calList.innerHTML = matches.map(m => `
                 <div class="autocomplete-item" onclick="addPlanningItem('${m.id}')">
                     <span class="font-bold text-blue-400">#${m.id}</span> ${m.t}
@@ -2062,22 +2145,12 @@ async function completeInitialization(userId) {
             `).join('');
             calList.classList.remove('hidden');
         });
-        
-        // Fermer si on clique ailleurs
         document.addEventListener('click', (e) => {
             if (!calInput.contains(e.target) && !calList.contains(e.target)) {
                 calList.classList.add('hidden');
             }
         });
     }
-
-    // 9. Tutoriel (À la fin)
-    setTimeout(() => {
-        const hasSeenTutorial = localStorage.getItem('ultimed_tutorial_seen');
-        if (!hasSeenTutorial && typeof startTutorial === 'function') {
-            startTutorial();
-        }
-    }, 1000);
 }
 
         function handleFilterChange(selectElement) {
