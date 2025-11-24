@@ -1579,6 +1579,7 @@ input[type=range]::-webkit-slider-runnable-track {
 	var userItemDifficulty = {}; // Stocke la difficulté { "154": 3 } (1 à 5)
 	var userItemErrors = {};
 	var userXPClaimed = {};
+	var userSubjectNotes = {};
 	var isRegistering = false;
 
 // --- CONFIGURATION DES RÉCOMPENSES (NIVEAUX) ---
@@ -2320,11 +2321,25 @@ async function completeInitialization(userId) {
     userTodos = loadedData.todos || [];
     userResources = loadedData.resources || [];
     
-    // -- Détails --
+    // -- Détails Items --
     userItemNotes = loadedData.item_notes || {};
     userItemDifficulty = loadedData.item_difficulty || {};
     userItemErrors = loadedData.item_errors || {};
     userXPClaimed = loadedData.xp_claimed || {};
+
+    // -- AJOUT : Récupération des Notes de Matières --
+    userSubjectNotes = loadedData.subject_notes || {};
+
+    // -- AJOUT : Récupération des Suggestions --
+    if (loadedData.daily_suggestions && loadedData.daily_suggestions.suggestions && loadedData.daily_suggestions.suggestions.length > 0) {
+        // On charge ce qui est en base, peu importe la date (comme demandé)
+        currentSuggestions = loadedData.daily_suggestions.suggestions;
+        dailySuggestionsDone = loadedData.daily_suggestions.done || {};
+    } else {
+        // Si rien en base, on vide pour forcer la génération
+        currentSuggestions = [];
+        dailySuggestionsDone = {};
+    }
 
     // -- Profil --
     if (loadedData.user_name) userName = loadedData.user_name;
@@ -2526,30 +2541,40 @@ function loadProfile() {
         }
 
         // La fonction de sauvegarde est modifiée pour utiliser Firestore
-// --- FONCTION DE SAUVEGARDE ROBUSTE (CORRIGÉE) ---
 // --- FONCTION DE SAUVEGARDE CORRIGÉE (COMPLETE) ---
 async function saveData() {
     const user = auth.currentUser;
-    if (!user) return; // On ne sauvegarde pas si pas connecté
+    if (!user) return;
 
-    // 1. On rassemble TOUT ce qui doit être gardé
     const dataToSave = {
-        // Progression principale
+        // Progression
         xp: userXP,
-        status: userStatus, // C'est ici que "Lu" et "Maîtrisé" sont stockés
+        status: userStatus,
         vues: userVues,
         todos: userTodos,
         history: userHistory,
         planning: userPlanning,
         resources: userResources,
 
-        // Données détaillées (Notes, Erreurs, Difficultés)
+        // Détails Items
         item_notes: userItemNotes || {},
         item_difficulty: userItemDifficulty || {},
         item_errors: userItemErrors || {},
-        xp_claimed: userXPClaimed || {}, // Pour éviter de gagner l'XP en boucle
+        xp_claimed: userXPClaimed || {},
 
-        // Profil & Personnalisation
+        // --- AJOUTS POUR LA SYNCHRO ---
+        // 1. Notes Générales (Par matière)
+        subject_notes: userSubjectNotes || {},
+        
+        // 2. Suggestions du jour (Persistantes)
+        daily_suggestions: {
+            date: getTodayKey(),
+            suggestions: currentSuggestions || [],
+            done: dailySuggestionsDone || {}
+        },
+        // ------------------------------
+
+        // Profil
         custom_links: userLinks || [],
         unlocked_avatars: userUnlockedAvatars || ['fa-dragon'],
         current_avatar: userAvatar || 'fa-dragon',
@@ -2559,11 +2584,9 @@ async function saveData() {
         last_update: new Date().toISOString()
     };
 
-    // 2. Écriture dans Firestore (Création ou Mise à jour)
     try {
-        // .set avec merge:true est la méthode la plus sûre
         await db.collection('users').doc(user.uid).set({ userData: dataToSave }, { merge: true });
-        console.log("Sauvegarde Cloud réussie.");
+        // console.log("Sauvegarde Cloud réussie."); // Optionnel pour debug
     } catch (error) {
         console.error("Erreur de sauvegarde :", error);
     }
@@ -2626,26 +2649,28 @@ async function saveData() {
         }
 
         function renderNotesPanel() {
-            const notesPanel = document.getElementById('notesPanel');
-            const notesIcon = document.getElementById('notesIcon');
-            const notesTitle = document.getElementById('notesTitle');
-            const notesArea = document.getElementById('quickNotes');
-            
-            const config = getNotesMatiereConfig(currentNotesMatiere);
+    const notesPanel = document.getElementById('notesPanel');
+    const notesIcon = document.getElementById('notesIcon');
+    const notesTitle = document.getElementById('notesTitle');
+    const notesArea = document.getElementById('quickNotes');
+    
+    const config = getNotesMatiereConfig(currentNotesMatiere);
 
-            notesIcon.className = `fa-solid ${config.icon} text-xs text-gray-300 group-hover:text-white transition-colors`;
-            notesTitle.innerText = config.name;
-            
-            notesPanel.classList.forEach(cls => {
-                 if (cls.startsWith('bg-')) notesPanel.classList.remove(cls); 
-            });
-            notesPanel.style.backgroundColor = config.background; 
-            
-            updateGlobalGlow(currentNotesMatiere);
+    notesIcon.className = `fa-solid ${config.icon} text-xs text-gray-300 group-hover:text-white transition-colors`;
+    notesTitle.innerText = config.name;
+    
+    // Nettoyage des anciennes classes bg-
+    notesPanel.classList.forEach(cls => {
+         if (cls.startsWith('bg-')) notesPanel.classList.remove(cls); 
+    });
+    notesPanel.style.backgroundColor = config.background; 
+    
+    updateGlobalGlow(currentNotesMatiere);
 
-            const savedContent = localStorage.getItem(`ultimed_notes_${currentNotesMatiere}`) || "";
-            notesArea.value = savedContent;
-        }
+    // MODIFICATION : On lit depuis la variable globale, plus le localStorage
+    const savedContent = userSubjectNotes[currentNotesMatiere] || "";
+    notesArea.value = savedContent;
+}
 
         function changeNotesMatiere(newMatiere) {
             saveNotes(document.getElementById('quickNotes').value); 
@@ -2656,11 +2681,18 @@ async function saveData() {
         }
 
         function saveNotes(content) {
-            localStorage.setItem(`ultimed_notes_${currentNotesMatiere}`, content);
-            const indicator = document.getElementById('saveIndicator');
-            indicator.classList.remove('opacity-0');
-            setTimeout(() => indicator.classList.add('opacity-0'), 1000);
-        }
+    // MODIFICATION : On enregistre dans la variable globale
+    userSubjectNotes[currentNotesMatiere] = content;
+    
+    // Et on envoie au Cloud
+    saveData();
+    
+    const indicator = document.getElementById('saveIndicator');
+    if(indicator) {
+        indicator.classList.remove('opacity-0');
+        setTimeout(() => indicator.classList.add('opacity-0'), 1000);
+    }
+}
 
         // --- UNIFIED GLOBAL SETTINGS LOGIC ---
         function openGlobalSettings() {
@@ -3659,47 +3691,41 @@ function updateStats() {
         }
 
         function saveDailySuggestionState() {
-            const state = {
-                date: getTodayKey(),
-                suggestions: currentSuggestions,
-                done: dailySuggestionsDone
-            };
-            localStorage.setItem('ultimed_daily_suggestions', JSON.stringify(state));
-        }
+    saveData();
+}
 
         function generateNewSuggestions() {
-            const todoCourses = courses.filter(c => !userStatus[c.id]);
-            const newSuggestions = [];
-            const suggestionsCount = Math.min(6, todoCourses.length);
-            
-            const usedIndices = new Set();
-            
-            for (let i = 0; i < suggestionsCount; i++) {
-                let randomIndex;
-                do {
-                    randomIndex = Math.floor(Math.random() * todoCourses.length);
-                } while (usedIndices.has(randomIndex));
-                
-                usedIndices.add(randomIndex);
-                
-                const item = todoCourses[randomIndex];
-                const config = matiereConfig[item.matiere] || defaultConfig;
+    const todoCourses = courses.filter(c => !userStatus[c.id]);
+    const newSuggestions = [];
+    const suggestionsCount = Math.min(6, todoCourses.length);
+    
+    // (Logique de sélection aléatoire inchangée...)
+    const usedIndices = new Set();
+    for (let i = 0; i < suggestionsCount; i++) {
+        let randomIndex;
+        do {
+            randomIndex = Math.floor(Math.random() * todoCourses.length);
+        } while (usedIndices.has(randomIndex));
+        usedIndices.add(randomIndex);
+        const item = todoCourses[randomIndex];
+        const config = matiereConfig[item.matiere] || defaultConfig;
+        newSuggestions.push({
+            id: item.id,
+            title: item.title,
+            matiere: item.matiere, 
+            theme: item.matiere || "Général",
+            icon: config.icon
+        });
+    }
 
-                newSuggestions.push({
-                    id: item.id,
-                    title: item.title,
-                    matiere: item.matiere, 
-                    theme: item.matiere || "Général",
-                    icon: config.icon
-                });
-            }
-
-            currentSuggestions = newSuggestions;
-            dailySuggestionsDone = {};
-            currentSuggestions.forEach(s => { dailySuggestionsDone[s.id] = false; });
-            saveDailySuggestionState();
-            showToast(`Nouvelles suggestions générées: ${currentSuggestions.length} items.`, 'info');
-        }
+    currentSuggestions = newSuggestions;
+    dailySuggestionsDone = {}; // Reset des validations
+    currentSuggestions.forEach(s => { dailySuggestionsDone[s.id] = false; });
+    
+    saveData(); // Sauvegarde Cloud immédiate
+    
+    showToast(`Nouvelles suggestions générées.`, 'info');
+}
 
         // --- UPDATED SUGGESTION HTML GENERATION ---
         function getSuggestionCardHTML(c) {
@@ -3869,26 +3895,38 @@ function showCelebrationSuggestions() {
 }
 
         function renderSuggestions(forceRefresh = false) {
-            const container = document.getElementById('suggestionList');
-            const block = document.getElementById('suggestionBlock');
+    const container = document.getElementById('suggestionList');
+    const block = document.getElementById('suggestionBlock');
 
-            if (forceRefresh || currentSuggestions.length === 0) {
-                generateNewSuggestions();
-            }
-            
-            if (currentSuggestions.length > 0) {
-                container.innerHTML = currentSuggestions.map(getSuggestionCardHTML).join('');
-                block.classList.remove('hidden');
-            } else {
-                if (courses.filter(c => !userStatus[c.id]).length === 0) {
-                    block.classList.add('hidden');
-                    container.innerHTML = `<div class="col-span-full text-center py-6 text-green-500 font-bold">Bravo ! Tous les items sont soit "Lu" soit "Maîtrisé".</div>`;
-                } else {
-                    container.innerHTML = `<div class="col-span-full text-center py-6 text-gray-500">Aucune suggestion disponible pour le moment. Essayez de <span class="font-bold cursor-pointer hover:text-white transition" onclick="renderSuggestions(true)">Rafraîchir</span>.</div>`;
-                    block.classList.remove('hidden');
-                }
-            }
+    // 1. LOGIQUE DE GÉNÉRATION
+    // On ne génère de nouvelles suggestions QUE si :
+    // - L'utilisateur a cliqué sur le bouton "Rafraîchir" (forceRefresh = true)
+    // - OU la liste actuelle est vide (ex: premier lancement d'un nouveau compte)
+    if (forceRefresh) {
+        generateNewSuggestions();
+        playSound('refresh'); 
+    } else if (currentSuggestions.length === 0) {
+        generateNewSuggestions();
+    }
+    
+    // 2. LOGIQUE D'AFFICHAGE
+    if (currentSuggestions.length > 0) {
+        // On affiche les cartes
+        container.innerHTML = currentSuggestions.map(getSuggestionCardHTML).join('');
+        block.classList.remove('hidden');
+    } else {
+        // Cas particulier : Plus rien à suggérer ou tout est fini
+        if (courses.filter(c => !userStatus[c.id]).length === 0) {
+            // Tout le programme est fini !
+            block.classList.add('hidden');
+            container.innerHTML = `<div class="col-span-full text-center py-6 text-green-500 font-bold">Bravo ! Tous les items sont soit "Lu" soit "Maîtrisé".</div>`;
+        } else {
+            // Erreur ou liste vide temporaire
+            container.innerHTML = `<div class="col-span-full text-center py-6 text-gray-500">Aucune suggestion disponible pour le moment. Essayez de <span class="font-bold cursor-pointer hover:text-white transition" onclick="renderSuggestions(true)">Rafraîchir</span>.</div>`;
+            block.classList.remove('hidden');
         }
+    }
+}s
 
         // --- UPDATED VUES COUNTER ---
 	function getVuesBarHTML(vues, itemId) {
