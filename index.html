@@ -494,33 +494,50 @@ input[type=range]::-webkit-slider-runnable-track {
         }
 
 /* --- FLASH LUMINEUX COLORÉ --- */
-@keyframes flashBurst {
-    0% { 
-        opacity: 0; 
-        background: radial-gradient(circle, rgba(59, 130, 246, 0) 0%, rgba(0,0,0,0) 100%);
-    }
-    20% { 
-        opacity: 1; 
-        background: radial-gradient(circle, rgba(59, 130, 246, 0.6) 0%, rgba(168, 85, 247, 0.4) 60%, rgba(0,0,0,0) 100%);
-        backdrop-filter: blur(5px);
-    }
-    90% {
-        opacity: 0;
-    }
-    100% { 
-        opacity: 0; 
-        background: radial-gradient(circle, rgba(59, 130, 246, 0) 0%, rgba(0,0,0,0) 100%);
-        backdrop-filter: blur(0px);
-    }
-}
-
+/* 1. La classe optimisée */
 .transition-flash {
     position: fixed;
     inset: 0;
-    z-index: 10000; /* Au-dessus de TOUT (même le login) */
+    z-index: 10000;
     pointer-events: none;
+    
+    /* On définit le fond ICI pour éviter de le recalculer à chaque frame */
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.6) 0%, rgba(168, 85, 247, 0.4) 60%, rgba(0,0,0,0) 100%);
+    
+    /* Optimisation matérielle indispensable pour la fluidité */
+    will-change: opacity, transform;
+    mix-blend-mode: screen; 
+    
+    /* On applique le flou de base (statique pour éviter le lag) */
+    backdrop-filter: blur(5px);
+
+    /* L'animation */
     animation: flashBurst 1.5s ease-out forwards;
-    mix-blend-mode: screen; /* Mode de fusion pour un effet "lumière" */
+}
+
+/* 2. Les Keyframes avec "Zone de Sécurité" */
+@keyframes flashBurst {
+    0% { 
+        opacity: 0; 
+        transform: scale(1);
+    }
+    10% { 
+        /* Montée très rapide de la lumière */
+        opacity: 1; 
+        transform: scale(1.05);
+    }
+    80% {
+        /* LE SECRET EST ICI : On commence à être invisible */
+        opacity: 0; 
+        transform: scale(1.15);
+    }
+    100% { 
+        /* ZONE DE SÉCURITÉ : On reste invisible jusqu'à la fin */
+        /* Cela garantit que si le JS supprime l'élément à 1.5s pile, */
+        /* l'élément est déjà invisible depuis 0.3 secondes. */
+        opacity: 0; 
+        transform: scale(1.2);
+    }
 }
 
 /* --- (Rappel) ANIMATION DASHBOARD --- */
@@ -2347,8 +2364,21 @@ function initApp() {
             
             // --- SÉQUENCE CINÉMATIQUE (AVEC FLASH) ---
             
-            // 1. Son spatial
-            playSound('track4'); 
+            // 1. On récupère le son (assurez-vous que c'est bien 'chronoStart' ou votre musique)
+            const introSound = audioSystem.sounds['track4']; 
+            
+            if (audioSystem.enabled && introSound) {
+                // On le lance
+                introSound.currentTime = 0;
+                introSound.volume = 0.2; // Ou votre volume préféré
+                introSound.play().catch(e => console.log("Audio bloqué", e));
+
+                // 2. On programme le fondu pour qu'il FINISSE à 12s
+                // Donc on commence à 9s (9000ms) et on fait un fondu de 3s (3000ms)
+                setTimeout(() => {
+                    fadeOutAndStop(introSound, 3000);
+                }, 9000);
+            }
 
             // 2. Création du Flash Lumineux
             const flash = document.createElement('div');
@@ -4376,6 +4406,36 @@ function playNextTrack() {
         nextTrack.currentTime = 0;
         nextTrack.play().catch(e => console.log("Erreur lecture", e));
     }
+}
+
+/**
+ * Baisse le volume progressivement puis coupe le son
+ * @param {HTMLAudioElement} audio - L'objet audio à couper
+ * @param {number} fadeDuration - Durée du fondu en ms (ex: 3000 pour 3s)
+ */
+function fadeOutAndStop(audio, fadeDuration) {
+    if (!audio || audio.paused) return;
+
+    const originalVolume = audio.volume;
+    const stepTime = 50; // Mise à jour toutes les 50ms
+    const steps = fadeDuration / stepTime;
+    const volumeStep = originalVolume / steps;
+
+    const fadeInterval = setInterval(() => {
+        // Protection : si le volume est suffisant, on baisse
+        if (audio.volume > volumeStep) {
+            audio.volume -= volumeStep;
+        } else {
+            // FIN : on coupe tout
+            clearInterval(fadeInterval);
+            audio.volume = 0;
+            audio.pause();
+            audio.currentTime = 0;
+            
+            // IMPORTANT : On remet le volume pour la prochaine utilisation
+            audio.volume = originalVolume; 
+        }
+    }, stepTime);
 }
 
 // Lancer l'init au démarrage (sans jouer, car le navigateur bloque l'autoplay)
