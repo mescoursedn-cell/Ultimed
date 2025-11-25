@@ -608,6 +608,18 @@ input[type=range]::-webkit-slider-runnable-track {
         </div>
     </div>
 
+<div class="fixed bottom-6 right-6 z-[90]">
+    <button onclick="toggleBackgroundMusic()" id="musicBtn" class="w-12 h-12 rounded-full bg-[#111]/80 backdrop-blur-md border border-white/10 text-gray-400 hover:text-white hover:border-purple-500/50 hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all duration-500 flex items-center justify-center group">
+        <i id="musicIcon" class="fa-solid fa-music text-sm group-hover:scale-110 transition-transform"></i>
+        
+        <div id="musicVisualizer" class="hidden absolute inset-0 items-center justify-center gap-1">
+            <div class="w-0.5 h-3 bg-purple-400 animate-[pulse_1s_ease-in-out_infinite]"></div>
+            <div class="w-0.5 h-5 bg-purple-400 animate-[pulse_1.2s_ease-in-out_infinite]"></div>
+            <div class="w-0.5 h-3 bg-purple-400 animate-[pulse_0.8s_ease-in-out_infinite]"></div>
+        </div>
+    </button>
+</div>
+
     <header class="fixed top-0 w-full z-50 bg-[#050505]/80 backdrop-blur-xl border-b border-white/10 transition-all duration-300 shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
         <div class="container mx-auto px-6 h-20 flex justify-between items-center relative">
             
@@ -1695,22 +1707,30 @@ input[type=range]::-webkit-slider-runnable-track {
 
 // --- SYSTEME SONORE ---
 	const audioSystem = {
-   	 enabled: true,
-   	 sounds: {
+    enabled: true,
+    // On sépare la musique des bruitages pour gérer le volume séparément
+    musicVolume: 0.05, // 5% de volume pour ne pas gêner la concentration
+    currentTrackIndex: 0,
+    isPlaying: false,
+    playlist: [], // Sera rempli à l'init
+    
+    sounds: {
         success: new Audio('https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3'),
         click: new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3'),
         levelUp: new Audio('https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3'),
         chronoStart: new Audio('https://assets.mixkit.co/active_storage/sfx/2986/2986-preview.mp3'),
-	mastery: new Audio('https://assets.mixkit.co/active_storage/sfx/657/657-preview.mp3'),
-	whoosh: new Audio('https://assets.mixkit.co/active_storage/sfx/3124/3124-preview.mp3'),
+        mastery: new Audio('https://assets.mixkit.co/active_storage/sfx/657/657-preview.mp3'),
+        whoosh: new Audio('https://assets.mixkit.co/active_storage/sfx/3124/3124-preview.mp3'),
         error: new Audio('https://assets.mixkit.co/active_storage/sfx/1110/1110-preview.mp3'),
-	refresh: new Audio('https://assets.mixkit.co/active_storage/sfx/2043/2043-preview.mp3'),
-	subjectClick: new Audio('https://assets.mixkit.co/active_storage/sfx/1120/1120-preview.mp3'),
-	creature: new Audio('https://assets.mixkit.co/active_storage/sfx/2350/2350-preview.mp3'),
-	Air: new Audio('./sounds/Air/AR-01-Beginnings.mp3'),
-	Melody: new Audio('./sounds/Melody/ML-01-Beginnings.mp3'),
-	Strings: new Audio('./sounds/Strings/ST-01-Beginnings.mp3'),
-	Undertones: new Audio('./sounds/Undertones/UT-01-Beginnings.mp3'),
+        refresh: new Audio('https://assets.mixkit.co/active_storage/sfx/2043/2043-preview.mp3'),
+        subjectClick: new Audio('https://assets.mixkit.co/active_storage/sfx/1120/1120-preview.mp3'),
+        creature: new Audio('https://assets.mixkit.co/active_storage/sfx/2350/2350-preview.mp3'),
+        
+        // Vos musiques d'ambiance
+        track1: new Audio('./sounds/Air/AR-01-Beginnings.mp3'),
+        track2: new Audio('./sounds/Melody/ML-01-Beginnings.mp3'),
+        track3: new Audio('./sounds/Strings/ST-01-Beginnings.mp3'),
+        track4: new Audio('./sounds/Undertones/UT-01-Beginnings.mp3')
     }
 };
 
@@ -2356,7 +2376,7 @@ function initApp() {
             // --- SÉQUENCE CINÉMATIQUE (AVEC FLASH) ---
             
             // 1. Son spatial
-            playSound('Undertones'); 
+            playSound('track4'); 
 
             // 2. Création du Flash Lumineux
             const flash = document.createElement('div');
@@ -4321,6 +4341,73 @@ function render() {
         }
 
         // --- UTILS ---
+
+// --- GESTION MUSIQUE D'AMBIANCE ---
+
+function initMusicPlayer() {
+    // 1. On prépare la playlist
+    const s = audioSystem.sounds;
+    audioSystem.playlist = [s.track1, s.track2, s.track3, s.track4];
+    
+    // 2. On configure chaque piste
+    audioSystem.playlist.forEach((track, index) => {
+        track.volume = audioSystem.musicVolume; // Volume doux
+        
+        // Quand une piste finit, on lance la suivante
+        track.addEventListener('ended', () => {
+            playNextTrack();
+        });
+    });
+}
+
+function toggleBackgroundMusic() {
+    const btn = document.getElementById('musicBtn');
+    const icon = document.getElementById('musicIcon');
+    const viz = document.getElementById('musicVisualizer');
+    
+    // Si la playlist est vide (premier lancement), on init
+    if (audioSystem.playlist.length === 0) initMusicPlayer();
+
+    const currentTrack = audioSystem.playlist[audioSystem.currentTrackIndex];
+
+    if (audioSystem.isPlaying) {
+        // PAUSE
+        currentTrack.pause();
+        audioSystem.isPlaying = false;
+        
+        // Visuel
+        icon.classList.remove('hidden');
+        viz.classList.add('hidden');
+        btn.classList.remove('border-purple-500', 'text-purple-400');
+        showToast("Musique en pause", "info");
+    } else {
+        // PLAY
+        // On joue la piste en cours (ou la première)
+        currentTrack.play().catch(e => console.log("Autoplay bloqué", e));
+        audioSystem.isPlaying = true;
+        
+        // Visuel
+        icon.classList.add('hidden');
+        viz.classList.remove('hidden'); // Affiche l'égaliseur
+        viz.classList.add('flex');
+        btn.classList.add('border-purple-500', 'text-purple-400');
+        showToast("Ambiance activée 🎵", "success");
+    }
+}
+
+function playNextTrack() {
+    // Piste suivante (boucle)
+    audioSystem.currentTrackIndex = (audioSystem.currentTrackIndex + 1) % audioSystem.playlist.length;
+    const nextTrack = audioSystem.playlist[audioSystem.currentTrackIndex];
+    
+    if (audioSystem.isPlaying) {
+        nextTrack.currentTime = 0;
+        nextTrack.play().catch(e => console.log("Erreur lecture", e));
+    }
+}
+
+// Lancer l'init au démarrage (sans jouer, car le navigateur bloque l'autoplay)
+initMusicPlayer();
 
 // --- LOGIQUE CARROUSEL IMMERSIF ---
 
