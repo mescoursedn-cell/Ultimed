@@ -504,6 +504,9 @@ input[type=range]::-webkit-slider-runnable-track {
         background: radial-gradient(circle, rgba(59, 130, 246, 0.6) 0%, rgba(168, 85, 247, 0.4) 60%, rgba(0,0,0,0) 100%);
         backdrop-filter: blur(5px);
     }
+    90% {
+        opacity: 0;
+    }
     100% { 
         opacity: 0; 
         background: radial-gradient(circle, rgba(59, 130, 246, 0) 0%, rgba(0,0,0,0) 100%);
@@ -2345,14 +2348,16 @@ function initApp() {
             // --- SÉQUENCE CINÉMATIQUE (AVEC FLASH) ---
             
             // 1. Son spatial
-            playSound('chronoStart'); 
+            playSound('track4'); 
 
             // 2. Création du Flash Lumineux
             const flash = document.createElement('div');
             flash.className = 'transition-flash';
             document.body.appendChild(flash);
             // Nettoyage du flash après l'animation
-            setTimeout(() => flash.remove(), 1500);
+            flash.addEventListener('animationend', () => {
+    flash.remove();
+});
 
             // 3. Explosion du Login (Disparition)
             if(overlay) overlay.classList.add('login-explode');
