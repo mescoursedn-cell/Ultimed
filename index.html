@@ -1561,6 +1561,7 @@ input[type=range]::-webkit-slider-runnable-track {
 // --- GLOBAL VARIABLES ---
         var userResources = [], userStatus = {}, userTodos = [], courses = [], celebrationTimeout;
         var userName = "", userAlias = "Docteur", userApiKey = "", chatHistory = [], currentRevisionContext = "";
+	var userExamDate = "";
         var currentNotesMatiere = "Général", currentSuggestions = [], dailySuggestionsDone = {}, currentStatusFilter = "all", userVues = {};
         var userAvatar = "fa-dragon"; 
         var userUnlockedAvatars = ['fa-dragon'];
@@ -2347,6 +2348,12 @@ async function completeInitialization(userId) {
     if (loadedData.current_avatar) userAvatar = loadedData.current_avatar;
     if (loadedData.unlocked_avatars) userUnlockedAvatars = loadedData.unlocked_avatars;
     if (loadedData.custom_links) userLinks = loadedData.custom_links;
+    if (loadedData.exam_date) {
+        userExamDate = loadedData.exam_date;
+        updateCountdownDisplay(userExamDate);
+        const settingDateInput = document.getElementById('settingDate');
+        if(settingDateInput) settingDateInput.value = userExamDate;
+    }
 
     // -- Mise à jour de l'interface --
     updateGreetingDisplay(); // Met à jour le nom et l'avatar
@@ -2354,7 +2361,6 @@ async function completeInitialization(userId) {
     if(typeof renderHeaderLinks === 'function') renderHeaderLinks();
     
     loadProfile(); // Charge les réglages locaux (Son, Clé API)
-    loadDailySuggestionState();
     initNotes(); 
 
     // Date examen
@@ -2391,6 +2397,7 @@ async function completeInitialization(userId) {
     if(overlay) overlay.classList.add('hidden');
 
     initSubjectCarousel();
+    renderSuggestions(false);
 }
 
 // Petite fonction utilitaire requise
@@ -2575,6 +2582,7 @@ async function saveData() {
         // ------------------------------
 
         // Profil
+	exam_date: userExamDate || "",
         custom_links: userLinks || [],
         unlocked_avatars: userUnlockedAvatars || ['fa-dragon'],
         current_avatar: userAvatar || 'fa-dragon',
@@ -2791,41 +2799,44 @@ async function saveData() {
         }
 
         function saveGlobalSettings() {
-            const name = document.getElementById('settingName').value.trim();
-            const alias = document.getElementById('settingAlias').value.trim();
-            
-            if (name) localStorage.setItem('ultimed_userName', name);
-            if (alias) localStorage.setItem('ultimed_userAlias', alias); else localStorage.removeItem('ultimed_userAlias');
-            localStorage.setItem('ultimed_userAvatar', userAvatar);
-            
-            userName = name;
-            userAlias = alias || "Docteur";
+    const name = document.getElementById('settingName').value.trim();
+    const alias = document.getElementById('settingAlias').value.trim();
+    
+    // Mise à jour Profil
+    userName = name;
+    userAlias = alias || "Docteur";
 
-            const date = document.getElementById('settingDate').value;
-            if (date) {
-                localStorage.setItem('ultimed_examDate', date);
-                updateCountdownDisplay(date);
-            }
+    // Mise à jour Date Concours
+    const date = document.getElementById('settingDate').value;
+    if (date) {
+        userExamDate = date; // On met à jour la variable globale
+        updateCountdownDisplay(date);
+    }
 
-            const key = document.getElementById('settingKey').value.trim();
-            if (key) {
-                localStorage.setItem('ultimed_apiKey', key);
-                userApiKey = key;
-            }
-	    const soundEnabled = document.getElementById('settingSoundToggle').checked;
-            audioSystem.enabled = soundEnabled;
-            localStorage.setItem('ultimed_sound_enabled', soundEnabled);
+    // Mise à jour Clé API
+    const key = document.getElementById('settingKey').value.trim();
+    if (key) {
+        userApiKey = key;
+        localStorage.setItem('ultimed_apiKey', key); // On garde la clé en local par sécurité/facilité
+    }
+    
+    // Son
+    const soundEnabled = document.getElementById('settingSoundToggle').checked;
+    audioSystem.enabled = soundEnabled;
+    localStorage.setItem('ultimed_sound_enabled', soundEnabled);
 
-            updateGreetingDisplay();
+    // Avatar Dino
+    const dinoIcon = document.getElementById('dinoIcon');
+    dinoIcon.className = `fa-solid ${userAvatar} text-6xl text-gray-500 transition-colors duration-300`;
 
-            const dinoIcon = document.getElementById('dinoIcon');
-            dinoIcon.className = `fa-solid ${userAvatar} text-6xl text-gray-500 transition-colors duration-300`;
+    updateGreetingDisplay();
 
-	saveData();
+    // SAUVEGARDE FINALE DANS LE CLOUD
+    saveData();
 
-            showToast("Configuration enregistrée !", "success");
-            closeGlobalSettings();
-        }
+    showToast("Configuration enregistrée !", "success");
+    closeGlobalSettings();
+}
 
 // --- CHANGEMENT DE MOT DE PASSE ---
 function updateUserPassword() {
@@ -3674,20 +3685,6 @@ function updateStats() {
         // --- SUGGESTIONS LOGIC ---
         function getTodayKey() {
             return new Date().toISOString().slice(0, 10);
-        }
-
-        function loadDailySuggestionState() {
-            const savedState = localStorage.getItem('ultimed_daily_suggestions');
-            if (savedState) {
-                const state = JSON.parse(savedState);
-                if (state.date === getTodayKey() && state.suggestions && state.suggestions.length > 0 && state.suggestions[0].theme) {
-                    currentSuggestions = state.suggestions;
-                    dailySuggestionsDone = state.done || {};
-                    return;
-                }
-            }
-            currentSuggestions = [];
-            dailySuggestionsDone = {};
         }
 
         function saveDailySuggestionState() {
