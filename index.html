@@ -115,6 +115,16 @@
     </script>
 
     <style>
+
+:target::before {
+    content: "";
+    display: block;
+    height: 120px; /* Espace de compensation (Header height + gap) */
+    margin-top: -120px; /* Remonter le padding pour ne pas le voir */
+    visibility: hidden;
+    pointer-events: none;
+}
+
         body { background-color: #050505; color: #e5e7eb; font-family: 'Inter', sans-serif; overflow-x: hidden; }
         .depth-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: radial-gradient(circle at center, #111, #050505); overflow: hidden; }
         .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.3; animation: float 18s infinite ease-in-out; }
@@ -540,10 +550,31 @@ input[type=range]::-webkit-slider-runnable-track {
     }
 }
 
+/* --- EFFET GLOW DYNAMIQUE NOTES --- */
+        #notesPanel {
+            /* Couleur par défaut (Gris/Blanc) */
+            --glow-rgb: 255, 255, 255; 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #notesPanel:hover {
+            /* Bordure colorée */
+            border-color: rgba(var(--glow-rgb), 0.6) !important;
+            
+            /* Lueur externe (Le "Brille") */
+            box-shadow: 0 0 40px -5px rgba(var(--glow-rgb), 0.3), 
+                        inset 0 0 20px rgba(var(--glow-rgb), 0.05) !important;
+            
+            /* Léger soulèvement */
+            transform: translateY(-4px);
+        }
+
     </style>
+
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css"/>
 <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>
 </head>
+
 <body class="min-h-screen flex flex-col text-gray-100 font-sans">
 
     <div class="depth-bg"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
@@ -624,42 +655,40 @@ input[type=range]::-webkit-slider-runnable-track {
                 
    <div class="flex items-center gap-3">
     
-    <div class="hidden xl:flex items-center gap-2.5 bg-blue-900/20 backdrop-blur-md px-3 py-1.5 rounded-lg border border-blue-500/10 shadow-lg hover:border-blue-500/30 transition-all cursor-help group h-10">
-        
-        <div class="flex flex-col items-end justify-center leading-none">
-            <span class="text-[8px] text-blue-300/60 font-bold uppercase tracking-wider">Niv.</span>
-            <span id="lvlDisplay" class="text-blue-100 font-display font-black text-lg leading-none group-hover:text-white transition">0</span>
-        </div>
-
-        <div class="h-5 w-px bg-blue-500/20 mx-1"></div>
-
-        <div class="flex flex-col justify-center w-24">
-            <div class="flex justify-between items-center mb-1">
-                <i class="fa-solid fa-bolt text-[8px] text-blue-500 group-hover:text-blue-400 transition"></i>
-                <span class="text-[8px] font-mono font-bold text-blue-300"><span id="xpDisplay">0</span> XP</span>
-            </div>
-            
-            <div class="w-full h-1 bg-blue-900/50 rounded-full overflow-hidden border border-white/5">
-                <div id="xpBar" class="h-full bg-gradient-to-r from-blue-400 to-indigo-400 shadow-[0_0_5px_rgba(96,165,250,0.8)] relative transition-all duration-500" style="width: 0%"></div>
-            </div>
-        </div>
+    <div onclick="openXPModal()" class="hidden xl:flex items-center gap-2.5 bg-blue-900/20 backdrop-blur-md px-3 py-1.5 rounded-lg border border-blue-500/10 shadow-lg hover:border-blue-500/50 hover:bg-blue-900/40 transition-all cursor-pointer group h-10 select-none active:scale-95">
+    
+    <div class="flex flex-col items-end justify-center leading-none">
+        <span class="text-[8px] text-blue-300/60 font-bold uppercase tracking-wider">Niv.</span>
+        <span id="lvlDisplay" class="text-blue-100 font-display font-black text-lg leading-none group-hover:text-white transition">0</span>
     </div>
 
-    <div class="hidden md:flex items-center gap-2.5 bg-yellow-900/10 backdrop-blur-md px-3 py-1.5 rounded-lg border border-yellow-500/10 shadow-lg hover:border-yellow-500/30 transition-all cursor-default group h-10">
-        
-        <div class="flex flex-col items-end justify-center leading-none">
-            <span class="text-[8px] text-yellow-500/60 font-bold uppercase tracking-wider mb-0.5">Jours</span>
-            <span class="text-[8px] text-gray-500 font-bold uppercase tracking-wider">Restants</span>
+    <div class="h-5 w-px bg-blue-500/20 mx-1"></div>
+
+    <div class="flex flex-col justify-center w-24">
+        <div class="flex justify-between items-center mb-1">
+            <i class="fa-solid fa-bolt text-[8px] text-blue-500 group-hover:text-blue-400 transition"></i>
+            <span class="text-[8px] font-mono font-bold text-blue-300"><span id="xpDisplay">0</span> XP</span>
         </div>
         
-        <div class="h-5 w-px bg-yellow-500/20 mx-1"></div>
-
-        <div class="flex items-center gap-2">
-            <span id="countdownDisplay" class="text-yellow-100 font-display font-black text-lg leading-none tracking-wide group-hover:text-white transition">---</span>
-            <i class="fa-solid fa-hourglass-half text-yellow-500/80 text-xs group-hover:animate-spin-slow"></i>
+        <div class="w-full h-1 bg-blue-900/50 rounded-full overflow-hidden border border-white/5">
+            <div id="xpBar" class="h-full bg-gradient-to-r from-blue-400 to-indigo-400 shadow-[0_0_5px_rgba(96,165,250,0.8)] relative transition-all duration-500" style="width: 0%"></div>
         </div>
     </div>
+</div>
 
+<div onclick="openCountdownModal()" class="hidden md:flex items-center gap-2.5 bg-orange-900/10 backdrop-blur-md px-3 py-1.5 rounded-lg border border-orange-500/10 shadow-lg hover:border-orange-500/50 hover:bg-orange-900/30 transition-all cursor-pointer group h-10 select-none active:scale-95">
+    
+    <div class="flex flex-col items-end justify-center leading-none">
+        <span class="text-[8px] text-orange-500/60 font-bold uppercase tracking-wider mb-0.5">Jours</span>
+        <span class="text-[8px] text-gray-500 font-bold uppercase tracking-wider">Restants</span>
+    </div>
+    
+    <div class="h-5 w-px bg-orange-500/20 mx-1"></div>
+
+    <div class="flex items-center gap-2">
+        <span id="countdownDisplay" class="text-orange-100 font-display font-black text-lg leading-none tracking-wide group-hover:text-white transition">---</span>
+        <i class="fa-solid fa-hourglass-half text-orange-500/80 text-xs group-hover:animate-spin-slow"></i>
+    </div>
 </div>
 
                 <button onclick="resetView()" class="w-10 h-10 glass-btn flex items-center justify-center text-gray-400 hover:text-green-400 transition-all shadow-lg group relative overflow-hidden" title="Accueil (Tableau de bord)">
@@ -848,21 +877,44 @@ input[type=range]::-webkit-slider-runnable-track {
                 </div>
             </div> 
 
-            <div id="notesPanel" class="card-panel rounded-3xl p-6 flex flex-col shadow-2xl relative group order-3 min-h-[400px] notes-thematic">
-                <div id="notesHeader" class="flex items-center justify-between mb-4">
-                    <div class="flex items-center gap-3">
-                        <div class="relative w-8 h-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition border border-white/10 group">
-                             <i id="notesIcon" class="fa-solid text-sm text-gray-400"></i>
-                             <select id="notesMatiereSelect" onchange="changeNotesMatiere(this.value)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" title="Changer de matière"></select>
-                        </div>
-                        <h3 id="notesTitle" class="font-display font-bold text-lg text-white tracking-wide">Notes Générales</h3>
-                    </div>
-                    <span id="saveIndicator" class="text-[10px] text-green-500 font-bold opacity-0 transition-opacity">SAUVEGARDÉ</span>
-                </div>
-                <div class="flex-grow relative bg-[#111] rounded-xl border border-white/5 overflow-hidden shadow-inner">
-                    <textarea id="quickNotes" class="w-full h-full bg-transparent border-none p-5 resize-none font-sans text-sm text-gray-300 leading-relaxed focus:ring-0 placeholder-gray-700" placeholder="Écrivez vos mémos ici..."></textarea>
-                </div>
+            <div id="notesPanel" 
+     onclick="openFullScreenNotes()" 
+     class="card-panel rounded-3xl p-6 flex flex-col shadow-2xl relative group order-3 min-h-[400px] notes-thematic cursor-pointer">
+    
+    <div id="notesHeader" class="flex items-center justify-between mb-4">
+        
+        <div class="flex items-center gap-3">
+            <div onclick="event.stopPropagation()" class="relative w-8 h-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition border border-white/10 group/select">
+                    <i id="notesIcon" class="fa-solid text-sm text-gray-400"></i>
+                    <select id="notesMatiereSelect" onchange="changeNotesMatiere(this.value)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" title="Changer de matière"></select>
             </div>
+            <h3 id="notesTitle" class="font-display font-bold text-lg text-white tracking-wide">Notes Générales</h3>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <span id="saveIndicator" class="text-[10px] text-green-500 font-bold opacity-0 transition-opacity">SAUVEGARDÉ</span>
+            
+            <button class="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/20 border border-white/10 text-gray-400 hover:text-white flex items-center justify-center transition-all hover:scale-110" title="Agrandir / Outils">
+                <i class="fa-solid fa-expand text-xs"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="flex-grow relative bg-black/20 backdrop-blur-md rounded-xl border border-white/10 overflow-hidden shadow-inner cursor-text focus-within:border-white/30 focus-within:bg-black/40 transition-all duration-300 group/edit" 
+         onclick="event.stopPropagation()">
+        
+        <div id="quickNotesPreview" 
+             contenteditable="true"
+             oninput="saveDashboardNotes()"
+             class="w-full h-full p-5 overflow-y-auto text-sm text-gray-200 leading-relaxed focus:outline-none custom-scrollbar relative z-10 text-shadow-sm">
+        </div>
+        
+        <div id="emptyNotePlaceholder" class="absolute top-5 left-5 text-sm text-gray-500/80 italic pointer-events-none hidden z-0">
+            Cliquez pour écrire...
+        </div>
+    </div>
+</div>
+
         </section>
         
         <section class="mb-12 animate-fade-in-up" style="animation-delay: 0.2s;">
@@ -1093,14 +1145,32 @@ input[type=range]::-webkit-slider-runnable-track {
                         </h2>
                     </div>
 
-                    <div class="ml-auto flex flex-col items-end bg-black/10 backdrop-blur-md border border-white/5 rounded-xl p-2 w-44">
-                        <span class="text-[9px] text-gray-500 font-bold uppercase mb-1 px-1">Difficulté Perso</span>
-                        
-                        <span id="difficultyLevelLabel" class="text-xs font-bold text-gray-300 mb-2 transition-colors">3 - Normale</span> 
+                    <div class="ml-auto flex items-center gap-3 flex-shrink-0">
+    
+    <div class="flex flex-row gap-2">
+        
+        <button onclick="startRevisionChat(currentItemId, document.getElementById('detailTitle').innerText)" 
+                class="flex items-center gap-2 px-3 py-2 rounded-xl border border-indigo-500/30 bg-indigo-500/10 text-indigo-400 hover:text-white hover:bg-indigo-500/40 transition-all hover:scale-105 hover:shadow-[0_0_15px_rgba(99,102,241,0.3)] text-xs font-bold" 
+                title="Interroger le Tuteur IA">
+            <i class="fa-solid fa-microchip text-sm"></i>
+            <span>Tuteur IA</span>
+        </button>
 
-                        <div class="flex gap-1 w-full" id="difficultySelector">
-                            </div>
-                    </div>
+        <button onclick="openErrorModal()" 
+                class="flex items-center gap-2 px-3 py-2 rounded-xl border border-red-500/30 bg-red-500/10 text-red-400 hover:text-white hover:bg-red-500/40 transition-all hover:scale-105 hover:shadow-[0_0_15px_rgba(239,68,68,0.3)] text-xs font-bold" 
+                title="Boîte à Erreurs">
+            <i class="fa-solid fa-box-open text-sm"></i>
+            <span>Erreurs</span>
+        </button>
+    </div>
+    
+    <div class="bg-black/10 backdrop-blur-md border border-white/5 rounded-xl p-2 w-44">
+        <span class="block text-right text-[9px] text-gray-500 font-bold uppercase mb-1 px-1">Difficulté Perso</span>
+        <span id="difficultyLevelLabel" class="block text-right text-xs font-bold text-gray-300 mb-2 transition-colors">3 - Normale</span> 
+        <div class="flex gap-1 w-full" id="difficultySelector">
+            </div>
+    </div>
+</div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-grow overflow-hidden">
@@ -1146,19 +1216,12 @@ input[type=range]::-webkit-slider-runnable-track {
                     <div class="card-panel p-5 rounded-2xl">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="text-sm font-bold text-white uppercase tracking-widest">Ressources</h3>
-                            <button onclick="openModalForItem(currentItemId, 'video')" class="w-6 h-6 rounded bg-white/10 hover:bg-white/20 text-white text-xs flex items-center justify-center transition"><i class="fa-solid fa-plus"></i></button>
                         </div>
                         <div id="detailResourcesList" class="space-y-3">
                             </div>
                     </div>
 
-                    <button onclick="startRevisionChat(currentItemId, document.getElementById('detailTitle').innerText)" class="w-full py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 border border-white/10 flex items-center justify-center gap-3 group hover:shadow-[0_0_20px_rgba(99,102,241,0.4)] transition-all">
-                        <i class="fa-solid fa-brain text-white text-xl group-hover:animate-pulse"></i>
-                        <div class="text-left">
-                            <div class="text-sm font-black text-white uppercase">Interroger le Tuteur IA</div>
-                            <div class="text-[10px] text-indigo-200">Générer un quiz ou un résumé</div>
-                        </div>
-                    </button>
+                  
                 </div>
 
                <div class="lg:col-span-2 flex flex-col gap-4 h-full overflow-hidden">
@@ -1203,22 +1266,6 @@ input[type=range]::-webkit-slider-runnable-track {
                              oninput="saveCurrentNotes()">
                         </div>
                     </div>
-
-                    <button onclick="openErrorModal()" class="flex-shrink-0 w-full bg-gradient-to-r from-red-900/40 to-orange-900/40 border border-red-500/30 hover:border-red-500/60 rounded-2xl p-4 flex items-center justify-between group transition-all duration-300 hover:shadow-[0_0_30px_-5px_rgba(239,68,68,0.25)]">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-xl bg-red-500/20 flex items-center justify-center text-red-400 border border-red-500/20 group-hover:scale-110 transition-transform">
-                                <i class="fa-solid fa-box-open text-xl"></i>
-                            </div>
-                            <div class="text-left">
-                                <h4 class="text-red-100 font-bold text-sm uppercase tracking-wider">Boîte à Erreurs</h4>
-                                <p class="text-red-300/60 text-xs" id="errorCountLabel">0 flashcards enregistrées</p>
-                            </div>
-                        </div>
-                        <div class="w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center text-red-400 group-hover:bg-red-500 group-hover:text-white transition">
-                            <i class="fa-solid fa-chevron-right text-xs"></i>
-                        </div>
-                    </button>
-
                 </div>
 
     </main>
@@ -1312,19 +1359,25 @@ input[type=range]::-webkit-slider-runnable-track {
                 <div class="h-px w-full bg-white/5"></div>
 
                 <section>
-                    <h3 class="text-xs font-bold text-gold-500 uppercase tracking-widest mb-4 flex items-center gap-2"><i class="fa-solid fa-flag-checkered"></i> Objectif Concours</h3>
-                    <div class="bg-gold-500/5 border border-gold-500/20 rounded-2xl p-5 flex flex-col md:flex-row gap-6 items-center">
-                        <div class="flex-grow w-full">
-                            <label class="block text-xs font-bold uppercase text-gold-500/70 mb-2">Date de l'épreuve</label>
-                            <input type="date" id="settingDate" class="w-full bg-black/50 border border-gold-500/30 rounded-xl px-4 py-3 text-white focus:border-gold-500 transition">
-                        </div>
-                        <div class="text-center min-w-[120px]">
-                            <div class="text-xs text-gray-400 mb-1">Restant</div>
-                            <div class="text-3xl font-mono font-black text-white" id="settingDaysLeft">--</div>
-                            <div class="text-[10px] uppercase text-gold-500 font-bold tracking-widest">Jours</div>
-                        </div>
-                    </div>
-                </section>
+    <h3 class="text-xs font-bold text-orange-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+        <i class="fa-solid fa-flag-checkered"></i> Objectif Concours
+    </h3>
+    
+    <div class="bg-orange-500/5 border border-orange-500/20 rounded-2xl p-5 flex flex-col md:flex-row gap-6 items-center">
+        
+        <div class="flex-grow w-full">
+            <label class="block text-xs font-bold uppercase text-orange-500/70 mb-2">Date de l'épreuve</label>
+            <input type="date" id="settingDate" class="w-full bg-black/50 border border-orange-500/30 rounded-xl px-4 py-3 text-white focus:border-orange-500 transition cursor-pointer">
+        </div>
+        
+        <div class="text-center min-w-[120px]">
+            <div class="text-xs text-gray-400 mb-1">Restant</div>
+            <div class="text-3xl font-mono font-black text-white" id="settingDaysLeft">--</div>
+            <div class="text-[10px] uppercase text-orange-500 font-bold tracking-widest">Jours</div>
+        </div>
+
+    </div>
+</section>
 
                 <div class="h-px w-full bg-white/5"></div>
 
@@ -1414,7 +1467,7 @@ input[type=range]::-webkit-slider-runnable-track {
             </div>
         </div>
     </div>
-    <div id="aiModal" class="hidden fixed inset-0 z-[60] modal-backdrop flex items-center justify-center px-4"><div class="bg-[#111] border border-white/10 rounded-3xl w-full max-w-2xl h-[80vh] flex flex-col shadow-2xl"><div class="px-6 py-4 border-b border-white/5 flex justify-between items-center"><h3 class="font-bold text-white flex items-center gap-2" id="aiModalTitle"><i class="fa-solid fa-brain text-indigo-400"></i> Assistant IA</h3><button onclick="closeAiModal()" class="text-gray-500 hover:text-white"><i class="fa-solid fa-times"></i></button></div><div id="aiLoading" class="hidden absolute inset-0 z-50 bg-[#0a0a0a] flex flex-col items-center justify-center"><div class="w-12 h-12 bg-white text-black flex items-center justify-center font-display font-black text-xl tracking-tighter rounded-sm animate-pulse-fast">IA</div><p class="mt-4 text-gray-500 text-sm">Réflexion en cours...</p></div><div id="aiContent" class="flex-grow overflow-y-auto p-6 bg-[#0a0a0a] flashcard-content max-w-none prose prose-invert prose-p:text-gray-300 prose-headings:text-white hidden"></div><div id="tutorChatInterface" class="hidden flex flex-col h-full overflow-hidden"><div id="chatHistory" class="flex-grow overflow-y-auto p-4 space-y-4 bg-[#0a0a0a] scroll-smooth"></div><div class="p-4 border-t border-white/10 bg-[#111] flex gap-2"><input type="text" id="chatInput" class="flex-grow bg-[#222] border border-[#333] rounded-xl px-4 py-3 text-white focus:border-blue-500 transition text-sm" placeholder="Posez votre question sur l'item..." onkeypress="if(event.key === 'Enter') sendChatMessage()"><button onclick="sendChatMessage()" class="w-12 h-12 flex items-center justify-center bg-blue-600 text-white rounded-xl hover:bg-blue-500 transition"><i class="fa-solid fa-paper-plane"></i></button></div></div></div></div>
+    <div id="aiModal" class="hidden fixed inset-0 z-[60] modal-backdrop flex items-center justify-center px-4"><div class="bg-[#111] border border-white/10 rounded-3xl w-full max-w-2xl h-[80vh] flex flex-col shadow-2xl"><div class="px-6 py-4 border-b border-white/5 flex justify-between items-center"><h3 class="font-bold text-white flex items-center gap-2" id="aiModalTitle"><i class="fa-solid fa-microchip text-purple-400"></i> Assistant IA</h3><button onclick="closeAiModal()" class="text-gray-500 hover:text-white"><i class="fa-solid fa-times"></i></button></div><div id="aiLoading" class="hidden absolute inset-0 z-50 bg-[#0a0a0a] flex flex-col items-center justify-center"><div class="w-12 h-12 bg-white text-black flex items-center justify-center font-display font-black text-xl tracking-tighter rounded-sm animate-pulse-fast">IA</div><p class="mt-4 text-gray-500 text-sm">Réflexion en cours...</p></div><div id="aiContent" class="flex-grow overflow-y-auto p-6 bg-[#0a0a0a] flashcard-content max-w-none prose prose-invert prose-p:text-gray-300 prose-headings:text-white hidden"></div><div id="tutorChatInterface" class="hidden flex flex-col h-full overflow-hidden"><div id="chatHistory" class="flex-grow overflow-y-auto p-4 space-y-4 bg-[#0a0a0a] scroll-smooth"></div><div class="p-4 border-t border-white/10 bg-[#111] flex gap-2"><input type="text" id="chatInput" class="flex-grow bg-[#222] border border-[#333] rounded-xl px-4 py-3 text-white focus:border-blue-500 transition text-sm" placeholder="Posez votre question sur l'item..." onkeypress="if(event.key === 'Enter') sendChatMessage()"><button onclick="sendChatMessage()" class="w-12 h-12 flex items-center justify-center bg-blue-600 text-white rounded-xl hover:bg-blue-500 transition"><i class="fa-solid fa-paper-plane"></i></button></div></div></div></div>
     <div id="confirmModal" class="hidden fixed inset-0 z-[90] modal-backdrop flex items-center justify-center px-4"><div class="bg-[#111] border border-white/10 rounded-2xl p-6 shadow-2xl max-w-sm w-full"><h3 class="text-lg font-bold text-white mb-2">Confirmation</h3><p class="text-gray-400 text-sm mb-6">Voulez-vous vraiment supprimer cette ressource ?</p><div class="flex justify-end gap-3"><button onclick="closeConfirmModal()" class="px-4 py-2 text-gray-400 hover:text-white text-sm font-medium">Non</button><button id="confirmBtnAction" class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-bold hover:bg-red-700">Oui, supprimer</button></div></div></div>
 
 	<div id="errorModal" class="fixed inset-0 z-[150] hidden flex items-center justify-center bg-black/90 backdrop-blur-md transition-opacity duration-300 opacity-0">
@@ -1555,6 +1608,163 @@ input[type=range]::-webkit-slider-runnable-track {
             </div>
         </div>
     </div>
+
+<div id="fullScreenNotesModal" class="fixed inset-0 z-[150] hidden flex items-center justify-center bg-black/90 backdrop-blur-xl transition-opacity duration-300 opacity-0">
+    <div class="w-full h-full md:w-[90%] md:h-[90%] bg-[#0a0a0a] border border-white/10 rounded-none md:rounded-3xl shadow-2xl flex flex-col overflow-hidden relative transform scale-95 transition-all duration-300" id="fullScreenNotesContent">
+        
+        <div class="p-4 md:p-6 border-b border-white/10 bg-[#111] flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center" id="fsNoteIconBg">
+                    <i id="fsNoteIcon" class="fa-solid fa-book text-xl text-gray-400"></i>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-display font-black text-white tracking-tight" id="fsNoteTitle">Notes Générales</h2>
+                    <p class="text-xs text-gray-500 font-mono uppercase tracking-widest">Éditeur Complet</p>
+                </div>
+            </div>
+            
+            <div class="flex gap-3">
+                <span id="fsSaveIndicator" class="text-xs font-bold text-green-500 self-center opacity-0 transition-opacity mr-4">SAUVEGARDÉ</span>
+                <button onclick="closeFullScreenNotes()" class="px-6 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold transition flex items-center gap-2">
+                    <span>Fermer</span>
+                    <i class="fa-solid fa-compress"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 p-3 border-b border-white/10 bg-[#151515]">
+            <div class="flex bg-black/20 rounded-lg p-1">
+                <button onclick="formatFullNote('formatBlock', 'H2')" class="w-8 h-8 rounded hover:bg-white/10 text-yellow-500 hover:text-white transition flex items-center justify-center" title="Grand Titre"><i class="fa-solid fa-heading"></i></button>
+            </div>
+            <div class="w-px h-6 bg-white/10"></div>
+            <div class="flex bg-black/20 rounded-lg p-1">
+                <button onclick="formatFullNote('bold')" class="w-8 h-8 rounded hover:bg-white/10 text-gray-400 hover:text-white transition flex items-center justify-center"><i class="fa-solid fa-bold"></i></button>
+                <button onclick="formatFullNote('italic')" class="w-8 h-8 rounded hover:bg-white/10 text-gray-400 hover:text-white transition flex items-center justify-center"><i class="fa-solid fa-italic"></i></button>
+                <button onclick="formatFullNote('underline')" class="w-8 h-8 rounded hover:bg-white/10 text-gray-400 hover:text-white transition flex items-center justify-center"><i class="fa-solid fa-underline"></i></button>
+            </div>
+            <div class="w-px h-6 bg-white/10"></div>
+            <div class="flex bg-black/20 rounded-lg p-1">
+                <button onclick="formatFullNote('insertUnorderedList')" class="w-8 h-8 rounded hover:bg-white/10 text-gray-400 hover:text-white transition flex items-center justify-center"><i class="fa-solid fa-list-ul"></i></button>
+                <button onclick="formatFullNote('insertOrderedList')" class="w-8 h-8 rounded hover:bg-white/10 text-gray-400 hover:text-white transition flex items-center justify-center"><i class="fa-solid fa-list-ol"></i></button>
+            </div>
+            <div class="w-px h-6 bg-white/10"></div>
+            <div class="flex items-center gap-1 bg-black/20 rounded-lg p-1 px-2">
+                <button onclick="formatFullNote('foreColor', '#e5e7eb')" class="w-5 h-5 rounded-full bg-gray-200 border border-transparent hover:scale-110 transition" title="Blanc"></button>
+                <button onclick="formatFullNote('foreColor', '#3b82f6')" class="w-5 h-5 rounded-full bg-blue-500 border border-transparent hover:scale-110 transition" title="Bleu"></button>
+                <button onclick="formatFullNote('foreColor', '#ef4444')" class="w-5 h-5 rounded-full bg-red-500 border border-transparent hover:scale-110 transition" title="Rouge"></button>
+                <button onclick="formatFullNote('foreColor', '#22c55e')" class="w-5 h-5 rounded-full bg-green-500 border border-transparent hover:scale-110 transition" title="Vert"></button>
+                <button onclick="formatFullNote('foreColor', '#eab308')" class="w-5 h-5 rounded-full bg-yellow-500 border border-transparent hover:scale-110 transition" title="Jaune"></button>
+                <button onclick="formatFullNote('foreColor', '#a855f7')" class="w-5 h-5 rounded-full bg-purple-500 border border-transparent hover:scale-110 transition" title="Violet"></button>
+            </div>
+             <div class="ml-auto border-l border-white/10 pl-2">
+                <button onclick="formatFullNote('removeFormat')" class="w-8 h-8 rounded hover:bg-red-500/20 text-gray-500 hover:text-red-400 transition flex items-center justify-center" title="Effacer le formatage"><i class="fa-solid fa-eraser"></i></button>
+            </div>
+        </div>
+
+        <div id="fullScreenEditor" 
+             contenteditable="true" 
+             class="flex-grow w-full bg-[#0a0a0a] p-8 overflow-y-auto text-gray-300 font-sans leading-relaxed focus:outline-none text-base custom-scrollbar prose prose-invert max-w-none"
+             oninput="saveFullScreenContent()">
+        </div>
+    </div>
+</div>
+
+<div id="xpModal" class="fixed inset-0 z-[160] hidden flex items-center justify-center bg-black/90 backdrop-blur-xl transition-opacity duration-300 opacity-0">
+    <div class="w-full max-w-lg bg-[#0f0f13] border border-blue-500/30 rounded-3xl shadow-[0_0_50px_rgba(59,130,246,0.2)] relative overflow-hidden transform scale-95 transition-all duration-300" id="xpModalContent">
+        
+        <div class="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-blue-900/40 to-transparent"></div>
+        
+        <div class="relative p-6 text-center border-b border-white/5">
+            <div class="w-20 h-20 mx-auto bg-blue-500/20 rounded-full flex items-center justify-center border border-blue-400/50 mb-3 shadow-[0_0_20px_rgba(59,130,246,0.4)]">
+                <i id="xpModalIcon" class="fa-solid fa-dragon text-3xl text-blue-400"></i>
+            </div>
+            <h2 class="text-2xl font-display font-black text-white uppercase tracking-widest">Niveau <span id="xpModalLevel" class="text-blue-400">0</span></h2>
+            <p class="text-xs text-blue-200/60 font-mono uppercase mt-1">Grade : Interne Novice</p>
+            <button onclick="closeXPModal()" class="absolute top-4 right-4 text-gray-500 hover:text-white transition"><i class="fa-solid fa-times"></i></button>
+        </div>
+
+        <div class="p-6 space-y-6">
+            
+            <div>
+                <div class="flex justify-between text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">
+                    <span>Progression Niveau</span>
+                    <span id="xpModalProgressText">0 / 1000 XP</span>
+                </div>
+                <div class="h-4 bg-black rounded-full border border-white/10 overflow-hidden relative">
+                    <div id="xpModalBar" class="h-full bg-gradient-to-r from-blue-600 to-cyan-400 shadow-[0_0_15px_rgba(59,130,246,0.6)] transition-all duration-1000" style="width: 0%"></div>
+                    <div class="absolute top-0 left-0 w-full h-full bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDUiLz4KPC9zdmc+')] opacity-30"></div>
+                </div>
+                <p class="text-[10px] text-right text-gray-500 mt-1 italic">Plus que <span id="xpModalMissing" class="text-white font-bold">1000</span> XP pour le prochain niveau</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-white/5 p-3 rounded-xl border border-white/5 text-center">
+                    <div class="text-2xl font-black text-green-400" id="xpModalLu">0</div>
+                    <div class="text-[9px] text-gray-400 uppercase">Items Lus</div>
+                </div>
+                <div class="bg-white/5 p-3 rounded-xl border border-white/5 text-center">
+                    <div class="text-2xl font-black text-gold-500" id="xpModalMaitrise">0</div>
+                    <div class="text-[9px] text-gray-400 uppercase">Maîtrisés</div>
+                </div>
+            </div>
+
+            <div class="bg-blue-900/10 border border-blue-500/20 rounded-xl p-4 flex items-center gap-4">
+                <div class="w-12 h-12 bg-black rounded-lg flex items-center justify-center border border-white/10">
+                    <i id="nextRewardIcon" class="fa-solid fa-question text-gray-600 text-xl"></i>
+                </div>
+                <div>
+                    <h4 class="text-sm font-bold text-white">Prochain Avatar</h4>
+                    <p class="text-[10px] text-blue-300" id="nextRewardText">Débloqué au niveau supérieur</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div id="chronoModal" class="fixed inset-0 z-[160] hidden flex items-center justify-center bg-black/90 backdrop-blur-xl transition-opacity duration-300 opacity-0">
+    <div class="w-full max-w-lg bg-[#120f0f] border border-orange-500/30 rounded-3xl shadow-[0_0_50px_rgba(249,115,22,0.15)] relative overflow-hidden transform scale-95 transition-all duration-300" id="chronoModalContent">
+        
+        <div class="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-orange-900/40 to-transparent"></div>
+
+        <div class="relative p-6 text-center border-b border-white/5">
+            <div class="w-20 h-20 mx-auto bg-orange-500/20 rounded-full flex items-center justify-center border border-orange-400/50 mb-3 shadow-[0_0_20px_rgba(249,115,22,0.4)] animate-pulse-slow">
+                <i class="fa-solid fa-hourglass-half text-3xl text-orange-400"></i>
+            </div>
+            <h2 class="text-2xl font-display font-black text-white uppercase tracking-widest">Objectif Concours</h2>
+            <input type="date" id="modalDateInput" onchange="updateExamDateFromModal(this.value)" class="mt-2 bg-black/50 border border-white/10 text-white text-xs px-3 py-1 rounded-lg text-center uppercase tracking-widest cursor-pointer hover:border-orange-500 transition-colors">
+            <button onclick="closeChronoModal()" class="absolute top-4 right-4 text-gray-500 hover:text-white transition"><i class="fa-solid fa-times"></i></button>
+        </div>
+
+        <div class="p-6 space-y-6">
+            
+            <div class="flex justify-center gap-4">
+                <div class="text-center">
+                    <div class="text-5xl font-display font-black text-white" id="chronoDays">000</div>
+                    <div class="text-[10px] font-bold text-orange-500 uppercase tracking-[0.2em]">Jours Restants</div>
+                </div>
+            </div>
+
+            <div>
+                <div class="flex justify-between text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">
+                    <span>Temps écoulé (Année Universitaire)</span>
+                    <span id="timeElapsedPct">0%</span>
+                </div>
+                <div class="h-3 bg-black rounded-full border border-white/10 overflow-hidden">
+                    <div id="timeProgressBar" class="h-full bg-gradient-to-r from-green-500 via-yellow-500 to-red-500" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="bg-[#0a0a0a] border border-white/5 rounded-xl p-4 flex items-start gap-3">
+                <i class="fa-solid fa-quote-left text-orange-500/50 text-xl mt-1"></i>
+                <div>
+                    <p class="text-sm text-gray-300 italic" id="chronoQuote">"Le temps est votre ressource la plus précieuse. Ne la gaspillez pas."</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
 
 	<<div id="subjectBurstOverlay" class="fixed inset-0 z-[200] flex items-center justify-center pointer-events-none hidden overflow-hidden">
     <div id="subjectBurstCircle" class="rounded-full absolute"></div>
@@ -2407,32 +2617,31 @@ if (dashboard) {
 
 // --- FONCTION DE CHARGEMENT MISE À JOUR ---
 async function completeInitialization(userId) {
-    console.log("Connexion réussie. ID:", userId);
+    console.log("Chargement des données pour :", userId);
 
-    // 1. Récupération des données Cloud
+    // 1. Récupération des données Cloud (Firebase)
     const userDocRef = db.collection('users').doc(userId);
     let loadedData = {};
 
     try {
         const doc = await userDocRef.get();
         if (doc.exists) {
-            console.log("Données trouvées !");
             loadedData = doc.data().userData || {};
         } else {
-            console.log("Profil vierge (Nouvel utilisateur).");
-            // On force une première sauvegarde pour créer le dossier
+            console.log("Nouveau profil détecté. Création de la sauvegarde...");
             setTimeout(saveData, 2000); 
         }
     } catch (error) {
-        console.warn("Mode Hors Ligne ou Erreur:", error);
+        console.warn("Erreur chargement Cloud :", error);
+        alert("Attention : Impossible de charger vos données (Erreur Réseau).");
     }
 
-    // 2. Afficher la date
+    // 2. Afficher la date du jour
     const options = { weekday: 'long', day: 'numeric', month: 'long' };
     const dateElement = document.getElementById('dateToday');
     if(dateElement) dateElement.innerText = new Date().toLocaleDateString('fr-FR', options);
 
-    // 3. APPLICATION DES DONNÉES (C'est ici que la magie opère)
+    // 3. HYDRATATION DES DONNÉES (On écrase les variables locales avec celles du Cloud)
     
     // -- Progression --
     userXP = loadedData.xp || 0;
@@ -2449,27 +2658,23 @@ async function completeInitialization(userId) {
     userItemDifficulty = loadedData.item_difficulty || {};
     userItemErrors = loadedData.item_errors || {};
     userXPClaimed = loadedData.xp_claimed || {};
-
-    // -- AJOUT : Récupération des Notes de Matières --
     userSubjectNotes = loadedData.subject_notes || {};
 
-    // -- AJOUT : Récupération des Suggestions --
-    if (loadedData.daily_suggestions && loadedData.daily_suggestions.suggestions && loadedData.daily_suggestions.suggestions.length > 0) {
-        // On charge ce qui est en base, peu importe la date (comme demandé)
-        currentSuggestions = loadedData.daily_suggestions.suggestions;
-        dailySuggestionsDone = loadedData.daily_suggestions.done || {};
-    } else {
-        // Si rien en base, on vide pour forcer la génération
-        currentSuggestions = [];
-        dailySuggestionsDone = {};
+    // -- Profil --
+    userName = loadedData.user_name || "";
+    userAlias = loadedData.user_alias || "Docteur";
+    userAvatar = loadedData.current_avatar || "fa-dragon";
+    userUnlockedAvatars = loadedData.unlocked_avatars || ['fa-dragon'];
+    userLinks = loadedData.custom_links || [];
+    
+    // -- Clé API (Priorité au Cloud, sinon on garde ce qu'on a trouvé dans loadProfile) --
+    if (loadedData.apiKey) {
+        userApiKey = loadedData.apiKey;
+        // On met à jour le local storage pour la prochaine fois
+        localStorage.setItem('ultimed_apiKey', userApiKey);
     }
 
-    // -- Profil --
-    if (loadedData.user_name) userName = loadedData.user_name;
-    if (loadedData.user_alias) userAlias = loadedData.user_alias;
-    if (loadedData.current_avatar) userAvatar = loadedData.current_avatar;
-    if (loadedData.unlocked_avatars) userUnlockedAvatars = loadedData.unlocked_avatars;
-    if (loadedData.custom_links) userLinks = loadedData.custom_links;
+    // -- Date Exam --
     if (loadedData.exam_date) {
         userExamDate = loadedData.exam_date;
         updateCountdownDisplay(userExamDate);
@@ -2477,48 +2682,61 @@ async function completeInitialization(userId) {
         if(settingDateInput) settingDateInput.value = userExamDate;
     }
 
-    // -- Mise à jour de l'interface --
-    updateGreetingDisplay(); // Met à jour le nom et l'avatar
+    // -- LOGIQUE SUGGESTIONS DU JOUR --
+    const todayKey = getTodayKey(); 
+    const savedSuggestionsDate = loadedData.daily_suggestions ? loadedData.daily_suggestions.date : null;
+
+    if (savedSuggestionsDate === todayKey && loadedData.daily_suggestions && loadedData.daily_suggestions.suggestions.length > 0) {
+        // C'est la même journée : On garde
+        console.log("Suggestions du jour restaurées.");
+        currentSuggestions = loadedData.daily_suggestions.suggestions;
+        dailySuggestionsDone = loadedData.daily_suggestions.done || {};
+    } else {
+        // Nouvelle journée ou vide : On reset pour forcer la génération plus tard
+        console.log("Nouvelle journée : Reset des suggestions.");
+        currentSuggestions = [];
+        dailySuggestionsDone = {};
+    }
+
+    // 4. MISE A JOUR DE L'INTERFACE
+    updateGreetingDisplay();
     if(typeof updateXPDisplay === 'function') updateXPDisplay();
     if(typeof renderHeaderLinks === 'function') renderHeaderLinks();
     
-    loadProfile(); // Charge les réglages locaux (Son, Clé API)
+    // Charge les réglages sons
+    loadProfile(); 
     initNotes(); 
 
-    // Date examen
-    const savedDate = localStorage.getItem('ultimed_examDate');
-    if(savedDate) {
-        updateCountdownDisplay(savedDate);
-        const settingDateInput = document.getElementById('settingDate');
-        if(settingDateInput) settingDateInput.value = savedDate;
-    }
-
-    // Listeners Recherche
+    // Listeners dynamiques
     const searchInput = document.getElementById('searchInput');
     if(searchInput) {
+        // Astuce pour supprimer les anciens event listeners
         const newSearch = searchInput.cloneNode(true);
         searchInput.parentNode.replaceChild(newSearch, searchInput);
         newSearch.addEventListener('input', render);
     }
     const quickNotes = document.getElementById('quickNotes');
-    if(quickNotes) quickNotes.addEventListener('input', (e) => saveNotes(e.target.value));
+    if(quickNotes) {
+        // Pareil pour les notes
+        const newNotes = quickNotes.cloneNode(true);
+        quickNotes.parentNode.replaceChild(newNotes, quickNotes);
+        newNotes.addEventListener('input', (e) => saveNotes(e.target.value));
+        // On remet le contenu
+        newNotes.value = userSubjectNotes[currentNotesMatiere] || "";
+    }
 
-    // Setup Autocomplete
     setupAutocompleteSystems();
 
-    // 4. LANCEMENT FINAL
-    console.log("Génération de l'interface...");
-    buildCourses(); // Construit la grille avec les statuts "Lu" / "Maîtrisé"
+    // 5. RENDU FINAL
+    buildCourses(); 
     populateFilters();
     updateStats();
     render(); 
     renderTodos();
 
-    // On cache le chargement
-    const overlay = document.getElementById('loginOverlay');
-    if(overlay) overlay.classList.add('hidden');
-
     initSubjectCarousel();
+    
+    // Génère de nouvelles suggestions UNIQUEMENT si la liste est vide (changement de jour)
     renderSuggestions(false);
 }
 
@@ -2563,6 +2781,24 @@ function handleAutoSearch(e, listElement, type) {
     listElement.classList.remove('hidden');
 }
 
+	function scrollToFilterBar() {
+    // Timeout pour laisser le temps au DOM de finir de dessiner la grille
+    setTimeout(() => {
+        const filterBar = document.getElementById('filterBar');
+        
+        if (filterBar) {
+            // Calcule la position verticale de la barre de filtre
+            const targetPosition = filterBar.offsetTop;
+            
+            // Défilement : targetPosition - 120px (Barre de navigation + décalage)
+            window.scrollTo({
+                top: targetPosition - 120, // Ajustement : Remonte de 120px au-dessus
+                behavior: 'smooth'
+            });
+        }
+    }, 100);
+}
+
         function handleFilterChange(selectElement) {
             const val = selectElement.value;
             updateGlobalGlow(val);
@@ -2597,7 +2833,7 @@ function handleAutoSearch(e, listElement, type) {
                 icon.classList.add('animate-icon-burst');
                 
                 // Son
-                playSound('whoosh'); 
+                playSound('subjectClick'); 
 
                 // Nettoyage
                 setTimeout(() => {
@@ -2629,6 +2865,7 @@ function handleAutoSearch(e, listElement, type) {
                 }
             }
             render(); 
+anchorToFilterBar()
         }
         
         function filterByStatus(status) {
@@ -2636,38 +2873,25 @@ function handleAutoSearch(e, listElement, type) {
             render();
             const statusMessage = currentStatusFilter === 'lu' ? "Affichez: Lus" : currentStatusFilter === 'maitrise' ? "Affichez: Maîtrisés" : "Affichez: Tous";
             showToast(statusMessage, 'info');
-            window.scrollTo({top: document.getElementById('filterBar').offsetTop - 100, behavior: 'smooth'}); 
+            setTimeout(() => {
+    const filterBar = document.getElementById('filterBar');
+    if(filterBar) filterBar.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}, 100); 
         }
 
 function loadProfile() {
-            const savedName = localStorage.getItem('ultimed_userName');
-            if(savedName) userName = savedName;
+    // On ne charge QUE les paramètres techniques locaux
+    
+    // 1. La Clé API (Pratique de l'avoir en local si on est hors ligne)
+    const savedKey = localStorage.getItem('ultimed_apiKey');
+    if(savedKey && !userApiKey) userApiKey = savedKey;
 
-            const savedAlias = localStorage.getItem('ultimed_userAlias');
-            if(savedAlias) userAlias = savedAlias;
-            
-            const savedKey = localStorage.getItem('ultimed_apiKey');
-            if(savedKey) userApiKey = savedKey;
-
-            const savedAvatar = localStorage.getItem('ultimed_userAvatar');
-            if(savedAvatar) userAvatar = savedAvatar;
-
-            // --- 1. Chargement des avatars débloqués ---
-            const savedUnlocks = localStorage.getItem('ultimed_unlocked_avatars');
-            if(savedUnlocks) {
-                userUnlockedAvatars = JSON.parse(savedUnlocks);
-            } else {
-                // Si c'est la première fois, on sauvegarde le dragon par défaut
-                localStorage.setItem('ultimed_unlocked_avatars', JSON.stringify(['fa-dragon']));
-            }
-
-            // --- 2. Chargement du Son (INDÉPENDANT) ---
-            const savedSound = localStorage.getItem('ultimed_sound_enabled');
-            if (savedSound !== null) {
-                // On convertit la chaîne "true"/"false" en booléen
-                audioSystem.enabled = (savedSound === 'true');
-            }
-        }
+    // 2. Le Son (Préférence de l'appareil)
+    const savedSound = localStorage.getItem('ultimed_sound_enabled');
+    if (savedSound !== null) {
+        audioSystem.enabled = (savedSound === 'true');
+    }
+}
 
         // La fonction de sauvegarde est modifiée pour utiliser Firestore
 // --- FONCTION DE SAUVEGARDE CORRIGÉE (COMPLETE) ---
@@ -2782,33 +3006,53 @@ async function saveData() {
     const notesPanel = document.getElementById('notesPanel');
     const notesIcon = document.getElementById('notesIcon');
     const notesTitle = document.getElementById('notesTitle');
-    const notesArea = document.getElementById('quickNotes');
+    const select = document.getElementById('notesMatiereSelect');
     
     const config = getNotesMatiereConfig(currentNotesMatiere);
 
-    notesIcon.className = `fa-solid ${config.icon} text-xs text-gray-300 group-hover:text-white transition-colors`;
-    notesTitle.innerText = config.name;
+    // 1. Textes et Icones
+    if(notesIcon) notesIcon.className = `fa-solid ${config.icon} text-xs text-gray-300 group-hover:text-white transition-colors`;
+    if(notesTitle) notesTitle.innerText = config.name;
     
-    // Nettoyage des anciennes classes bg-
-    notesPanel.classList.forEach(cls => {
-         if (cls.startsWith('bg-')) notesPanel.classList.remove(cls); 
-    });
-    notesPanel.style.backgroundColor = config.background; 
+    if(select && select.value !== currentNotesMatiere) select.value = currentNotesMatiere;
+
+    // 2. Fond et Style de Base
+    if(notesPanel) {
+        notesPanel.classList.forEach(cls => {
+             if (cls.startsWith('bg-')) notesPanel.classList.remove(cls); 
+        });
+        notesPanel.style.backgroundColor = config.background; 
+        
+        // --- LA MAGIE OPÈRE ICI ---
+        // On récupère le code RGB de la matière (ex: "239, 68, 68" pour Cardio)
+        const rgb = getMatiereColorValue(config.color);
+        
+        // On l'injecte dans la variable CSS du panneau
+        notesPanel.style.setProperty('--glow-rgb', rgb);
+        // -------------------------
+    }
     
     updateGlobalGlow(currentNotesMatiere);
 
-    // MODIFICATION : On lit depuis la variable globale, plus le localStorage
-    const savedContent = userSubjectNotes[currentNotesMatiere] || "";
-    notesArea.value = savedContent;
+    if (typeof updateDashboardPreview === 'function') {
+        updateDashboardPreview();
+    }
 }
 
         function changeNotesMatiere(newMatiere) {
-            saveNotes(document.getElementById('quickNotes').value); 
-            currentNotesMatiere = newMatiere;
-            localStorage.setItem('ultimed_notes_matiere', newMatiere);
-            renderNotesPanel();
-            showToast(`Notes basculées sur ${newMatiere}`, 'info');
-        }
+    // 1. Mise à jour de la variable globale
+    currentNotesMatiere = newMatiere;
+
+    // 2. Sauvegarde de la préférence locale (pour s'en souvenir au prochain rechargement)
+    localStorage.setItem('ultimed_notes_matiere', newMatiere);
+
+    // 3. Mise à jour de l'interface (Couleur, Titre, Icone, Aperçu du texte)
+    // Cette fonction appelle déjà updateDashboardPreview() à la fin
+    renderNotesPanel();
+
+    // 4. Petit feedback sonore
+    playSound('subjectClick');
+}
 
         function saveNotes(content) {
     // MODIFICATION : On enregistre dans la variable globale
@@ -2826,35 +3070,45 @@ async function saveData() {
 
         // --- UNIFIED GLOBAL SETTINGS LOGIC ---
         function openGlobalSettings() {
-            const modal = document.getElementById('globalSettingsModal');
-            const content = document.getElementById('globalSettingsContent');
-            
-            document.getElementById('settingName').value = userName;
-            document.getElementById('settingAlias').value = userAlias === "Docteur" ? "" : userAlias;
-            document.getElementById('settingKey').value = userApiKey;
-            
-            const savedDate = localStorage.getItem('ultimed_examDate');
-            if(savedDate) {
-                document.getElementById('settingDate').value = savedDate;
-                updateSettingPreview(savedDate);
-	    }
-	    const toggle = document.getElementById('settingSoundToggle');
-            if(toggle) {
-                toggle.checked = audioSystem.enabled;
-                toggleSoundPreview(toggle); // Met à jour l'icône visuellement
-            }
+    const modal = document.getElementById('globalSettingsModal');
+    const content = document.getElementById('globalSettingsContent');
+    
+    // 1. Remplir les champs Profil
+    document.getElementById('settingName').value = userName;
+    document.getElementById('settingAlias').value = userAlias === "Docteur" ? "" : userAlias;
+    document.getElementById('settingKey').value = userApiKey;
+    
+    // 2. Remplir la Date et Lancer le Calcul
+    const dateInput = document.getElementById('settingDate');
+    
+    // On utilise la variable globale userExamDate (source de vérité)
+    if (userExamDate) {
+        dateInput.value = userExamDate;
+        updateSettingPreview(userExamDate); // <--- C'EST CETTE LIGNE QUI AFFICHE LES JOURS
+    } else {
+        document.getElementById('settingDaysLeft').innerText = "--";
+    }
 
-            renderGlobalAvatarSelection();
+    // 3. Ajouter l'écouteur d'événement sur l'input date
+    // Pour que le nombre change en temps réel quand on modifie la date
+    dateInput.onchange = (e) => updateSettingPreview(e.target.value);
 
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modal.classList.remove('opacity-0');
-                content.classList.remove('scale-95');
-                content.classList.add('scale-100');
-            }, 10);
+    // 4. Remplir les Avatars & Sons
+    renderGlobalAvatarSelection();
+    const toggle = document.getElementById('settingSoundToggle');
+    if(toggle) {
+        toggle.checked = audioSystem.enabled;
+        toggleSoundPreview(toggle);
+    }
 
-            document.getElementById('settingDate').onchange = (e) => updateSettingPreview(e.target.value);
-        }
+    // 5. Affichage Modale
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        content.classList.remove('scale-95');
+        content.classList.add('scale-100');
+    }, 10);
+}
 
         function closeGlobalSettings() {
             const modal = document.getElementById('globalSettingsModal');
@@ -2910,15 +3164,34 @@ async function saveData() {
 }
 
         function updateSettingPreview(dateStr) {
-            if (!dateStr) return;
-            const target = new Date(dateStr);
-            const today = new Date();
-            const diffTime = target - today;
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            const el = document.getElementById('settingDaysLeft');
-            el.innerText = diffDays >= 0 ? diffDays : "0";
-            el.className = diffDays >= 0 ? "text-3xl font-mono font-black text-white" : "text-3xl font-mono font-black text-red-500";
+    if (!dateStr) {
+        document.getElementById('settingDaysLeft').innerText = "--";
+        return;
+    }
+
+    const target = new Date(dateStr);
+    const today = new Date();
+    
+    // Calcul de la différence en millisecondes
+    const diffTime = target - today;
+    // Conversion en jours (arrondi au supérieur)
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    const el = document.getElementById('settingDaysLeft');
+    
+    if (el) {
+        if (diffDays < 0) {
+            el.innerText = "0";
+            el.className = "text-3xl font-mono font-black text-gray-500"; // Gris si passé
+        } else {
+            el.innerText = diffDays;
+            // Rouge si urgence (< 30 jours), sinon Blanc
+            el.className = diffDays <= 30 
+                ? "text-3xl font-mono font-black text-red-500 animate-pulse" 
+                : "text-3xl font-mono font-black text-white";
         }
+    }
+}
 
         function saveGlobalSettings() {
     const name = document.getElementById('settingName').value.trim();
@@ -3030,12 +3303,12 @@ function updateCountdownDisplay(dateStr) {
     const options = { day: 'numeric', month: 'short', year: 'numeric' };
     if(miniDateEl) miniDateEl.innerText = examDate.toLocaleDateString('fr-FR', options);
     
-    // Base de style "Propre et Jaune"
-    const baseStyle = "font-display font-black text-xl tracking-wide digit-scroll drop-shadow-md transition-colors duration-300";
+    // Base de style commune
+    const baseStyle = "font-display font-black text-lg leading-none tracking-wide digit-scroll drop-shadow-md transition-colors duration-300";
 
     if (diffDays < 0) {
         displayEl.innerText = "Terminé";
-        displayEl.className = `text-gray-400 ${baseStyle}`;
+        displayEl.className = `text-gray-500 ${baseStyle}`;
     } else if (diffDays === 0) {
          displayEl.innerText = "JOUR J";
          displayEl.className = `text-red-500 animate-pulse ${baseStyle}`;
@@ -3043,11 +3316,11 @@ function updateCountdownDisplay(dateStr) {
         displayEl.innerText = diffDays;
         
         if (diffDays <= 30) { 
-            // Urgence (Moins de 30 jours) -> Rouge/Orange
-            displayEl.className = `text-orange-500 ${baseStyle}`;
+            // URGENCE (< 30 jours) : Rouge Vif
+            displayEl.className = `text-red-500 ${baseStyle}`;
         } else { 
-            // Normal -> Jaune Vif (Au lieu de blanc)
-            displayEl.className = `text-yellow-400 ${baseStyle}`;
+            // NORMAL : Orange (au lieu de Jaune)
+            displayEl.className = `text-orange-400 ${baseStyle}`;
         }
     }
 }
@@ -3577,7 +3850,7 @@ function showSessionReport(minutes, xp, bonus) {
 }
         
 function addToTodos(id, title) {
-    // 1. Vérifier si l'item est déjà dans la liste pour éviter les doublons
+    // 1. Vérification doublon
     const exists = userTodos.some(t => t.linkedItemId === id);
     
     if (exists) {
@@ -3586,7 +3859,7 @@ function addToTodos(id, title) {
         return;
     }
 
-    // 2. Création de l'objectif (To-Do)
+    // 2. Ajout liste "To-Do"
     userTodos.push({
         text: `Item ${id} - ${title}`,
         done: false,
@@ -3594,34 +3867,32 @@ function addToTodos(id, title) {
         linkedItemId: id
     });
 
-    // --- SYNCHRONISATION CALENDRIER (AJOUT) ---
-    // On récupère la date d'aujourd'hui au format YYYY-MM-DD
+    // 3. Synchro Calendrier (Aujourd'hui)
     const todayKey = new Date().toISOString().split('T')[0];
-    
-    // Si le tableau du jour n'existe pas, on le crée
     if (!userPlanning[todayKey]) userPlanning[todayKey] = [];
     
-    // On ajoute l'ID au planning s'il n'y est pas déjà
     if (!userPlanning[todayKey].includes(id)) {
         userPlanning[todayKey].push(id);
     }
-    // ------------------------------------------
 
-    // 3. Sauvegarde et Mise à jour
+    // 4. Sauvegarde
     saveData();
-    renderTodos();
     
-    // Si le calendrier est ouvert, on le rafraîchit pour voir le point bleu apparaître
+    // 5. Mises à jour visuelles
+    renderTodos(); // Met à jour la liste latérale
+    render();      // <--- C'EST ICI : Met à jour le bouton sur la carte (Gris -> Bleu)
+    
+    // Met à jour le calendrier s'il est ouvert
     if (!document.getElementById('calendarView').classList.contains('hidden')) {
         renderCalendar();
         if (selectedCalendarDate === todayKey) renderDayDetails(todayKey);
     }
     
-    // 4. Feedback
+    // 6. Feedback
     playSound('success');
-    showToast(`Item ${id} ajouté aux objectifs & planning !`, "success");
+    showToast(`Item ${id} ajouté aux objectifs !`, "success");
     
-    // 5. Animation visuelle
+    // Animation panneau latéral
     const todoPanel = document.querySelector('#todoList').parentElement;
     todoPanel.classList.add('ring-2', 'ring-blue-500', 'ring-opacity-50');
     setTimeout(() => todoPanel.classList.remove('ring-2', 'ring-blue-500', 'ring-opacity-50'), 500);
@@ -3663,67 +3934,161 @@ function addToTodos(id, title) {
 }
 
         function toggleTodo(id) {
-            const todo = userTodos.find(t => t.id === id);
-            if(todo) { 
-                todo.done = !todo.done; 
-                
-                // Si on vient de cocher la case (Action terminée)
-                if (todo.done) {
-                    playSound('success'); 
-                    
-                    if (todo.linkedItemId) {
-                        const itemId = todo.linkedItemId;
+    const todo = userTodos.find(t => t.id === id);
+    
+    if (!todo) {
+        console.error("Objectif ID introuvable lors du basculement:", id);
+        return;
+    }
+    
+    // 1. Bascule de l'état visuel
+    todo.done = !todo.done; 
 
-                        // --- 1. AJOUT D'UNE VUE (La nouveauté) ---
-                        userVues[itemId] = (userVues[itemId] || 0) + 1;
-                        // -----------------------------------------
+    // 2. LOGIQUE CENTRALE (Calcul et attribution)
+    if (todo.linkedItemId) {
+        const itemId = todo.linkedItemId;
+        
+        // Initialisation de Sécurité des compteurs
+        if (!userVues[itemId]) userVues[itemId] = 0;
+        if (!userStatus[itemId]) userStatus[itemId] = null;
+        if (!userXPClaimed) userXPClaimed = {};
+        if (!userXPClaimed[itemId]) userXPClaimed[itemId] = {};
 
-                        // --- 2. VÉRIFICATION DES PALIERS (Comme le bouton +) ---
-                        
-                        // Passage en LU (si c'est la 1ère fois)
-                        if (userStatus[itemId] !== 'lu' && userStatus[itemId] !== 'maitrise') {
-                            userStatus[itemId] = 'lu';
-                            addXP(20, 'Statut Lu activé');
-                        }
+        if (todo.done) {
+            // --- CAS : TÂCHE ACCOMPLIE (+1 Point / Vue) ---
+            
+            // A. Incrémentation
+            userVues[itemId]++;
+            
+            // B. Mise à jour du Statut (Automatique)
+            let justLeveledUp = false;
 
-                        // Passage en MAÎTRISE (6 vues)
-                        if (userVues[itemId] === 6 && userStatus[itemId] !== 'maitrise') {
-                            userStatus[itemId] = 'maitrise';
-                            addXP(200, 'Maîtrise atteinte !');
-                            showCelebration(); // Animation Or
-                        }
+            if (userVues[itemId] === 1 && !userStatus[itemId]) {
+                userStatus[itemId] = 'lu';
+                addXP(50, '1er passage (Objectif)');
+                justLeveledUp = true;
+            }
+            else if (userVues[itemId] === 6 && userStatus[itemId] !== 'maitrise') {
+                userStatus[itemId] = 'maitrise';
+                addXP(200, 'Maîtrise (Objectif)');
+                showCelebration();
+                justLeveledUp = true;
+            }
+            else if (userVues[itemId] === 10) {
+                userStatus[itemId] = 'legendaire'; // Mise à jour interne du statut pour le fun
+                addXP(1000, 'LÉGENDAIRE (Objectif)');
+                showLegendaryCelebration();
+                justLeveledUp = true;
+            } 
+            
+            if (!justLeveledUp) {
+                addXP(20, 'Objectif validé');
+            }
 
-                        // Passage en LÉGENDAIRE (10 vues)
-                        if (userVues[itemId] === 10) {
-                            addXP(1000, 'LÉGENDAIRE !');
-                            showLegendaryCelebration(); // Animation Violette
-                        }
-                        // -------------------------------------------------------
+            // C. Ajout au Calendrier
+            trackHistory(itemId); 
+            playSound('success');
 
-                        // 3. Historique & XP de base
-                        trackHistory(itemId);
-                        addXP(50, 'Objectif complété');
-                        
-                        // 4. Mise à jour visuelle globale (pour que la carte change de couleur si besoin)
-                        buildCourses(); 
-                        render(); 
-
-                        showToast(`Objectif validé (+1 vue sur l'item ${itemId})`, 'success');
-                    } else {
-                        // Tâche manuelle (sans item lié)
-                        addXP(10, 'Tâche terminée');
-                    }
-                }
-                
-                saveData(); 
-                renderTodos();
+        } else {
+            // --- CAS : DÉCOCHAGE (Undo / -1 Point) ---
+            
+            if (userVues[itemId] > 0) userVues[itemId]--;
+            
+            // Rétrogradation des statuts
+            if (userVues[itemId] === 0) userStatus[itemId] = null;
+            else if (userVues[itemId] < 6 && userStatus[itemId] === 'maitrise') userStatus[itemId] = 'lu';
+            
+            // Retrait du calendrier
+            const todayKey = new Date().toISOString().split('T')[0];
+            if (userHistory[todayKey]) {
+                userHistory[todayKey] = userHistory[todayKey].filter(x => x !== itemId);
+                if (userHistory[todayKey].length === 0) delete userHistory[todayKey];
             }
         }
-        
-        function deleteTodo(id) {
-             userTodos = userTodos.filter(t => t.id !== id);
-             saveData(); renderTodos();
+    } else {
+        // Tâche manuelle
+        if(todo.done) {
+            addXP(10, 'Tâche terminée');
+            playSound('click');
         }
+    }
+    
+    // 3. SAUVEGARDE
+    saveData(); 
+    
+    // 4. MISE À JOUR VISUELLE COMPLÈTE (Chaine de rendu)
+    buildCourses();      // Reconstruit l'objet 'courses' avec les nouvelles vues/statuts
+    renderTodos();       // Met à jour la liste latérale
+    render();            // Met à jour la grille (cartes Lu/Maîtrisé)
+    updateStats();       // Met à jour les cercles de stats
+    
+    // Mise à jour Calendrier (pour voir le point vert ou sa suppression)
+    const calView = document.getElementById('calendarView');
+    if (calView && !calView.classList.contains('hidden')) {
+        renderCalendar();
+        const todayKey = new Date().toISOString().split('T')[0];
+        if (typeof selectedCalendarDate !== 'undefined' && selectedCalendarDate === todayKey) {
+            renderDayDetails(todayKey);
+        }
+    }
+}
+        
+function toggleTodoFromCard(id, title) {
+    // On cherche si l'objectif existe déjà pour cet Item
+    const existingTodo = userTodos.find(t => t.linkedItemId === id);
+
+    if (existingTodo) {
+        // CAS 1 : IL EXISTE DÉJÀ -> ON LE SUPPRIME
+        // On utilise la fonction deleteTodo qu'on a déjà corrigée
+        deleteTodo(existingTodo.id);
+    } else {
+        // CAS 2 : IL N'EXISTE PAS -> ON L'AJOUTE
+        addToTodos(id, title);
+    }
+}
+
+        function deleteTodo(id) {
+    // 1. On trouve l'objectif avant de le supprimer pour avoir son ID d'item
+    const todoToDelete = userTodos.find(t => t.id === id);
+    
+    if (todoToDelete) {
+        // --- SYNCHRO SUPPRESSION CALENDRIER ---
+        // Si cet objectif est lié à un Item (ex: Item 154)
+        if (todoToDelete.linkedItemId) {
+            const todayKey = new Date().toISOString().split('T')[0];
+            
+            // On vérifie s'il est dans le planning d'aujourd'hui
+            if (userPlanning[todayKey]) {
+                // On le retire du tableau du jour
+                userPlanning[todayKey] = userPlanning[todayKey].filter(itemId => itemId !== todoToDelete.linkedItemId);
+                
+                // Si le tableau est vide, on nettoie la clé
+                if (userPlanning[todayKey].length === 0) delete userPlanning[todayKey];
+            }
+        }
+        // --------------------------------------
+
+        // 2. Suppression de la liste des objectifs
+        userTodos = userTodos.filter(t => t.id !== id);
+        
+        // 3. Sauvegarde
+        saveData(); 
+
+        // 4. Mises à jour visuelles
+        renderTodos(); // Met à jour la liste latérale
+        render();      // <--- IMPORTANT : Remet le bouton de la carte en GRIS (+)
+        
+        // Met à jour le calendrier s'il est ouvert (retire le point bleu)
+        if (!document.getElementById('calendarView').classList.contains('hidden')) {
+            renderCalendar();
+            const todayKey = new Date().toISOString().split('T')[0];
+            if (selectedCalendarDate === todayKey) renderDayDetails(todayKey);
+        }
+        
+        playSound('click');
+        showToast("Objectif supprimé (Planning mis à jour)", "info");
+    }
+}
 
         function renderTodos() {
             const list = document.getElementById('todoList');
@@ -4275,7 +4640,7 @@ function showCelebrationSuggestions() {
     }
     
     const tutorBtn = `<button onclick="startRevisionChat('${c.id}', '${c.title.replace(/'/g, "&apos;")}')" class="w-8 h-8 rounded-full border border-indigo-500/30 bg-indigo-500/5 text-indigo-400/70 hover:text-white hover:bg-indigo-500/40 flex items-center justify-center transition-all hover:scale-110 hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]" title="Tuteur IA">
-        <i class="fa-solid fa-brain text-[10px]"></i>
+        <i class="fa-solid fa-microchip text-[10px]"></i>
     </button>`;
 
     const titleContent = `<span>${c.title}</span>`;
@@ -4294,14 +4659,35 @@ function showCelebrationSuggestions() {
             </div>
             
             <div class="absolute top-3 right-3 z-20 flex gap-1.5">
-                <button onclick="event.stopPropagation(); addToTodos('${c.id}', '${c.title.replace(/'/g, "&apos;")}')" 
-                        class="w-8 h-8 rounded-full border ${todoBtnClass} flex items-center justify-center backdrop-blur-md transition-all duration-300 group/cal" 
-                        title="${isInTodos ? 'Déjà planifié' : 'Ajouter aux objectifs'}">
-                    <i class="fa-solid ${isInTodos ? 'fa-calendar-check' : 'fa-calendar-plus'} text-xs group-hover/cal:scale-110 transition-transform"></i>
+                <button onclick="event.stopPropagation(); toggleTodoFromCard('${c.id}', '${c.title.replace(/'/g, "&apos;")}')" 
+            class="w-8 h-8 rounded-full border ${todoBtnClass} flex items-center justify-center backdrop-blur-md transition-all duration-300 group/cal" 
+            title="${isInTodos ? 'Retirer des objectifs' : 'Ajouter aux objectifs'}">
+        
+        <i class="fa-solid ${isInTodos ? 'fa-calendar-minus' : 'fa-calendar-plus'} text-xs group-hover/cal:scale-110 transition-transform"></i>
+    
+    </button>
+
+                <button onclick="event.stopPropagation(); toggleStatus('${c.id}', 'lu')" 
+                        class="w-8 h-8 rounded-full border flex items-center justify-center backdrop-blur-md transition-all duration-300 ${
+                            c.status === 'lu' ? 'bg-green-500 border-green-500 text-black shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 
+                            'border-white/10 bg-black/20 text-gray-600 hover:text-green-400 hover:border-green-500/50'
+                        }" 
+                        title="Marquer comme Lu">
+                    <i class="fa-solid fa-check text-xs"></i>
+                </button>
+		
+		<button onclick="event.stopPropagation(); toggleStatus('${c.id}', 'maitrise')" 
+                        class="w-8 h-8 rounded-full border flex items-center justify-center backdrop-blur-md transition-all duration-300 ${
+                            c.status === 'maitrise' ? 'bg-yellow-500 border-yellow-500 text-black shadow-[0_0_10px_rgba(234,179,8,0.5)]' : 
+                            'border-white/10 bg-black/20 text-gray-600 hover:text-yellow-400 hover:border-yellow-500/50'
+                        }" 
+                        title="Marquer comme Maîtrisé">
+                    <i class="fa-solid fa-trophy text-xs"></i>
                 </button>
 
-                <button onclick="toggleStatus('${c.id}', 'lu')" class="w-8 h-8 rounded-full border ${isLu ? 'bg-green-500 border-green-500 text-black shadow-[0_0_10px_rgba(34,197,94,0.4)]' : 'border-white/10 bg-black/20 text-gray-600 hover:text-green-400 hover:border-green-500/50'} flex items-center justify-center backdrop-blur-md transition-all duration-300"><i class="fa-solid fa-check text-xs"></i></button>
+
             </div>
+
 
             <div class="p-5 z-10 flex-grow pt-14 flex flex-col">
                 
@@ -4501,18 +4887,17 @@ function initSubjectCarousel() {
     const matieres = Object.keys(matiereConfig).sort();
     
     // 1. Carte "TOUT"
-    // Changement : bg-[#111] -> bg-white/5 backdrop-blur-xl
+    // MODIFICATION ICI : Icône fa-book-medical (Programme R2C)
     let html = `
         <div onclick="selectMatiereFromCarousel('all')" class="flex-shrink-0 w-24 h-32 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-white/10 hover:scale-105 hover:border-white/30 transition-all duration-300 group shadow-lg">
             <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/20 transition">
-                <i class="fa-solid fa-globe text-gray-400 group-hover:text-white text-lg"></i>
+                <i class="fa-solid fa-book-medical text-gray-400 group-hover:text-white text-lg"></i>
             </div>
             <span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider text-center group-hover:text-white">Tout</span>
         </div>
     `;
 
     // 2. Les Matières
-    // Changement : bg-[#151515]/90 -> bg-white/5 backdrop-blur-xl
     html += matieres.map(m => {
         const conf = matiereConfig[m];
         return `
@@ -4534,6 +4919,8 @@ function initSubjectCarousel() {
 
 // 2. Basculer entre Vue Statique et Vue Carrousel
 function toggleSubjectCarousel() {
+        playSound('subjectClick');
+
     const staticView = document.getElementById('staticHeaderContent');
     const carouselContainer = document.getElementById('subjectCarouselContainer');
     const track = document.getElementById('subjectCarouselTrack');
@@ -4555,7 +4942,6 @@ function toggleSubjectCarousel() {
         carouselContainer.classList.remove('opacity-0', 'pointer-events-none');
         if(backdrop) backdrop.classList.remove('opacity-0', 'pointer-events-none');
         
-        playSound('whoosh');
     }
 }
 
@@ -4568,6 +4954,7 @@ function selectMatiereFromCarousel(matiere) {
     select.value = matiere;
     handleFilterChange(select);
     
+    handleFilterChange(select);
     playSound('subjectClick');
 }
 
@@ -4579,7 +4966,132 @@ function closeItemDetailAndGoHome() {
     // On appelle la fonction de nettoyage et de rendu
     resetView();      
     
+    playSound('subjectClick');
+}
+
+/* --- GESTION NOTES PLEIN ÉCRAN --- */
+function saveDashboardNotes() {
+    const preview = document.getElementById('quickNotesPreview');
+    const content = preview.innerHTML;
+    const placeholder = document.getElementById('emptyNotePlaceholder');
+
+    // 1. Mise à jour de la variable globale
+    userSubjectNotes[currentNotesMatiere] = content;
+
+    // 2. Gestion du placeholder
+    if (content.trim() === "" || content === "<br>") {
+        if(placeholder) placeholder.classList.remove('hidden');
+    } else {
+        if(placeholder) placeholder.classList.add('hidden');
+    }
+
+    // 3. Sauvegarde Cloud (avec Debounce pour ne pas spammer)
+    if (window.dashboardSaveTimeout) clearTimeout(window.dashboardSaveTimeout);
+    
+    window.dashboardSaveTimeout = setTimeout(() => {
+        saveData();
+        // Indicateur visuel discret
+        const ind = document.getElementById('saveIndicator');
+        if(ind) {
+            ind.style.opacity = '1';
+            setTimeout(() => ind.style.opacity = '0', 1000);
+        }
+    }, 1000); // Sauvegarde 1 seconde après la dernière frappe
+}
+
+function openFullScreenNotes() {
+    const modal = document.getElementById('fullScreenNotesModal');
+    const contentBox = document.getElementById('fullScreenNotesContent');
+    const editor = document.getElementById('fullScreenEditor');
+    const preview = document.getElementById('quickNotesPreview');
+
+    // 1. Configurer le titre et l'icône selon la matière actuelle
+    const config = getNotesMatiereConfig(currentNotesMatiere);
+    document.getElementById('fsNoteTitle').innerText = config.name;
+    
+    // Icone et Couleur du header
+    const iconEl = document.getElementById('fsNoteIcon');
+    const iconBg = document.getElementById('fsNoteIconBg');
+    iconEl.className = `fa-solid ${config.icon} text-xl text-${config.color}-400`;
+    iconBg.className = `w-12 h-12 rounded-xl bg-${config.color}-500/10 border border-${config.color}-500/20 flex items-center justify-center`;
+
+    // 2. Charger le contenu HTML complet
+    // On récupère le contenu depuis la variable globale
+    const savedContent = userSubjectNotes[currentNotesMatiere] || "";
+    editor.innerHTML = savedContent;
+
+    // 3. Afficher la modale
+    modal.classList.remove('hidden');
+    // Animation d'entrée
+    setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        contentBox.classList.remove('scale-95');
+        contentBox.classList.add('scale-100');
+    }, 10);
+    
+    // Focus sur l'éditeur
+    editor.focus();
     playSound('whoosh');
+}
+
+function closeFullScreenNotes() {
+    const modal = document.getElementById('fullScreenNotesModal');
+    const contentBox = document.getElementById('fullScreenNotesContent');
+    
+    // Animation de sortie
+    modal.classList.add('opacity-0');
+    contentBox.classList.remove('scale-100');
+    contentBox.classList.add('scale-95');
+    
+    setTimeout(() => {
+        modal.classList.add('hidden');
+    }, 300);
+
+    // Mise à jour de l'aperçu dans le dashboard
+    updateDashboardPreview();
+}
+
+function saveFullScreenContent() {
+    const content = document.getElementById('fullScreenEditor').innerHTML;
+    
+    // 1. Mise à jour variable globale
+    userSubjectNotes[currentNotesMatiere] = content;
+    
+    // 2. Sauvegarde Cloud
+    saveData();
+    
+    // 3. Indicateur visuel "Sauvegardé" dans la modale
+    const ind = document.getElementById('fsSaveIndicator');
+    ind.style.opacity = '1';
+    // Debounce pour l'indicateur
+    if(window.fsSaveTimeout) clearTimeout(window.fsSaveTimeout);
+    window.fsSaveTimeout = setTimeout(() => ind.style.opacity = '0', 1000);
+}
+
+// Fonction de formatage (identique à celle des items, adaptée pour la modale)
+function formatFullNote(command, value = null) {
+    document.execCommand(command, false, value);
+    document.getElementById('fullScreenEditor').focus();
+    saveFullScreenContent(); // Sauvegarde immédiate après formatage
+}
+
+function updateDashboardPreview() {
+    const preview = document.getElementById('quickNotesPreview');
+    const placeholder = document.getElementById('emptyNotePlaceholder');
+    
+    if(!preview) return;
+
+    const content = userSubjectNotes[currentNotesMatiere] || "";
+    
+    // Mise à jour du contenu
+    preview.innerHTML = content;
+
+    // Gestion du placeholder
+    if (!content || content.trim() === "") {
+        if(placeholder) placeholder.classList.remove('hidden');
+    } else {
+        if(placeholder) placeholder.classList.add('hidden');
+    }
 }
 
 // --- JAUGE DE DIFFICULTÉ ---
@@ -5023,41 +5535,52 @@ function startTutorial() {
         function populateFilters() { const select = document.getElementById('matiereFilter'); const matieres = [...new Set(rawItems.map(i => i.m))].sort(); select.innerHTML = '<option value="all">Toutes</option>' + matieres.map(m => `<option value="${m}">${m}</option>`).join(''); }
 
 	function toggleStatus(id, type) {
-    const isUpgrade = type === 'maitrise' && userStatus[id] !== 'maitrise';
-    
-    // 1. Initialisation du drapeau de réclamation
+    // Initialisation sécurité
     if (!userXPClaimed[id]) userXPClaimed[id] = {};
-    
-    // --- (Status change logic remains the same) ---
+
+    // 1. GESTION DE LA BASCULE (TOGGLE)
     if (type === 'maitrise' && userStatus[id] === 'maitrise') {
-        userStatus[id] = 'lu';
+        userStatus[id] = 'lu'; // Si on décoche Maîtrisé, on retombe sur Lu par sécurité
     } else {
+        // Si on clique sur le statut déjà actif, on l'enlève (null), sinon on l'applique
         userStatus[id] = userStatus[id] === type ? null : type;
     }
 
-    // --- NOUVELLE LOGIQUE XP (Anti-Ferme) ---
-    
-    // 1. Gain LU (+50 XP) : Seulement si l'item est marqué 'lu' ET que l'XP n'a jamais été réclamée
+    // 2. --- NOUVEAU : INCRÉMENTATION AUTOMATIQUE ---
+    // Si un statut est actif (donc ce n'est pas une suppression)
+    if (userStatus[id]) {
+        // A. On ajoute 1 vue
+        userVues[id] = (userVues[id] || 0) + 1;
+        
+        // B. On ajoute à l'historique du calendrier (point vert sur la date d'aujourd'hui)
+        trackHistory(id);
+
+        // C. Vérification : Passage en LÉGENDAIRE (10 vues)
+        if (userVues[id] === 10) {
+            addXP(1000, 'EXPERTISE LÉGENDAIRE (10 vues)');
+            showLegendaryCelebration();
+        }
+    }
+    // -----------------------------------------------
+
+    // 3. GESTION DE L'XP (Première fois seulement)
     if (userStatus[id] === 'lu' && !userXPClaimed[id].lu) {
         addXP(50, 'Cours Lu (1ère fois)');
         playSound('success');
-        userXPClaimed[id].lu = true; // On pose le drapeau !
+        userXPClaimed[id].lu = true;
     }
-    
-    // 2. Gain MAÎTRISÉ (+200 XP) : Seulement si l'item est marqué 'maitrise' ET que l'XP n'a jamais été réclamée
     else if (userStatus[id] === 'maitrise' && !userXPClaimed[id].maitrise) {
         addXP(200, 'Cours Maîtrisé (1ère fois)');
-        userXPClaimed[id].maitrise = true; // On pose le drapeau !
+        // On lance l'anim Maîtrise sauf si on vient de lancer l'anim Légendaire (pour ne pas superposer)
+        if (userVues[id] !== 10) showCelebration();
+        userXPClaimed[id].maitrise = true;
     }
-    
-    // --- (Fin de la logique XP) ---
 
-    saveData(); // Sauvegarde les statuts et le nouveau drapeau
-    buildCourses();
+    // 4. SAUVEGARDE ET RENDU
+    saveData();
+    buildCourses(); // Indispensable pour redessiner la barre de points
     updateStats();
     render();
-
-    if(isUpgrade) showCelebration();
 }        
 
 	function playSound(type) {
@@ -5283,6 +5806,25 @@ function showLegendaryCelebration() {
     }, 3500);
 }
 
+	function anchorToFilterBar() {
+    const targetElement = document.getElementById('subjectHeader');
+    
+    if (targetElement) {
+        // Timeout pour attendre que le DOM se stabilise après le rendu de la grille
+        setTimeout(() => {
+            // Calcule la position verticale de l'en-tête
+            const targetPosition = targetElement.offsetTop;
+            
+            // Défilement : targetPosition - 90px
+            // L'offset de 90px est calculé pour placer l'élément juste sous le header fixe (h-20 ≈ 80px)
+            window.scrollTo({
+                top: targetPosition - 90, 
+                behavior: 'smooth'
+            });
+        }, 200); // Délai stable de 200ms
+    }
+}
+
         function filterByMatiere(m) { 
             document.getElementById('matiereFilter').value = m; 
             handleFilterChange(document.getElementById('matiereFilter')); 
@@ -5357,7 +5899,7 @@ function closeResetModal() {
 
 // 3. EXÉCUTE LE NETTOYAGE (L'ancienne logique)
 function executeFullReset() {
-    // RAZ Mémoire
+    // 1. RAZ des variables en mémoire
     userStatus = {};
     userTodos = [];
     userVues = {};
@@ -5368,30 +5910,28 @@ function executeFullReset() {
     userItemDifficulty = {};
     userItemErrors = {};
     userLinks = [];
-    dailySuggestionsDone = {};
-    currentSuggestions = [];
-    sessionViewedResources = {};
     userHistory = {}; 
     userPlanning = {};
+    userSubjectNotes = {};
+    dailySuggestionsDone = {};
+    currentSuggestions = [];
 
-    // Profil
+    // Profil par défaut
     userName = "";
     userAlias = "Docteur";
     userAvatar = "fa-dragon";
     userUnlockedAvatars = ['fa-dragon'];
 
-    // RAZ Stockage
-    const keysToRemove = [
-        'ultimed_status', 'ultimed_todos', 'ultimed_vues', 'ultimed_xp',
-        'ultimed_daily_suggestions', 'ultimed_history', 'ultimed_planning',
-        'ultimed_resources', 'ultimed_item_notes', 'ultimed_item_errors',
-        'ultimed_item_difficulty', 'ultimed_userName', 'ultimed_userAlias',
-        'ultimed_userAvatar', 'ultimed_unlocked_avatars', 'ultimed_examDate',
-        'ultimed_custom_links', 'ultimed_xp_claimed'
-    ];
-    keysToRemove.forEach(key => localStorage.removeItem(key));
+    // 2. RAZ du LocalStorage (Nettoyage complet)
+    // On garde juste la clé API pour ne pas embêter l'utilisateur
+    const savedKey = localStorage.getItem('ultimed_apiKey');
+    localStorage.clear();
+    if(savedKey) localStorage.setItem('ultimed_apiKey', savedKey);
 
-    // Mise à jour visuelle
+    // 3. RAZ de Firebase (Sauvegarde d'un objet vide/par défaut)
+    saveData(); 
+
+    // 4. Mise à jour visuelle
     updateGreetingDisplay();
     document.getElementById('countdownDisplay').innerText = "---";
     const targetDateMini = document.getElementById('targetDateMini');
@@ -5405,23 +5945,22 @@ function executeFullReset() {
     renderTodos();
     if (typeof updateXPDisplay === 'function') updateXPDisplay();
     
+    // Reset Calendrier UI
     if (typeof renderCalendar === 'function') {
         currentCalendarDate = new Date();
         renderCalendar();
         document.getElementById('dayItemsList').innerHTML = '<div class="text-center text-gray-600 text-xs italic mt-10">Rien de prévu ni de fait.</div>';
-        const streakEl = document.getElementById('streakCount');
-        if(streakEl) streakEl.innerText = "0";
     }
     
+    // Relancer les suggestions
     renderSuggestions(true);
 
-    // Fermeture
+    // Fermeture des modales
     closeResetModal();
     closeGlobalSettings();
     
-    // Feedback final
-    playSound('whoosh'); // Son de nettoyage
-    showToast("Système entièrement réinitialisé.", "success");
+    playSound('whoosh'); 
+    showToast("Système entièrement réinitialisé (Cloud & Local).", "success");
 }
 
         // --- MODALS & PLAYER ---
@@ -5686,7 +6225,7 @@ function startRevisionChat(item, title) {
 
             modal.classList.remove('hidden');
             modal.classList.add('flex');
-            document.getElementById('aiModalTitle').innerHTML = `<i class="fa-solid fa-brain text-indigo-400"></i> Tuteur: ${title}`;
+            document.getElementById('aiModalTitle').innerHTML = `<i class="fa-solid fa-microchip text-purple-400"></i> Tuteur: ${title}`;
             
             contentArea.classList.add('hidden');
             chatInterface.classList.remove('hidden');
@@ -6018,7 +6557,7 @@ function renderCalendar() {
             renderDayDetails(dateKey);
         }
 
-        function renderDayDetails(dateKey) {
+   function renderDayDetails(dateKey) {
             const list = document.getElementById('dayItemsList');
             const label = document.getElementById('selectedDateLabel');
             const dateObj = new Date(dateKey);
@@ -6091,22 +6630,197 @@ function renderCalendar() {
                     const config = matiereConfig[course.m] || defaultConfig;
                     
                     return `
-                        <div onclick="openItemDetail('${itemId}')" class="bg-[#111] border border-white/5 p-3 rounded-xl flex items-center gap-3 hover:bg-white/5 transition cursor-pointer group">
-                            <div class="w-8 h-8 rounded-full bg-${config.color}-500/20 flex-shrink-0 flex items-center justify-center text-${config.color}-400 group-hover:scale-110 transition-transform">
+                        <div class="bg-[#111] border border-green-500/20 p-3 rounded-xl flex items-center gap-3 hover:bg-green-500/5 transition cursor-default group">
+                            
+                            <div class="w-8 h-8 rounded-full bg-${config.color}-500/20 flex-shrink-0 flex items-center justify-center text-${config.color}-400 opacity-50 group-hover:opacity-100 transition-opacity">
                                 <i class="fa-solid ${config.icon} text-xs"></i>
                             </div>
-                            <div class="flex-grow overflow-hidden">
-                                <div class="text-[10px] text-green-500 font-bold uppercase truncate">Item ${itemId}</div>
-                                <div class="text-xs text-white font-medium truncate group-hover:text-green-300 transition-colors">${course.t}</div>
+                            
+                            <div class="flex-grow overflow-hidden opacity-60 group-hover:opacity-100 transition-opacity">
+                                <div class="text-[10px] text-green-500 font-bold uppercase truncate decoration-green-500/50 line-through group-hover:no-underline">Item ${itemId}</div>
+                                <div class="text-xs text-gray-400 font-medium truncate group-hover:text-white transition-colors">${course.t}</div>
                             </div>
-                            <div class="text-green-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <i class="fa-solid fa-check text-xs"></i>
-                            </div>
+                            
+                            <button onclick="undoHistoryItem('${dateKey}', '${itemId}')" class="w-8 h-8 rounded-full hover:bg-white/10 text-green-600 hover:text-yellow-400 flex items-center justify-center transition opacity-0 group-hover:opacity-100" title="Annuler / Remettre à faire">
+                                <i class="fa-solid fa-rotate-left text-xs"></i>
+                            </button>
+
                         </div>
                     `;
                 }).join('');
             }
+}
+
+/* --- LOGIQUE HUB XP --- */
+function openXPModal() {
+    const modal = document.getElementById('xpModal');
+    const content = document.getElementById('xpModalContent');
+    
+    // 1. Remplissage des données
+    const currentLvlXP = userXP % 1000; // XP dans le niveau actuel
+    const percent = (currentLvlXP / 1000) * 100;
+    
+    document.getElementById('xpModalLevel').innerText = userLevel;
+    document.getElementById('xpModalProgressText').innerText = `${Math.floor(currentLvlXP)} / 1000 XP`;
+    document.getElementById('xpModalBar').style.width = `${percent}%`;
+    document.getElementById('xpModalMissing').innerText = Math.floor(1000 - currentLvlXP);
+    
+    // Stats
+    const totalLu = Object.values(userStatus).filter(s => s === 'lu' || s === 'maitrise').length;
+    const totalMaitrise = Object.values(userStatus).filter(s => s === 'maitrise').length;
+    document.getElementById('xpModalLu').innerText = totalLu;
+    document.getElementById('xpModalMaitrise').innerText = totalMaitrise;
+    
+    // Prochaine récompense
+    const nextLvl = userLevel + 1;
+    let rewardIcon = "fa-question";
+    let rewardText = "Récompense mystère...";
+    
+    // On cherche la prochaine récompense définie
+    // On parcourt les niveaux supérieurs pour trouver le prochain avatar
+    let found = false;
+    for(let l = nextLvl; l <= 50; l++) {
+        if (levelRewards[l]) {
+            rewardIcon = levelRewards[l];
+            rewardText = `Avatar débloqué au niveau ${l}`;
+            found = true;
+            break;
         }
+    }
+    
+    if (found) {
+        document.getElementById('nextRewardIcon').className = `fa-solid ${rewardIcon} text-blue-400 text-2xl animate-bounce`;
+        document.getElementById('nextRewardText').innerText = rewardText;
+    } else {
+        // Si tout est débloqué
+        document.getElementById('nextRewardIcon').className = "fa-solid fa-crown text-gold-500 text-2xl";
+        document.getElementById('nextRewardText').innerText = "Niveau Légendaire atteint !";
+    }
+
+    // 2. Affichage
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        content.classList.remove('scale-95');
+        content.classList.add('scale-100');
+    }, 10);
+    playSound('whoosh');
+}
+
+function closeXPModal() {
+    const modal = document.getElementById('xpModal');
+    const content = document.getElementById('xpModalContent');
+    modal.classList.add('opacity-0');
+    content.classList.remove('scale-100');
+    content.classList.add('scale-95');
+    setTimeout(() => modal.classList.add('hidden'), 300);
+}
+
+/* --- LOGIQUE HUB CHRONOS --- */
+function openCountdownModal() {
+    const modal = document.getElementById('chronoModal');
+    const content = document.getElementById('chronoModalContent');
+    const dateInput = document.getElementById('modalDateInput');
+    
+    // 1. Initialisation des dates
+    const today = new Date();
+    let targetDate;
+
+    // Détermine le début de l'année universitaire (1er Septembre précédent)
+    let startYear = today.getFullYear();
+    if (today.getMonth() < 8) { // Si on est entre Janvier (0) et Août (7)
+        startYear--; // L'année a commencé l'année civile d'avant
+    }
+    const academicStart = new Date(startYear, 8, 1); // 1er Septembre (Mois 8)
+
+    // 2. Gestion de la Date Cible (Concours)
+    if (userExamDate) {
+        dateInput.value = userExamDate;
+        targetDate = new Date(userExamDate);
+    } else {
+        // Par défaut : 15 Juin de l'année de fin académique
+        targetDate = new Date(startYear + 1, 5, 15); 
+        dateInput.value = ""; // On laisse vide pour inciter à remplir
+    }
+
+    // 3. Calcul des Jours Restants (Grand Compteur)
+    const diffTime = targetDate - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    const chronoElement = document.getElementById('chronoDays');
+    if (userExamDate) {
+        chronoElement.innerText = diffDays > 0 ? diffDays : "0";
+        chronoElement.className = diffDays < 30 ? "text-5xl font-display font-black text-red-500 animate-pulse" : "text-5xl font-display font-black text-white";
+    } else {
+        chronoElement.innerText = "---";
+        chronoElement.className = "text-5xl font-display font-black text-gray-500";
+    }
+
+    // 4. Calcul de la Barre de Progression (TEMPS ÉCOULÉ)
+    // Durée totale : Du 1er Septembre au Concours
+    const totalDuration = targetDate - academicStart;
+    // Durée écoulée : Du 1er Septembre à Aujourd'hui
+    const elapsedDuration = today - academicStart;
+
+    let pct = 0;
+    if (totalDuration > 0) {
+        pct = (elapsedDuration / totalDuration) * 100;
+    }
+
+    // Bornes (0% min, 100% max)
+    if (pct < 0) pct = 0;
+    if (pct > 100) pct = 100;
+
+    // Mise à jour visuelle
+    document.getElementById('timeProgressBar').style.width = `${pct}%`;
+    document.getElementById('timeElapsedPct').innerText = `${Math.round(pct)}%`;
+
+    // 5. Citation Motivation
+    const quotes = [
+        "Chaque minute compte.",
+        "La douleur est temporaire, la fierté est éternelle.",
+        "Ne regarde pas l'horloge, fais comme elle : avance.",
+        "Ton futur toi te remerciera.",
+        "Discipline = Liberté."
+    ];
+    document.getElementById('chronoQuote').innerText = `"${quotes[Math.floor(Math.random() * quotes.length)]}"`;
+
+    // 6. Affichage Modale
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        content.classList.remove('scale-95');
+        content.classList.add('scale-100');
+    }, 10);
+    playSound('whoosh');
+}
+
+function updateExamDateFromModal(newDate) {
+    if(newDate) {
+        userExamDate = newDate;
+        updateCountdownDisplay(userExamDate);
+        
+        // Mise à jour aussi dans les settings globaux si ouverts
+        const settingInput = document.getElementById('settingDate');
+        if(settingInput) settingInput.value = newDate;
+        
+        // Sauvegarde
+        saveData();
+        
+        // Rafraîchir la modale instantanément
+        openCountdownModal();
+        showToast("Objectif mis à jour !", "success");
+    }
+}
+
+function closeChronoModal() {
+    const modal = document.getElementById('chronoModal');
+    const content = document.getElementById('chronoModalContent');
+    modal.classList.add('opacity-0');
+    content.classList.remove('scale-100');
+    content.classList.add('scale-95');
+    setTimeout(() => modal.classList.add('hidden'), 300);
+}
 
         // --- FONCTIONS D'AJOUT / SUPPRESSION PLANNING ---
 
@@ -6171,16 +6885,81 @@ function renderCalendar() {
 
         function removePlanningItem(dateKey, index) {
     if (userPlanning[dateKey]) {
+        // 1. On sauvegarde l'ID de l'item AVANT de le supprimer du tableau
+        const itemIdToRemove = userPlanning[dateKey][index];
+
+        // 2. Suppression du planning (Logique de base)
         userPlanning[dateKey].splice(index, 1);
-        // Nettoyage si vide
+        
+        // Nettoyage si la journée est vide
         if (userPlanning[dateKey].length === 0) delete userPlanning[dateKey];
         
-        saveData(); // <--- AJOUT ESSENTIEL (Remplace le localStorage)
+        // 3. --- SYNCHRO INVERSE (CALENDRIER -> OBJECTIFS) ---
+        const todayKey = new Date().toISOString().split('T')[0];
+
+        // Si on supprime un item de la date d'AUJOURD'HUI
+        if (dateKey === todayKey && itemIdToRemove) {
+            // On vérifie s'il existe dans la liste des To-Dos
+            const todoExists = userTodos.some(t => t.linkedItemId === itemIdToRemove);
+            
+            if (todoExists) {
+                // On le retire de la liste des objectifs
+                userTodos = userTodos.filter(t => t.linkedItemId !== itemIdToRemove);
+                
+                // Mise à jour visuelle immédiate de la colonne de droite et de la grille
+                renderTodos(); 
+                render(); // Le bouton de la carte redevient gris (+)
+            }
+        }
+        // ----------------------------------------------------
         
+        saveData(); 
+        
+        // Mise à jour de l'affichage Calendrier
         renderDayDetails(dateKey);
         renderCalendar();
+        
         playSound('click');
+        showToast("Item retiré du planning.", "info");
     }
+}
+
+function undoHistoryItem(dateKey, itemId) {
+    // 1. Retirer de l'historique du jour (Calendrier)
+    if (userHistory[dateKey]) {
+        userHistory[dateKey] = userHistory[dateKey].filter(id => id !== itemId);
+        // Si le jour devient vide, on supprime la clé pour garder le fichier propre
+        if (userHistory[dateKey].length === 0) delete userHistory[dateKey];
+    }
+
+    // 2. DÉCRÉMENTATION INTELLIGENTE (Retrait du point)
+    if (userVues[itemId] && userVues[itemId] > 0) {
+        userVues[itemId]--; // On retire 1 vue
+        
+        // A. Si on tombe à 0 vue -> On enlève le statut "Lu"
+        if (userVues[itemId] === 0) {
+            userStatus[itemId] = null;
+        }
+        // B. Si on tombe sous le seuil de maîtrise (6) -> On repasse en "Lu"
+        else if (userVues[itemId] < 6 && userStatus[itemId] === 'maitrise') {
+            userStatus[itemId] = 'lu';
+        }
+    }
+
+    // 3. Sauvegarde
+    saveData();
+
+    // 4. Mises à jour visuelles
+    renderDayDetails(dateKey); // Met à jour la liste à droite (l'item remonte dans "À faire")
+    renderCalendar();          // Met à jour les points de couleur
+    
+    // Ces fonctions mettent à jour la grille principale et les stats globales
+    buildCourses();            
+    updateStats();
+    render();                  
+    
+    playSound('click');
+    showToast(`Action annulée (Vue retirée : ${userVues[itemId] || 0})`, "info");
 }
 
 // --- LOGIQUE VUE DÉTAILLÉE ---
@@ -6440,20 +7219,23 @@ function updateDetailStatusUI(itemId) {
 
 // --- FONCTION DE NAVIGATION RAPIDE PAR MATIÈRE ---
 function jumpToMatiere(matiere) {
-    // 1. Si on est dans le détail, on le ferme
+    // 1. Fermeture de la vue détaillée et réinitialisation de la recherche
     document.getElementById('itemDetailView').classList.add('hidden');
     document.getElementById('dashboardView').classList.remove('hidden');
     document.getElementById('filterBar').classList.remove('hidden');
     
-    // 2. On vide la recherche textuelle pour ne voir QUE la matière
-    document.getElementById('searchInput').value = '';
+    document.getElementById('searchInput').value = ''; // On vide la recherche
 
-    // 3. On lance le filtre
-    filterByMatiere(matiere);
+    // 2. Lancer la mise à jour (handleFilterChange n'inclut PAS de scroll)
+    const filterSelect = document.getElementById('matiereFilter');
+    filterSelect.value = matiere;
+    handleFilterChange(filterSelect); 
+
+    // 3. Déclenchement de l'ancrage stable
+    // C'est ce qui centre l'affichage sur la barre de recherche
+    anchorToFilterBar(); 
     
-    // 4. Petit son et scroll
-    playSound('whoosh');
-    window.scrollTo({top: 0, behavior: 'smooth'});
+    playSound('subjectClick');
 }
 
 initApp();
