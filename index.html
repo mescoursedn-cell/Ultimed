@@ -1148,128 +1148,173 @@ input[type=range]::-webkit-slider-runnable-track {
                         </h2>
                     </div>
 
-                    <div class="ml-auto flex items-center gap-3 flex-shrink-0">
-    
-    <div class="flex flex-row gap-2">
+                    <div class="ml-auto flex items-center gap-3 flex-shrink-0 h-14"> <div class="flex flex-row gap-2 h-full">
         
         <button onclick="startRevisionChat(currentItemId, document.getElementById('detailTitle').innerText)" 
-                class="flex items-center gap-2 px-3 py-2 rounded-xl border border-indigo-500/30 bg-indigo-500/10 text-indigo-400 hover:text-white hover:bg-indigo-500/40 transition-all hover:scale-105 hover:shadow-[0_0_15px_rgba(99,102,241,0.3)] text-xs font-bold" 
+                class="w-14 h-full flex items-center justify-center rounded-xl border border-indigo-500/30 bg-indigo-500/10 text-indigo-400 hover:text-white hover:bg-indigo-500/40 transition-all hover:scale-105 hover:shadow-[0_0_15px_rgba(99,102,241,0.3)] group" 
                 title="Interroger le Tuteur IA">
-            <i class="fa-solid fa-microchip text-sm"></i>
-            <span>Tuteur IA</span>
+            <i class="fa-solid fa-microchip text-xl group-hover:animate-pulse"></i>
         </button>
 
         <button onclick="openErrorModal()" 
-                class="flex items-center gap-2 px-3 py-2 rounded-xl border border-red-500/30 bg-red-500/10 text-red-400 hover:text-white hover:bg-red-500/40 transition-all hover:scale-105 hover:shadow-[0_0_15px_rgba(239,68,68,0.3)] text-xs font-bold" 
+                class="w-14 h-full flex items-center justify-center rounded-xl border border-red-500/30 bg-red-500/10 text-red-400 hover:text-white hover:bg-red-500/40 transition-all hover:scale-105 hover:shadow-[0_0_15px_rgba(239,68,68,0.3)] relative group" 
                 title="Boîte à Erreurs">
-            <i class="fa-solid fa-box-open text-sm"></i>
-            <span>Erreurs</span>
+            <i class="fa-solid fa-box-open text-xl"></i>
+            
+            <span id="errorCountLabel" class="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-red-600 rounded-full text-white font-bold text-[10px] flex items-center justify-center border border-[#111] shadow-sm hidden group-hover:bg-red-500">
+                0
+            </span>
         </button>
     </div>
     
-    <div class="bg-black/10 backdrop-blur-md border border-white/5 rounded-xl p-2 w-44">
-        <span class="block text-right text-[9px] text-gray-500 font-bold uppercase mb-1 px-1">Difficulté Perso</span>
-        <span id="difficultyLevelLabel" class="block text-right text-xs font-bold text-gray-300 mb-2 transition-colors">3 - Normale</span> 
-        <div class="flex gap-1 w-full" id="difficultySelector">
+    <div class="bg-black/10 backdrop-blur-md border border-white/5 rounded-xl px-3 py-1 w-48 h-full flex flex-col justify-center">
+        <div class="flex justify-between items-end mb-1">
+            <span class="text-[9px] text-gray-500 font-bold uppercase">Difficulté</span>
+            <span id="difficultyLevelLabel" class="text-xs font-bold text-gray-300">3 - Normale</span> 
+        </div>
+        <div class="flex gap-1 w-full mt-0.5" id="difficultySelector">
             </div>
     </div>
 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-grow overflow-hidden">
+            <div class="flex-grow flex flex-col gap-6 overflow-hidden">
+            
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-shrink-0">
+        
+        <div class="space-y-6 overflow-y-auto custom-scrollbar pr-2 lg:col-span-1">
+            
+            <div class="grid grid-cols-2 gap-3">
                 
-                <div class="space-y-6 overflow-y-auto custom-scrollbar pr-2">
-                    
-                    <div class="grid grid-cols-2 gap-3">
-                        
-                        <div class="card-panel p-4 rounded-xl flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center"><i class="fa-solid fa-eye"></i></div>
-                            <div>
-                                <div class="text-xl font-bold text-white" id="detailVues">0</div>
-                                <div class="text-[10px] text-gray-500 uppercase">Vues</div>
-                            </div>
-                        </div>
-
-                        <div class="card-panel p-4 rounded-xl flex items-center gap-3 cursor-pointer hover:bg-white/5 transition" onclick="toggleStatusFromDetail()">
-                            <div id="detailStatusIconBg" class="w-10 h-10 rounded-full bg-gray-800 text-gray-500 flex items-center justify-center transition-colors"><i id="detailStatusIcon" class="fa-solid fa-check"></i></div>
-                            <div>
-                                <div class="text-sm font-bold text-white" id="detailStatusText">Non Lu</div>
-                                <div class="text-[10px] text-gray-500 uppercase">Statut</div>
-                            </div>
-                        </div>
-
-                        <div class="card-panel p-4 rounded-xl flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center"><i class="fa-solid fa-clipboard-list"></i></div>
-                            <div>
-                                <div class="text-xl font-bold text-white" id="detailFrequency">0</div>
-                                <div class="text-[10px] text-gray-500 uppercase">Concours</div>
-                            </div>
-                        </div>
-
-                        <div class="card-panel p-4 rounded-xl flex items-center gap-3">
-                             <div id="detailDiffIconBg" class="w-10 h-10 rounded-full bg-gray-800 text-gray-400 flex items-center justify-center"><i class="fa-solid fa-layer-group"></i></div>
-                             <div>
-                                <div class="text-sm font-bold text-white" id="detailOfficialDiff">Normale</div>
-                                <div class="text-[10px] text-gray-500 uppercase">Difficulté R2C</div>
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <div class="card-panel p-5 rounded-2xl">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-sm font-bold text-white uppercase tracking-widest">Ressources</h3>
-                        </div>
-                        <div id="detailResourcesList" class="space-y-3">
-                            </div>
-                    </div>
-
-                  
-                </div>
-
-               <div class="lg:col-span-2 flex flex-col gap-4 h-full overflow-hidden">
-                    
-                    <div class="flex-grow card-panel rounded-2xl flex flex-col relative group border-blue-500/30 shadow-lg overflow-hidden">
-                        <div class="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                            <span class="text-[10px] text-green-400 font-mono bg-black/50 px-2 py-1 rounded" id="noteSaveIndicator">Sauvegardé</span>
-                        </div>
-
-                        <div class="flex flex-wrap items-center justify-center gap-2 p-2 border-b border-white/10 bg-[#151515]">
-                             <div class="flex bg-black/20 rounded-lg p-1">
-                                <button onclick="formatText('formatBlock', 'H2')" class="w-8 h-8 rounded hover:bg-white/10 text-gold-500 hover:text-white transition flex items-center justify-center" title="Grand Titre"><i class="fa-solid fa-heading"></i></button>
-                            </div>
-                            <div class="w-px h-6 bg-white/10"></div>
-                            <div class="flex bg-black/20 rounded-lg p-1">
-                                <button onclick="formatText('bold')" class="w-8 h-8 rounded hover:bg-white/10 text-gray-400 hover:text-white transition flex items-center justify-center"><i class="fa-solid fa-bold"></i></button>
-                                <button onclick="formatText('italic')" class="w-8 h-8 rounded hover:bg-white/10 text-gray-400 hover:text-white transition flex items-center justify-center"><i class="fa-solid fa-italic"></i></button>
-                                <button onclick="formatText('underline')" class="w-8 h-8 rounded hover:bg-white/10 text-gray-400 hover:text-white transition flex items-center justify-center"><i class="fa-solid fa-underline"></i></button>
-                            </div>
-                            <div class="w-px h-6 bg-white/10"></div>
-                            <div class="flex bg-black/20 rounded-lg p-1">
-                                <button onclick="formatText('insertUnorderedList')" class="w-8 h-8 rounded hover:bg-white/10 text-gray-400 hover:text-white transition flex items-center justify-center"><i class="fa-solid fa-list-ul"></i></button>
-                                <button onclick="formatText('insertOrderedList')" class="w-8 h-8 rounded hover:bg-white/10 text-gray-400 hover:text-white transition flex items-center justify-center"><i class="fa-solid fa-list-ol"></i></button>
-                            </div>
-                            <div class="w-px h-6 bg-white/10"></div>
-                            <div class="flex items-center gap-1 bg-black/20 rounded-lg p-1 px-2">
-                                <button onclick="formatText('foreColor', '#e5e7eb')" class="w-5 h-5 rounded-full bg-gray-200 border border-transparent hover:scale-110 transition" title="Blanc"></button>
-                                <button onclick="formatText('foreColor', '#3b82f6')" class="w-5 h-5 rounded-full bg-blue-500 border border-transparent hover:scale-110 transition" title="Bleu"></button>
-                                <button onclick="formatText('foreColor', '#ef4444')" class="w-5 h-5 rounded-full bg-red-500 border border-transparent hover:scale-110 transition" title="Rouge"></button>
-                                <button onclick="formatText('foreColor', '#22c55e')" class="w-5 h-5 rounded-full bg-green-500 border border-transparent hover:scale-110 transition" title="Vert"></button>
-                                <button onclick="formatText('foreColor', '#eab308')" class="w-5 h-5 rounded-full bg-yellow-500 border border-transparent hover:scale-110 transition" title="Jaune"></button>
-                                <button onclick="formatText('foreColor', '#a855f7')" class="w-5 h-5 rounded-full bg-purple-500 border border-transparent hover:scale-110 transition" title="Violet"></button>
-                            </div>
-                            <div class="ml-2 border-l border-white/10 pl-2">
-                                <button onclick="formatText('removeFormat')" class="w-8 h-8 rounded hover:bg-red-500/20 text-gray-500 hover:text-red-400 transition flex items-center justify-center"><i class="fa-solid fa-eraser"></i></button>
-                            </div>
-                        </div>
-
-                        <div id="detailNotesArea" 
-                             contenteditable="true" 
-                             class="w-full h-full bg-[#0a0a0a] p-6 overflow-y-auto text-gray-300 font-sans leading-relaxed focus:outline-none text-sm custom-scrollbar"
-                             oninput="saveCurrentNotes()">
-                        </div>
+                <div class="card-panel p-4 rounded-xl flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center"><i class="fa-solid fa-eye"></i></div>
+                    <div>
+                        <div class="text-xl font-bold text-white" id="detailVues">0</div>
+                        <div class="text-[10px] text-gray-500 uppercase">Vues</div>
                     </div>
                 </div>
+
+                <div class="card-panel p-4 rounded-xl flex items-center gap-3 cursor-pointer hover:bg-white/5 transition" onclick="toggleStatusFromDetail()">
+                    <div id="detailStatusIconBg" class="w-10 h-10 rounded-full bg-gray-800 text-gray-500 flex items-center justify-center transition-colors"><i id="detailStatusIcon" class="fa-solid fa-check"></i></div>
+                    <div>
+                        <div class="text-sm font-bold text-white" id="detailStatusText">Non Lu</div>
+                        <div class="text-[10px] text-gray-500 uppercase">Statut</div>
+                    </div>
+
+                </div>
+
+                <div class="card-panel p-4 rounded-xl flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center"><i class="fa-solid fa-clipboard-list"></i></div>
+                    <div>
+                        <div class="text-xl font-bold text-white" id="detailFrequency">0</div>
+                        <div class="text-[10px] text-gray-500 uppercase">Concours</div>
+                    </div>
+                </div>
+
+                <div class="card-panel p-4 rounded-xl flex items-center gap-3">
+                        <div id="detailDiffIconBg" class="w-10 h-10 rounded-full bg-gray-800 text-gray-400 flex items-center justify-center"><i class="fa-solid fa-layer-group"></i></div>
+                        <div>
+                        <div class="text-sm font-bold text-white" id="detailOfficialDiff">Normale</div>
+                        <div class="text-[10px] text-gray-500 uppercase">Difficulté R2C</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="card-panel p-5 rounded-2xl">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-sm font-bold text-white uppercase tracking-widest">Ressources</h3>
+                </div>
+                <div id="detailResourcesList" class="space-y-3">
+                    </div>
+            </div>                  
+        </div>
+
+        <div class="lg:col-span-2 flex flex-col gap-4 h-full overflow-hidden">
+            
+            <div class="flex-grow card-panel rounded-2xl flex flex-col relative group border-blue-500/30 shadow-lg overflow-hidden">
+                <div class="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                    <span class="text-[10px] text-green-400 font-mono bg-black/50 px-2 py-1 rounded" id="noteSaveIndicator">Sauvegardé</span>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-center gap-2 p-2 border-b border-white/10 bg-[#151515]">
+                        <div class="flex bg-black/20 rounded-lg p-1">
+                        <button onclick="formatText('formatBlock', 'H2')" class="w-8 h-8 rounded hover:bg-white/10 text-gold-500 hover:text-white transition flex items-center justify-center" title="Grand Titre"><i class="fa-solid fa-heading"></i></button>
+                    </div>
+                    <div class="w-px h-6 bg-white/10"></div>
+                    <div class="flex bg-black/20 rounded-lg p-1">
+                        <button onclick="formatText('bold')" class="w-8 h-8 rounded hover:bg-white/10 text-gray-400 hover:text-white transition flex items-center justify-center"><i class="fa-solid fa-bold"></i></button>
+                        <button onclick="formatText('italic')" class="w-8 h-8 rounded hover:bg-white/10 text-gray-400 hover:text-white transition flex items-center justify-center"><i class="fa-solid fa-italic"></i></button>
+                        <button onclick="formatText('underline')" class="w-8 h-8 rounded hover:bg-white/10 text-gray-400 hover:text-white transition flex items-center justify-center"><i class="fa-solid fa-underline"></i></button>
+                    </div>
+                    <div class="w-px h-6 bg-white/10"></div>
+                    <div class="flex bg-black/20 rounded-lg p-1">
+                        <button onclick="formatText('insertUnorderedList')" class="w-8 h-8 rounded hover:bg-white/10 text-gray-400 hover:text-white transition flex items-center justify-center"><i class="fa-solid fa-list-ul"></i></button>
+                        <button onclick="formatText('insertOrderedList')" class="w-8 h-8 rounded hover:bg-white/10 text-gray-400 hover:text-white transition flex items-center justify-center"><i class="fa-solid fa-list-ol"></i></button>
+                    </div>
+
+                    <div class="w-px h-6 bg-white/10"></div>
+                    <div class="flex items-center gap-1 bg-black/20 rounded-lg p-1 px-2">
+                        <button onclick="formatText('foreColor', '#e5e7eb')" class="w-5 h-5 rounded-full bg-gray-200 border border-transparent hover:scale-110 transition" title="Blanc"></button>
+                        <button onclick="formatText('foreColor', '#3b82f6')" class="w-5 h-5 rounded-full bg-blue-500 border border-transparent hover:scale-110 transition" title="Bleu"></button>
+                        <button onclick="formatText('foreColor', '#ef4444')" class="w-5 h-5 rounded-full bg-red-500 border border-transparent hover:scale-110 transition" title="Rouge"></button>
+                        <button onclick="formatText('foreColor', '#22c55e')" class="w-5 h-5 rounded-full bg-green-500 border border-transparent hover:scale-110 transition" title="Vert"></button>
+                        <button onclick="formatText('foreColor', '#eab308')" class="w-5 h-5 rounded-full bg-yellow-500 border border-transparent hover:scale-110 transition" title="Jaune"></button>
+                        <button onclick="formatText('foreColor', '#a855f7')" class="w-5 h-5 rounded-full bg-purple-500 border border-transparent hover:scale-110 transition" title="Violet"></button>
+                    </div>
+                    <div class="ml-2 border-l border-white/10 pl-2">
+                        <button onclick="formatText('removeFormat')" class="w-8 h-8 rounded hover:bg-red-500/20 text-gray-500 hover:text-red-400 transition flex items-center justify-center"><i class="fa-solid fa-eraser"></i></button>
+                    </div>
+                </div>
+
+                <div id="detailNotesArea" 
+                        contenteditable="true" 
+                        class="w-full h-full bg-[#0a0a0a] p-6 overflow-y-auto text-gray-300 font-sans leading-relaxed focus:outline-none text-sm custom-scrollbar"
+                        oninput="saveCurrentNotes()">
+                </div>
+            </div>
+        </div>
+
+    </div> 
+    <div class="mt-6 w-full card-panel rounded-2xl p-6 relative group border-blue-500/30 shadow-lg animate-fade-in-up flex-shrink-0">
+        
+        <div class="flex justify-between items-center mb-6 border-b border-white/5 pb-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-fuchsia-500/20 text-fuchsia-400 flex items-center justify-center border border-fuchsia-500/30 shadow-[0_0_15px_rgba(192,38,211,0.2)]">
+                    <i class="fa-solid fa-images"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-display font-bold text-white">Atlas & Schémas</h3>
+                    <p class="text-xs text-gray-500">Galerie personnelle de l'item</p>
+                </div>
+            </div>
+            
+            <label class="cursor-pointer group/upload relative overflow-hidden">
+                <input type="file" accept="image/*" multiple onchange="handleImageUpload(this)" class="hidden">
+                <div class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white hover:from-fuchsia-500 hover:to-purple-500 transition-all duration-300 flex items-center gap-2 font-bold text-xs shadow-lg shadow-purple-900/40 border border-white/10 hover:scale-105 active:scale-95">
+                    <i class="fa-solid fa-cloud-arrow-up text-sm"></i>
+                    <span class="uppercase tracking-wide">Ajouter</span>
+                </div>
+            </label>
+        </div>
+
+        <div id="itemGalleryGrid" class="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4 pb-2">
+            </div>
+        
+        <div id="emptyGalleryState" class="hidden py-12 flex flex-col items-center justify-center text-gray-600 border-2 border-dashed border-white/5 rounded-xl bg-black/20">
+            <div class="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-3">
+                <i class="fa-regular fa-image text-2xl opacity-50"></i>
+            </div>
+            <p class="text-sm font-medium">Glissez ou ajoutez vos schémas ici</p>
+        </div>
+    </div>
+    <div id="imageLightbox" class="fixed inset-0 z-[200] hidden bg-black/95 backdrop-blur-2xl flex items-center justify-center px-4 transition-all duration-300 opacity-0" onclick="closeLightbox()">
+        <button class="absolute top-6 right-6 w-12 h-12 rounded-full bg-white/10 hover:bg-red-500 text-white transition flex items-center justify-center z-50 backdrop-blur-md border border-white/10">
+            <i class="fa-solid fa-times text-xl"></i>
+        </button>
+        <img id="lightboxImg" src="" class="max-w-[95vw] max-h-[95vh] rounded-lg shadow-2xl object-contain transform scale-95 transition-transform duration-300">
+    </div>
+</div>
 
     </main>
 
@@ -1490,7 +1535,7 @@ input[type=range]::-webkit-slider-runnable-track {
             </div>
 
             <div class="flex-grow p-6 overflow-y-auto custom-scrollbar bg-[#0a0a0a]">
-                <div id="errorCardsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div id="errorCardsGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 auto-rows-fr">
                     </div>
                 
                 <div id="emptyErrorState" class="hidden flex flex-col items-center justify-center h-full text-gray-600 opacity-50 mt-10">
@@ -1836,7 +1881,7 @@ input[type=range]::-webkit-slider-runnable-track {
         */
 
 // --- GLOBAL VARIABLES ---
-        var userResources = [], userStatus = {}, userTodos = [], courses = [], celebrationTimeout;
+        var userResources = [], userStatus = {}, userTodos = [], courses = [], celebrationTimeout, userItemImages = {};
         var userName = "", userAlias = "Docteur", userApiKey = "", chatHistory = [], currentRevisionContext = "";
 	var userExamDate = "";
         var currentNotesMatiere = "Général", currentSuggestions = [], dailySuggestionsDone = {}, currentStatusFilter = "all", userVues = {};
@@ -1859,7 +1904,7 @@ input[type=range]::-webkit-slider-runnable-track {
 	var userXPClaimed = {};
 	var userSubjectNotes = {};
 	var isRegistering = false;
-
+	
 // --- CONFIGURATION DES RÉCOMPENSES (NIVEAUX) ---
 	const levelRewards = {
     2: 'fa-cat',      // Chat au niveau 2
@@ -2655,7 +2700,8 @@ async function completeInitialization(userId) {
     userPlanning = loadedData.planning || {};
     userTodos = loadedData.todos || [];
     userResources = loadedData.resources || [];
-    
+    userItemImages = loadedData.item_images || {};
+
     // -- Détails Items --
     userItemNotes = loadedData.item_notes || {};
     userItemDifficulty = loadedData.item_difficulty || {};
@@ -2911,6 +2957,7 @@ async function saveData() {
         history: userHistory,
         planning: userPlanning,
         resources: userResources,
+	item_images: userItemImages || {},
 
         // Détails Items
         item_notes: userItemNotes || {},
@@ -5684,29 +5731,47 @@ function renderErrorCards() {
     emptyState.classList.add('hidden');
 
     container.innerHTML = errors.map((err, index) => `
-        <div class="group relative bg-[#1a1a1a] border border-red-500/20 p-4 rounded-xl hover:border-red-500/50 transition-all hover:-translate-y-1 shadow-md">
-            <div class="pr-6">
-                <p class="text-red-100 text-sm font-medium leading-relaxed">${err}</p>
-            </div>
-            <button onclick="removeErrorCard(${index})" class="absolute top-2 right-2 w-6 h-6 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition opacity-0 group-hover:opacity-100">
+        <div class="group relative bg-[#1a1a1a] border border-red-500/20 p-4 rounded-xl hover:border-red-500/50 transition-all hover:-translate-y-1 shadow-md aspect-square flex flex-col">
+            
+            <button onclick="removeErrorCard(${index})" class="absolute top-2 right-2 w-6 h-6 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition opacity-0 group-hover:opacity-100 z-10">
                 <i class="fa-solid fa-times text-xs"></i>
             </button>
-            <div class="absolute bottom-2 right-3 text-[10px] text-red-500/30 font-mono select-none">CARD #${index + 1}</div>
+
+            <div class="flex-grow overflow-y-auto custom-scrollbar pr-1 mt-2 mb-4">
+                <p class="text-red-100 text-xs md:text-sm font-medium leading-relaxed break-words text-center flex items-center justify-center min-h-full">
+                    ${err}
+                </p>
+            </div>
+            
+            <div class="absolute bottom-2 right-3 text-[9px] text-red-500/30 font-mono select-none">#${index + 1}</div>
         </div>
     `).join('');
 }
 
 function updateErrorButtonLabel() {
     if(!currentItemId) return;
+    
+    // Récupération des erreurs
     let errors = userItemErrors[currentItemId];
     let count = 0;
+    
     if (Array.isArray(errors)) count = errors.length;
     else if (typeof errors === 'string' && errors.length > 0) count = 1;
 
     const label = document.getElementById('errorCountLabel');
-    if(label) label.innerText = `${count} flashcard${count > 1 ? 's' : ''} enregistrée${count > 1 ? 's' : ''}`;
+    
+    if(label) {
+        if (count > 0) {
+            // Affiche SEULEMENT le chiffre
+            label.innerText = count; 
+            // Affiche la pastille
+            label.classList.remove('hidden'); 
+        } else {
+            // Cache la pastille s'il n'y a pas d'erreur
+            label.classList.add('hidden'); 
+        }
+    }
 }
-
         /* --- MODE OR (MAÎTRISE) --- */
 function showCelebration(type, data = null) {
     const overlay = document.getElementById('celebrationOverlay');
@@ -7128,6 +7193,9 @@ const badge = document.getElementById('detailMatiereBadge');
 
     // 9. Mise à jour du bouton "Boîte à erreurs" (Compteur)
     updateErrorButtonLabel();
+
+    // 10. GÉNÉRATION DE LA GALERIE (Nouveau)
+          renderItemGallery(itemId);
 }
 
 function closeItemDetail() {
@@ -7291,6 +7359,152 @@ function jumpToMatiere(matiere) {
     anchorToFilterBar(); 
     
     playSound('subjectClick');
+}
+
+/* --- GESTION GALERIE IMAGES --- */
+
+// 1. Déclenché à l'ouverture de l'Item
+function renderItemGallery(itemId) {
+    const grid = document.getElementById('itemGalleryGrid');
+    const empty = document.getElementById('emptyGalleryState');
+    
+    if (!grid) return;
+
+    const images = userItemImages[itemId] || [];
+    grid.innerHTML = '';
+
+    if (images.length === 0) {
+        empty.classList.remove('hidden');
+    } else {
+        empty.classList.add('hidden');
+        
+        images.forEach((imgData, index) => {
+            // Création de l'élément wrapper
+            const div = document.createElement('div');
+            
+            // Classes clés pour le Masonry : 'break-inside-avoid' empêche l'image d'être coupée entre deux colonnes
+            div.className = "break-inside-avoid relative group rounded-xl overflow-hidden border border-white/10 bg-black/40 hover:border-fuchsia-500/50 transition-all duration-300 mb-4 shadow-lg hover:shadow-purple-900/20";
+            
+            // Le HTML interne
+            div.innerHTML = `
+                <div class="relative cursor-zoom-in" onclick="openLightbox('${imgData}')">
+                    <img src="${imgData}" class="w-full h-auto object-contain opacity-90 group-hover:opacity-100 transition-opacity duration-300" loading="lazy">
+                    
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3">
+                    </div>
+                </div>
+                
+                <button onclick="deleteItemImage(${index})" class="absolute top-2 right-2 w-8 h-8 rounded-lg bg-black/60 hover:bg-red-500 text-white/80 hover:text-white backdrop-blur-md flex items-center justify-center shadow-lg transition-all transform scale-0 group-hover:scale-100 z-10 border border-white/10">
+                    <i class="fa-solid fa-trash-can text-xs"></i>
+                </button>
+            `;
+            grid.appendChild(div);
+        });
+    }
+}
+
+// 2. Gestion de l'Upload avec Compression (Indispensable pour Firestore/LocalStorage)
+async function handleImageUpload(input) {
+    if (!currentItemId || !input.files || input.files.length === 0) return;
+
+    const files = Array.from(input.files);
+    let processedCount = 0;
+    
+    // Feedback immédiat
+    const btn = input.parentElement.querySelector('div');
+    const oldHtml = btn.innerHTML;
+    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i><span>Traitement...</span>`;
+
+    for (const file of files) {
+        try {
+            const compressedBase64 = await compressImage(file);
+            if (!userItemImages[currentItemId]) userItemImages[currentItemId] = [];
+            userItemImages[currentItemId].push(compressedBase64);
+            processedCount++;
+        } catch (e) {
+            console.error("Erreur compression:", e);
+        }
+    }
+
+    if (processedCount > 0) {
+        saveData();
+        renderItemGallery(currentItemId);
+        playSound('success');
+        showToast(`${processedCount} image(s) ajoutée(s)`, "success");
+    }
+    
+    // Reset UI
+    input.value = ''; 
+    btn.innerHTML = oldHtml;
+}
+
+// 3. Utilitaire de compression (Redimensionne à max 1000px et convertit en JPEG 0.7)
+function compressImage(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 1200; // Un peu plus grand pour la lisibilité des schémas
+                const scaleSize = MAX_WIDTH / img.width;
+                
+                // On garde les proportions exactes
+                canvas.width = scaleSize < 1 ? MAX_WIDTH : img.width;
+                canvas.height = scaleSize < 1 ? img.height * scaleSize : img.height;
+                
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                
+                // Compression JPEG 75%
+                resolve(canvas.toDataURL('image/jpeg', 0.75)); 
+            };
+            img.onerror = (err) => reject(err);
+        };
+        reader.onerror = (err) => reject(err);
+    });
+}
+
+// 4. Suppression
+function deleteItemImage(index) {
+    if (confirm("Supprimer cette image ?")) {
+        userItemImages[currentItemId].splice(index, 1);
+        saveData();
+        renderItemGallery(currentItemId);
+        playSound('click');
+    }
+}
+
+// 5. Lightbox
+function openLightbox(src) {
+    const modal = document.getElementById('imageLightbox');
+    const img = document.getElementById('lightboxImg');
+    
+    img.src = src;
+    modal.classList.remove('hidden');
+    
+    // Petite animation d'entrée
+    requestAnimationFrame(() => {
+        modal.classList.remove('opacity-0');
+        img.classList.remove('scale-95');
+        img.classList.add('scale-100');
+    });
+}
+
+function closeLightbox() {
+    const modal = document.getElementById('imageLightbox');
+    const img = document.getElementById('lightboxImg');
+    
+    modal.classList.add('opacity-0');
+    img.classList.remove('scale-100');
+    img.classList.add('scale-95');
+    
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        img.src = '';
+    }, 300);
 }
 
 initApp();
