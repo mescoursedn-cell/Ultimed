@@ -1986,28 +1986,48 @@ input[type=range]::-webkit-slider-runnable-track {
 
 const audioSystem = {
     enabled: true,
-    musicVolume: 0.15, // Volume un peu plus fort par défaut
-    currentTrackIndex: 0,
+    musicVolume: 0.15,
+    currentTheme: 'theme1',
     isPlaying: false,
-    currentTheme: 'theme1', // Thème par défaut
-    playlist: [], // Liste de lecture active
-    audioObj: new Audio(), // Un seul objet Audio pour éviter les superpositions
+    playlist: [], 
+    
+    // Lecteur standard (Thème 1)
+    mainAudio: new Audio(),
+    
+    // Lecteurs Superposés (Thème 2)
+    layer1: new Audio(),
+    layer2: new Audio(),
+    layersFinished: 0, // Compteur pour la synchro
 
-    // DEFINITION DES THEMES
     themes: {
-        theme1: [ // VOS MUSIQUES ACTUELLES
+        theme1: [ // Séquentiel (Un par un)
             './sounds/Air/AR-01-Beginnings.mp3',
             './sounds/Melody/ML-01-Beginnings.mp3',
             './sounds/Strings/ST-01-Beginnings.mp3',
             './sounds/Undertones/UT-01-Beginnings.mp3'
         ],
-        theme2: [ // VOS 4 NOUVELLES MUSIQUES (Mettez ici vos noms de fichiers)
+         theme2: [ // VOS 4 NOUVELLES MUSIQUES (Mettez ici vos noms de fichiers)
             './sounds/Epic/Drive.mp3', 
             './sounds/Epic/Clean-Bass.mp3',
             './sounds/Epic/Keep-Moving.mp3',
             './sounds/Epic/Painful-Wait-A.mp3'
         ]
     },
+    
+    // Vos bruitages (inchangés)
+    sounds: {
+        success: new Audio('https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3'),
+        click: new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3'),
+        levelUp: new Audio('https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3'),
+        chronoStart: new Audio('https://assets.mixkit.co/active_storage/sfx/2986/2986-preview.mp3'),
+        mastery: new Audio('https://assets.mixkit.co/active_storage/sfx/657/657-preview.mp3'),
+        whoosh: new Audio('https://assets.mixkit.co/active_storage/sfx/3124/3124-preview.mp3'),
+        error: new Audio('https://assets.mixkit.co/active_storage/sfx/1110/1110-preview.mp3'),
+        refresh: new Audio('https://assets.mixkit.co/active_storage/sfx/2043/2043-preview.mp3'),
+        subjectClick: new Audio('https://assets.mixkit.co/active_storage/sfx/1120/1120-preview.mp3'),
+        creature: new Audio('https://assets.mixkit.co/active_storage/sfx/2350/2350-preview.mp3')
+    }
+};
     
     sounds: {
         success: new Audio('https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3'),
@@ -4893,28 +4913,165 @@ function render() {
         // --- UTILS ---
 // --- GESTION MUSIQUE D'AMBIANCE ---
 
+// 1. Initialisation
 function initMusicPlayer() {
-    // Charger le thème par défaut
+    // Config Thème 1 (Séquentiel)
+    audioSystem.mainAudio.volume = audioSystem.musicVolume;
+    audioSystem.mainAudio.addEventListener('ended', playNextTrackStandard);
+
+    // Config Thème 2 (Layers)
+    [audioSystem.layer1, audioSystem.layer2].forEach(layer => {
+        layer.volume = audioSystem.musicVolume;
+        layer.addEventListener('ended', handleLayerEnded);
+    });
+
     loadTheme('theme1');
-    
-    // Écouteur pour passer à la piste suivante automatiquement
-    audioSystem.audioObj.addEventListener('ended', playNextTrack);
-    audioSystem.audioObj.volume = audioSystem.musicVolume;
 }
 
-// 2. Charger un thème dans la playlist
-function loadTheme(themeName) {
-    audioSystem.currentTheme = themeName;
-    audioSystem.playlist = audioSystem.themes[themeName] || audioSystem.themes['theme1'];
-    audioSystem.currentTrackIndex = 0;
+// 2. Gestionnaire de fin de piste (Pour la synchro Thème 2)
+function handleLayerEnded() {
+    audioSystem.layersFinished++;
     
-    // Si on change de thème pendant la lecture, on lance le nouveau
-    if (audioSystem.isPlaying) {
-        playTrack(0);
+    // On attend que les 2 soient finis pour relancer
+    if (audioSystem.layersFinished >= 2) {
+        playRandomLayeredTheme();
     }
 }
 
-// 3. Ouvrir / Fermer le menu
+// 3. Charger un thème
+function loadTheme(themeName) {
+    stopAllMusic(); // On arrête tout avant de changer
+    audioSystem.currentTheme = themeName;
+    audioSystem.playlist = audioSystem.themes[themeName] || audioSystem.themes['theme1'];
+    
+    // Si on était en lecture, on relance immédiatement avec la nouvelle logique
+    if (audioSystem.isPlaying) {
+        startMusicLogic();
+    }
+}
+
+// 4. Démarrer la musique selon le mode
+function startMusicLogic() {
+    audioSystem.isPlaying = true;
+    
+    if (audioSystem.currentTheme === 'theme1') {
+        // Mode Standard
+        playTrackStandard(0);
+    } else {
+        // Mode Layered (Aléatoire)
+        playRandomLayeredTheme();
+    }
+    updateMusicUI();
+}
+
+// 5. Logique Thème 1 (Standard)
+let currentStandardIndex = 0;
+function playTrackStandard(index) {
+    if (index >= audioSystem.playlist.length) index = 0;
+    currentStandardIndex = index;
+    
+    audioSystem.mainAudio.src = audioSystem.playlist[index];
+    audioSystem.mainAudio.play().catch(e => console.log("Autoplay bloqué", e));
+}
+
+function playNextTrackStandard() {
+    playTrackStandard(currentStandardIndex + 1);
+}
+
+// 6. Logique Thème 2 (Aléatoire & Superposé)
+function playRandomLayeredTheme() {
+    const list = audioSystem.playlist;
+    if (list.length < 2) return; // Sécurité
+
+    // Reset du compteur de fin
+    audioSystem.layersFinished = 0;
+
+    // Choix de 2 index différents au hasard
+    let idx1 = Math.floor(Math.random() * list.length);
+    let idx2 = idx1;
+    while (idx2 === idx1) {
+        idx2 = Math.floor(Math.random() * list.length);
+    }
+
+    // Chargement des sources
+    audioSystem.layer1.src = list[idx1];
+    audioSystem.layer2.src = list[idx2];
+
+    // Lecture simultanée
+    // On ajoute un léger délai aléatoire sur la 2ème pour un effet plus naturel
+    audioSystem.layer1.play().catch(e => {});
+    setTimeout(() => {
+        audioSystem.layer2.play().catch(e => {});
+    }, 500); // Décalage de 0.5s optionnel
+}
+
+// 7. Stop Total (Helper)
+function stopAllMusic() {
+    // Stop Main
+    audioSystem.mainAudio.pause();
+    audioSystem.mainAudio.currentTime = 0;
+    
+    // Stop Layers
+    audioSystem.layer1.pause();
+    audioSystem.layer1.currentTime = 0;
+    audioSystem.layer2.pause();
+    audioSystem.layer2.currentTime = 0;
+}
+
+// 8. Play / Pause (Bouton)
+function togglePlayPause() {
+    if (audioSystem.isPlaying) {
+        // PAUSE
+        if (audioSystem.currentTheme === 'theme1') {
+            audioSystem.mainAudio.pause();
+        } else {
+            audioSystem.layer1.pause();
+            audioSystem.layer2.pause();
+        }
+        audioSystem.isPlaying = false;
+        showToast("Musique en pause", "info");
+    } else {
+        // PLAY
+        // Si rien n'est chargé (src vide), on lance la logique de démarrage
+        const isMainReady = audioSystem.currentTheme === 'theme1' && audioSystem.mainAudio.src;
+        const isLayerReady = audioSystem.currentTheme === 'theme2' && audioSystem.layer1.src;
+
+        if (isMainReady) {
+            audioSystem.mainAudio.play();
+            audioSystem.isPlaying = true;
+        } else if (isLayerReady) {
+            audioSystem.layer1.play();
+            audioSystem.layer2.play();
+            audioSystem.isPlaying = true;
+        } else {
+            // Premier lancement
+            startMusicLogic();
+        }
+        showToast("Lecture en cours 🎵", "success");
+    }
+    updateMusicUI();
+}
+
+// 9. Changement de Thème (Interface)
+function setMusicTheme(themeName) {
+    if (audioSystem.currentTheme === themeName && audioSystem.isPlaying) {
+        showToast("Ce thème joue déjà.", "info");
+        return;
+    }
+    
+    loadTheme(themeName);
+    
+    // Si on n'était pas en lecture, on lance
+    if (!audioSystem.isPlaying) {
+        startMusicLogic();
+    }
+    
+    const nomTheme = themeName === 'theme1' ? 'Focus' : 'Épique';
+    showToast(`Thème activé : ${nomTheme}`, "success");
+    updateMusicUI();
+}
+
+// 10. UI & Menu (Inchangé mais nécessaire)
 function toggleMusicMenu() {
     const menu = document.getElementById('musicMenuOptions');
     const mainBtn = document.getElementById('mainMusicBtn');
@@ -4924,95 +5081,27 @@ function toggleMusicMenu() {
     const isOpen = !menu.classList.contains('pointer-events-none');
 
     if (isOpen) {
-        // --- FERMETURE (Repli vers la droite) ---
-        // On ajoute translate-x-10 pour le faire glisser sous le bouton principal
         menu.classList.add('opacity-0', 'translate-x-10', 'pointer-events-none', 'scale-95');
-        
         mainIcon.classList.replace('fa-xmark', 'fa-music');
-        mainBtn.classList.remove('border-purple-500', 'shadow-[0_0_20px_rgba(168,85,247,0.4)]'); // Retrait effet glow actif
-        
-        // Si musique joue, on réaffiche le visualiseur
+        mainBtn.classList.remove('border-purple-500', 'shadow-[0_0_20px_rgba(168,85,247,0.4)]');
         if (audioSystem.isPlaying) {
             mainIcon.classList.add('hidden');
             viz.classList.remove('hidden');
             viz.classList.add('flex');
         }
     } else {
-        // --- OUVERTURE (Déploiement vers la gauche) ---
-        // On enlève le décalage X
         menu.classList.remove('opacity-0', 'translate-x-10', 'pointer-events-none', 'scale-95');
-        
-        // Gestion icône X
         viz.classList.add('hidden');
         viz.classList.remove('flex');
         mainIcon.classList.remove('hidden');
         mainIcon.classList.replace('fa-music', 'fa-xmark');
-        
-        // Style bouton actif (Glow violet pour montrer qu'il est ouvert)
         mainBtn.classList.add('border-purple-500', 'shadow-[0_0_20px_rgba(168,85,247,0.4)]');
-        
         playSound('click');
     }
 }
 
-// 4. Play / Pause (Bouton dédié)
-function togglePlayPause() {
-    if (audioSystem.isPlaying) {
-        audioSystem.audioObj.pause();
-        audioSystem.isPlaying = false;
-        showToast("Musique en pause", "info");
-    } else {
-        // Si aucune source n'est chargée, on charge la première
-        if (!audioSystem.audioObj.src) {
-            playTrack(0);
-        } else {
-            audioSystem.audioObj.play().catch(e => console.log("Lecture bloquée", e));
-        }
-        audioSystem.isPlaying = true;
-        showToast("Lecture en cours 🎵", "success");
-    }
-    updateMusicUI();
-}
-
-// 5. Changer de Thème (Clic sur bouton thème)
-function setMusicTheme(themeName) {
-    if (audioSystem.currentTheme === themeName && audioSystem.isPlaying) {
-        showToast("Ce thème joue déjà.", "info");
-        return;
-    }
-    
-    loadTheme(themeName);
-    playTrack(0); // Lance la première piste du nouveau thème
-    audioSystem.isPlaying = true;
-    
-    const nomTheme = themeName === 'theme1' ? 'Focus' : 'Épique';
-    showToast(`Thème activé : ${nomTheme}`, "success");
-    updateMusicUI();
-}
-
-// 6. Jouer une piste spécifique
-function playTrack(index) {
-    if (index >= audioSystem.playlist.length) index = 0; // Boucle
-    audioSystem.currentTrackIndex = index;
-    
-    const src = audioSystem.playlist[index];
-    audioSystem.audioObj.src = src;
-    audioSystem.audioObj.volume = audioSystem.musicVolume;
-    audioSystem.audioObj.play().catch(e => console.log("Autoplay bloqué", e));
-    audioSystem.isPlaying = true;
-}
-
-// 7. Piste suivante
-function playNextTrack() {
-    let nextIndex = audioSystem.currentTrackIndex + 1;
-    if (nextIndex >= audioSystem.playlist.length) nextIndex = 0;
-    playTrack(nextIndex);
-}
-
-// 8. Mise à jour visuelle des boutons
 function updateMusicUI() {
     const miniIcon = document.getElementById('miniPlayIcon');
-    
     if (audioSystem.isPlaying) {
         miniIcon.classList.replace('fa-play', 'fa-pause');
     } else {
@@ -5020,7 +5109,7 @@ function updateMusicUI() {
     }
 }
 
-// Initialisation au chargement
+// Init
 initMusicPlayer();
 
 /**
