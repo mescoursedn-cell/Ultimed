@@ -540,24 +540,6 @@ input[type=range]::-webkit-slider-runnable-track {
     }
 }
 
-/* --- (Rappel) ANIMATION DASHBOARD --- */
-@keyframes dashboardEntry {
-    0% { opacity: 0; transform: scale(0.95) translateY(20px); filter: blur(10px); }
-    100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
-}
-.cinematic-dashboard {
-    animation: dashboardEntry 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-/* --- (Rappel) EXPLOSION LOGIN --- */
-.login-explode {
-    transition: all 0.8s cubic-bezier(0.7, 0, 0.3, 1);
-    transform: scale(1.2);
-    opacity: 0 !important;
-    filter: blur(20px);
-    pointer-events: none;
-}
-
     </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css"/>
 <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>
@@ -2389,15 +2371,15 @@ function initApp() {
     flash.remove();
 });
 
-            // 3. Explosion du Login (Disparition)
-            if(overlay) overlay.classList.add('login-explode');
-            
+            // 3. Explosion du Login (Disparition)            
+if (dashboard) {
+                dashboard.classList.remove('hidden'); // On l'affiche
+            }
 
             // 5. Nettoyage final du Login (0.8s plus tard)
             setTimeout(() => {
                 if(overlay) {
                     overlay.classList.add('hidden');
-                    overlay.classList.remove('login-explode'); 
                 }
             }, 800);
 
@@ -2409,13 +2391,11 @@ function initApp() {
             
             // Reset état initial
             if(overlay) {
-                overlay.classList.remove('hidden', 'login-explode', 'opacity-0');
                 overlay.style = ""; 
             }
             
             if(dashboard) {
                 dashboard.classList.add('hidden');
-                dashboard.classList.remove('cinematic-dashboard');
             }
         }
     });
@@ -3086,6 +3066,7 @@ let timerTargetSeconds = 0;
 
 // 1. Ouvrir / Fermer le panneau
 function toggleGoalPanel() {
+playSound('click');
     const panel = document.getElementById('goalControlPanel');
     const btn = document.getElementById('goalDisplayBtn');
     
@@ -3139,6 +3120,7 @@ function updateGoalFromInput(minutes) {
 }
 
 function setPresetGoal(minutes) {
+    playSound('click');
     // On utilise la fonction principale pour tout mettre à jour d'un coup
     updateGoalFromInput(minutes);
     
