@@ -717,10 +717,10 @@ input[type=range]::-webkit-slider-runnable-track {
          <div id="timerFlame" class="hidden absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-full bg-yellow-500/5 blur-xl z-0"></div>
     </div>
     
-    <div class="absolute top-4 right-4 z-30 flex flex-col items-end">
+    <div class="absolute top-6 right-6 z-30 flex flex-col items-end">
     
-    <button onclick="toggleGoalPanel()" id="goalDisplayBtn" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-blue-400 hover:bg-blue-500/10 hover:border-blue-500/50 transition-all shadow-lg group active:scale-95" title="Définir un objectif">
-        <i class="fa-solid fa-crosshairs group-hover:rotate-90 transition-transform duration-500"></i>
+    <button onclick="toggleGoalPanel()" id="goalDisplayBtn" class="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-blue-400 hover:bg-blue-500/10 hover:border-blue-500/50 transition-all shadow-lg group active:scale-95" title="Définir un objectif">
+        <i class="fa-solid fa-crosshairs text-sm group-hover:rotate-90 transition-transform duration-500"></i>
         <span id="goalValueDisplay" class="hidden">Libre</span>
     </button>
 
@@ -833,11 +833,15 @@ input[type=range]::-webkit-slider-runnable-track {
                     <span class="text-xs text-gray-500 uppercase font-bold" id="dateToday">...</span>
                 </div>
 
-                <div class="relative mb-4">
-                    <input type="text" id="todoInput" placeholder="Rechercher un item..." class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-blue-500 transition text-white" autocomplete="off">
-                    <i class="fa-solid fa-search absolute right-4 top-3.5 text-gray-500 text-sm"></i>
-                    <div id="autocompleteList" class="autocomplete-list hidden"></div>
-                </div>
+                <div class="relative mb-4 group">
+    <input type="text" id="todoInput" placeholder="Rechercher..." 
+           class="w-full bg-transparent border border-transparent hover:bg-white/5 focus:bg-black/40 focus:border-blue-500/50 rounded-xl px-4 py-2 text-xs font-medium text-gray-600 focus:text-white placeholder-gray-800 focus:placeholder-gray-500 transition-all outline-none" 
+           autocomplete="off">
+           
+    <i class="fa-solid fa-search absolute right-4 top-2.5 text-gray-800 group-hover:text-gray-600 transition-colors text-xs pointer-events-none"></i>
+    
+    <div id="autocompleteList" class="autocomplete-list hidden"></div>
+</div>
 
                 <div class="flex-grow overflow-y-auto custom-scrollbar space-y-2 pr-1" id="todoList">
                     <div class="text-center text-gray-600 text-xs mt-10 italic">Sélectionnez vos priorités.</div>
@@ -6330,7 +6334,7 @@ function renderDetailResources(itemId) {
     }).join('');
 }
 
-// -- Gestion Statut depuis la vue détaillée --
+// -- Gestion Statut depuis la vue détaillée --01:36 26/11/2025
 function toggleStatusFromDetail() {
     if(!currentItemId) return;
     
