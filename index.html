@@ -3526,6 +3526,7 @@ function updateUserPassword() {
     const menuUserName = document.getElementById('menuUserName');
     if(menuUserName) menuUserName.innerText = targetName;
 
+    // --- 4. CORRECTION : SYNCHRONISATION DE LA CRÉATURE DU TIMER ---
     const dinoIcon = document.getElementById('dinoIcon');
     if (dinoIcon) {
         // On détermine si la créature doit dormir ou être éveillée selon l'état du timer
@@ -3535,6 +3536,7 @@ function updateUserPassword() {
         // On force la mise à jour de l'icône avec le bon avatar
         dinoIcon.className = `fa-solid ${userAvatar} text-6xl text-gray-500 transition-colors duration-300 ${animationState}`;
     }
+    // ---------------------------------------------------------------
 }
 
 function updateCountdownDisplay(dateStr) {
