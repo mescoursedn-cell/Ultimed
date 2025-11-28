@@ -2027,7 +2027,10 @@ input[type=range]::-webkit-slider-runnable-track {
 	var userXPClaimed = {};
 	var userSubjectNotes = {};
 	var isRegistering = false;
+	var pendingImportContent = null;
+        var pendingConfirmAction = null;
 	
+
 // --- CONFIGURATION DES RÉCOMPENSES (NIVEAUX) ---
 	const levelRewards = {
     2: 'fa-cat',      // Chat au niveau 2
@@ -2720,7 +2723,6 @@ function showToast(message, type = 'info') {
         }
 
         // --- CONFIRM MODAL SYSTEM ---
-        var pendingConfirmAction = null;
         
 function openConfirmModal(action) {
             pendingConfirmAction = action;
@@ -2825,15 +2827,28 @@ async function completeInitialization(userId) {
 
     try {
         const doc = await userDocRef.get();
+        
         if (doc.exists) {
+            // Cas 1 : Sauvegarde trouvée, tout va bien
+            console.log("Données trouvées !");
             loadedData = doc.data().userData || {};
         } else {
-            console.log("Nouveau profil détecté. Création de la sauvegarde...");
-            setTimeout(saveData, 2000); 
+            // Cas 2 : Aucune sauvegarde trouvée
+            // SÉCURITÉ : On demande confirmation avant de créer un nouveau profil vide
+            // pour éviter d'écraser une sauvegarde existante en cas de bug.
+            console.log("Aucune donnée trouvée pour cet ID.");
+            
+            if(confirm("Attention : Aucune sauvegarde trouvée.\n\nCliquez sur OK pour créer un nouveau profil vide.\nCliquez sur ANNULER si vous pensez que c'est une erreur (bug réseau) pour ne rien perdre.")) {
+                 setTimeout(saveData, 2000); // On crée le profil seulement si vous dites OK
+            } else {
+                return; // On arrête tout, on ne touche à rien
+            }
         }
     } catch (error) {
-        console.warn("Erreur chargement Cloud :", error);
-        alert("Attention : Impossible de charger vos données (Erreur Réseau).");
+        // Cas 3 : Erreur technique (Pas d'internet, bug Firebase...)
+        console.error("Erreur critique de chargement :", error);
+        alert("ERREUR CRITIQUE : Impossible de lire vos données (Problème réseau ?).\n\nLe site va arrêter le chargement pour protéger votre sauvegarde.\nVérifiez votre connexion et rechargez la page.");
+        return; // Arrêt d'urgence pour ne pas écraser les données
     }
 
     // 2. Afficher la date du jour
@@ -3361,16 +3376,32 @@ async function saveData() {
 
         function renderGlobalAvatarSelection() {
     const grid = document.getElementById('avatarGrid');
+    if(!grid) return;
     
-    // On inverse la map levelRewards pour trouver facilement le niveau requis pour une icône
-    // Ex: on veut savoir que 'fa-dog' requiert le niveau 5
+    // --- DÉBUT DU CORRECTIF DE SÉCURITÉ ---
+    // On s'assure que la liste est bien un Tableau (Array), sinon on la répare
+    let safeUnlocks = ['fa-dragon']; // Valeur par défaut
+    
+    if (Array.isArray(userUnlockedAvatars)) {
+        safeUnlocks = userUnlockedAvatars;
+    } else if (typeof userUnlockedAvatars === 'string') {
+        try {
+            safeUnlocks = JSON.parse(userUnlockedAvatars);
+        } catch (e) {
+            console.warn("Erreur lecture avatars, utilisation défaut.");
+        }
+    }
+    // --------------------------------------
+
+    // Map inversée pour trouver le niveau requis
     const iconToLevel = {};
     for (const [lvl, icon] of Object.entries(levelRewards)) {
         iconToLevel[icon] = lvl;
     }
 
     grid.innerHTML = availableAvatars.map(icon => {
-        const isUnlocked = userUnlockedAvatars.includes(icon);
+        // On utilise notre liste sécurisée 'safeUnlocks'
+        const isUnlocked = safeUnlocks.includes(icon);
         const isSelected = icon === userAvatar;
         
         if (isUnlocked) {
@@ -3380,26 +3411,25 @@ async function saveData() {
                 : 'bg-[#151515] text-gray-600 border-white/5 hover:bg-white/10 hover:text-gray-300';
             
             return `
-                <button onclick="userAvatar = '${icon}'; renderGlobalAvatarSelection()" class="aspect-square rounded-xl border ${activeClass} flex items-center justify-center transition-all duration-300 text-lg group relative" title="Sélectionner">
+                <button onclick="userAvatar = '${icon}'; renderGlobalAvatarSelection(); playSound('click');" class="aspect-square rounded-xl border ${activeClass} flex items-center justify-center transition-all duration-300 text-lg group relative" title="Choisir">
                     <i class="fa-solid ${icon}"></i>
                     ${isSelected ? '<div class="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border border-black"></div>' : ''}
                 </button>
             `;
         } else {
-            // CAS 2 : BLOQUÉ (Affiche le niveau requis)
+            // CAS 2 : BLOQUÉ
             const requiredLevel = iconToLevel[icon] || "?";
-            
             return `
-                <div class="aspect-square rounded-xl border border-white/5 bg-black/40 text-gray-800 flex flex-col items-center justify-center cursor-not-allowed group relative overflow-hidden">
+                <div class="aspect-square rounded-xl border border-white/5 bg-black/40 text-gray-800 flex flex-col items-center justify-center cursor-not-allowed group relative overflow-hidden" title="Niveau ${requiredLevel} requis">
                     <i class="fa-solid fa-lock text-xs mb-1"></i>
                     <span class="text-[8px] font-mono font-bold text-gray-600">LVL ${requiredLevel}</span>
-                    
                     <i class="fa-solid ${icon} absolute opacity-10 text-4xl transform scale-150 rotate-12 pointer-events-none"></i>
                 </div>
             `;
         }
     }).join('');
 }
+
 
         function updateSettingPreview(dateStr) {
     if (!dateStr) {
@@ -7002,26 +7032,88 @@ function startRevisionChat(item, title) {
 
         // --- FONCTIONS DE PARTAGE (EXPORT/IMPORT) ---
 
-        function exportData() {
-            const dataToExport = {};
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key.startsWith('ultimed_') && key !== 'ultimed_apiKey') { 
-                    dataToExport[key] = localStorage.getItem(key);
-                }
-            }
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToExport));
-            const downloadAnchorNode = document.createElement('a');
-            downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", "ultimed_config.json");
-            document.body.appendChild(downloadAnchorNode);
-            downloadAnchorNode.click();
-            downloadAnchorNode.remove();
-            showToast("Configuration exportée !", "success");
+        /* --- EXPORTATEUR CLOUD (GÉNÈRE UN FICHIER PROPRE) --- */
+async function exportData() {
+    const user = firebase.auth().currentUser;
+    if (!user) {
+        alert("Erreur : Vous devez être connecté pour exporter vos données.");
+        return;
+    }
+
+    // Petit effet visuel sur le bouton cliqué (s'il existe)
+    const btn = document.activeElement; 
+    const originalText = btn ? btn.innerText : "Exporter";
+    if (btn && btn.tagName === 'BUTTON') {
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Création...';
+    }
+
+    try {
+        console.log("📦 Récupération des données depuis le Cloud...");
+        
+        // 1. On récupère les données fraîches depuis Firebase
+        const doc = await db.collection('users').doc(user.uid).get();
+        
+        let finalData = {};
+
+        if (doc.exists) {
+            // Si on a des données Cloud, on les prend (C'est la source la plus fiable)
+            finalData = doc.data().userData;
+        } else {
+            // Secours : Si pas de Cloud, on prend les variables locales actuelles
+            console.warn("⚠️ Pas de données Cloud trouvées, export de la mémoire locale.");
+            finalData = {
+                xp: userXP,
+                status: userStatus,
+                vues: userVues,
+                history: userHistory,
+                planning: userPlanning,
+                resources: userResources,
+                item_notes: userItemNotes,
+                subject_notes: userSubjectNotes,
+                item_difficulty: userItemDifficulty,
+                item_errors: userItemErrors,
+                xp_claimed: userXPClaimed,
+                unlocked_avatars: userUnlockedAvatars,
+                user_name: userName,
+                user_alias: userAlias,
+                exam_date: userExamDate
+            };
         }
 
-        // Variable globale pour stocker temporairement le contenu du fichier
-var pendingImportContent = null;
+        // 2. Ajout de métadonnées (Pour savoir quand le fichier a été fait)
+        finalData.export_date = new Date().toISOString();
+        finalData.app_version = "0.81";
+
+        // 3. Génération du fichier
+        const dataStr = JSON.stringify(finalData, null, 2); // null, 2 pour rendre le fichier lisible par un humain
+        const blob = new Blob([dataStr], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        
+        // 4. Téléchargement
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", url);
+        
+        // Nom du fichier avec la date du jour (ex: UltiMed_Backup_2023-11-27.json)
+        const dateStr = new Date().toISOString().slice(0, 10);
+        downloadAnchorNode.setAttribute("download", `UltiMed_Backup_${dateStr}.json`);
+        
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+        
+        showToast("Fichier de sauvegarde généré !", "success");
+        playSound('success');
+
+    } catch (error) {
+        console.error("Erreur d'exportation :", error);
+        alert("Une erreur est survenue lors de l'exportation : " + error.message);
+    } finally {
+        // On remet le texte du bouton
+        if (btn && btn.tagName === 'BUTTON') {
+            btn.innerHTML = originalText;
+        }
+    }
+}
 
 // --- NOUVELLES FONCTIONS DE GESTION MODALE ---
 
@@ -7035,22 +7127,110 @@ function closeImportModal() {
 }
 
 // Fonction qui exécute l'importation après la confirmation utilisateur
-function executeImport(contentStr) {
+/* --- IMPORTATEUR UNIVERSEL (COMPATIBLE TOUS FORMATS) --- */
+async function executeImport(contentStr) {
+    const user = firebase.auth().currentUser;
+    if (!user) {
+        alert("Erreur : Vous devez être connecté pour importer des données.");
+        return;
+    }
+
+    // Afficher un chargement sur le bouton
+    const btn = document.getElementById('confirmImportBtn');
+    const oldText = btn.innerText;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Traitement...';
+
     try {
-        const content = JSON.parse(contentStr);
-        for (const key in content) {
-            if (key.startsWith('ultimed_')) {
-                localStorage.setItem(key, content[key]);
+        const json = JSON.parse(contentStr);
+        let data = {};
+        let importType = "";
+
+        // --- CAS 1 : Format "GOLDEN BACKUP" (Propre) ---
+        // C'est le format que nous avons généré tout à l'heure
+        if (json.xp !== undefined || json.userData) {
+            console.log("📂 Format détecté : Moderne / Cloud");
+            importType = "Moderne";
+            // Si le fichier contient un wrapper "userData", on prend l'intérieur, sinon on prend le json direct
+            data = json.userData || json;
+        } 
+        
+        // --- CAS 2 : Format "LEGACY" (Ancien / Tablette) ---
+        // C'est le format avec les "ultimed_"
+        else {
+            console.log("📂 Format détecté : Legacy (Ancien)");
+            importType = "Legacy";
+            
+            // On convertit manuellement les vieilles clés vers le nouveau format
+            data = {
+                xp: parseInt(json.ultimed_xp || 0),
+                user_name: json.ultimed_userName || "",
+                user_alias: json.ultimed_userAlias || "Docteur",
+                current_avatar: json.ultimed_userAvatar || "fa-dragon",
+                exam_date: json.ultimed_examDate || "",
+                
+                // Parsing sécurisé des JSON Strings (les trucs avec des backslashes)
+                status: safeParse(json.ultimed_status),
+                vues: safeParse(json.ultimed_vues),
+                history: safeParse(json.ultimed_history),
+                planning: safeParse(json.ultimed_planning),
+                unlocked_avatars: safeParse(json.ultimed_unlocked_avatars),
+                item_notes: safeParse(json.ultimed_item_notes),
+                item_difficulty: safeParse(json.ultimed_item_difficulty),
+                item_errors: safeParse(json.ultimed_item_errors),
+                xp_claimed: safeParse(json.ultimed_xp_claimed),
+                
+                // Gestion spéciale des ressources (parfois vides dans les vieux fichiers)
+                resources: safeParse(json.ultimed_resources, []),
+                todos: safeParse(json.ultimed_todos, []),
+                
+                // Reconstruction des notes de matières
+                subject_notes: {},
+                last_update: new Date().toISOString()
+            };
+
+            // Boucle spéciale pour récupérer les notes par matière (ex: ultimed_notes_Cardiologie)
+            for (const key in json) {
+                if (key.startsWith('ultimed_notes_') && key !== 'ultimed_notes_matiere') {
+                    const matiere = key.replace('ultimed_notes_', '');
+                    if (json[key] && json[key] !== "") {
+                        data.subject_notes[matiere] = json[key];
+                    }
+                }
             }
+
+            // Restauration des réglages locaux (LocalStorage)
+            if(json.ultimed_sound_enabled) localStorage.setItem('ultimed_sound_enabled', json.ultimed_sound_enabled);
+            if(json.ultimed_tutorial_seen) localStorage.setItem('ultimed_tutorial_seen', json.ultimed_tutorial_seen);
         }
+
+        // --- ÉTAPE FINALE : ENVOI AU CLOUD ---
+        console.log("📤 Envoi des données normalisées vers Firebase...");
         
-        // C'est irréversible, donc on recharge pour tout initialiser correctement
-        alert("Importation réussie ! La page va se recharger.");
-        location.reload();
+        await db.collection('users').doc(user.uid).set({ userData: data }, { merge: true });
         
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> Succès !';
+        
+        // Petit délai pour voir le succès
+        setTimeout(() => {
+            alert(`IMPORT RÉUSSI (${importType}) !\n\nVos données ont été mises à jour.\nLa page va se recharger.`);
+            location.reload();
+        }, 500);
+
     } catch (err) {
-        alert("Erreur : Le fichier est invalide.");
-        console.error(err);
+        console.error("Erreur d'importation :", err);
+        alert("Le fichier semble corrompu ou invalide.\nErreur : " + err.message);
+        btn.innerText = oldText; // Remet le texte normal en cas d'erreur
+    }
+}
+
+// Petite fonction utilitaire pour éviter les crashs sur le JSON
+function safeParse(value, fallback = {}) {
+    try {
+        if (!value) return fallback;
+        if (typeof value === 'object') return value; // Déjà un objet
+        return JSON.parse(value);
+    } catch (e) {
+        return fallback;
     }
 }
 
@@ -7060,31 +7240,42 @@ function importData(inputElement) {
     if (!file) return;
 
     const reader = new FileReader();
+    
+    // Une fois le fichier lu par le navigateur
     reader.onload = function(e) {
-        // Stocker le contenu du fichier
-        const contentStr = e.target.result;
-        pendingImportContent = contentStr;
+        // 1. On stocke le contenu (texte) dans la variable globale
+        pendingImportContent = e.target.result;
 
-        // Ouvrir la modale personnalisée
+        // 2. On ouvre la modale de confirmation
         const modal = document.getElementById('importConfirmModal');
         modal.classList.remove('hidden');
         
-        // Animation d'entrée
+        // Animation d'entrée douce
         setTimeout(() => {
             modal.classList.remove('opacity-0');
             modal.querySelector('.glass-panel').classList.remove('scale-95');
             modal.querySelector('.glass-panel').classList.add('scale-100');
         }, 10);
         
-        // Attacher l'événement au bouton de confirmation
-        document.getElementById('confirmImportBtn').onclick = () => {
+        // 3. On programme le bouton "Oui, Remplacer" pour lancer la nouvelle fonction magique
+        const confirmBtn = document.getElementById('confirmImportBtn');
+        
+        // On nettoie les anciens clics pour éviter les doublons
+        const newBtn = confirmBtn.cloneNode(true);
+        confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+        
+        // On attache l'action au nouveau bouton
+        newBtn.onclick = () => {
+            // C'est ici qu'on appelle l'importateur universel qu'on vient de créer
             executeImport(pendingImportContent);
         };
     };
     
-    // Lire le fichier
+    // Lancement de la lecture
     reader.readAsText(file);
-    inputElement.value = ''; // Réinitialiser le champ pour pouvoir re-cliquer
+    
+    // Réinitialiser l'input pour pouvoir réimporter le même fichier si besoin
+    inputElement.value = ''; 
 }
 
 // --- MOTEUR CALENDRIER (V2 : PLANIFICATION) ---
