@@ -5336,7 +5336,6 @@ function initSubjectCarousel() {
     const matieres = Object.keys(matiereConfig).sort();
     
     // 1. Carte "TOUT"
-    // MODIFICATION ICI : Icône fa-book-medical (Programme R2C)
     let html = `
         <div onclick="selectMatiereFromCarousel('all')" class="flex-shrink-0 w-24 h-32 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-white/10 hover:scale-105 hover:border-white/30 transition-all duration-300 group shadow-lg">
             <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/20 transition">
@@ -5351,11 +5350,8 @@ function initSubjectCarousel() {
         const conf = matiereConfig[m];
         return `
         <div onclick="selectMatiereFromCarousel('${m}')" class="flex-shrink-0 w-24 h-32 bg-white/5 backdrop-blur-xl border border-white/5 hover:border-${conf.color}-500/50 rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer transition-all duration-300 hover:scale-110 hover:-translate-y-1 hover:shadow-[0_10px_30px_-10px_rgba(0,0,0,0.8)] group relative overflow-hidden">
-            
             <div class="absolute inset-0 bg-gradient-to-b from-${conf.color}-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            
             <i class="fa-solid ${conf.icon} text-2xl text-${conf.color}-500/70 group-hover:text-${conf.color}-400 transition-all duration-300 relative z-10 group-hover:scale-110"></i>
-            
             <span class="text-[8px] font-bold text-gray-400 group-hover:text-white text-center px-1 leading-tight uppercase tracking-wide relative z-10 transition-colors">
                 ${m.replace('Médecine ', '').replace('Chirurgie ', '').substring(0, 12)}
             </span>
@@ -5364,8 +5360,24 @@ function initSubjectCarousel() {
     }).join('');
 
     track.innerHTML = html;
-}
 
+    // --- AJOUT : SCROLL HORIZONTAL AVEC LA MOLETTE ---
+    const container = document.getElementById('scrollContainer');
+    // On vérifie si l'événement n'est pas déjà attaché (pour éviter les doublons si la fonction est rappelée)
+    if (container && !container.hasAttribute('data-wheel-attached')) {
+        container.addEventListener("wheel", (evt) => {
+            // Empêche le scroll vertical de la page quand on est sur le carrousel
+            evt.preventDefault();
+            // Transforme le scroll vertical (deltaY) en scroll horizontal (scrollLeft)
+            // On multiplie par 2 pour que ça aille un peu plus vite (confort)
+            container.scrollLeft += evt.deltaY * 2;
+        }, { passive: false });
+        
+        container.setAttribute('data-wheel-attached', 'true');
+    }
+    // -------------------------------------------------
+}
+		
 // 2. Basculer entre Vue Statique et Vue Carrousel
 function toggleSubjectCarousel() {
         playSound('subjectClick');
